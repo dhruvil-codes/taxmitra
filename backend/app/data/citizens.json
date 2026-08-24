@@ -1,0 +1,13 @@
+[
+  {
+    "id": "C-001",
+    "name": "Aarav Sharma",
+    "pan_masked": "ABCD••••E1F (fictional)",
+    "city": "Pune",
+    "preferred_locale": "en",
+    "profile_note": {
+      "en": "Salaried teacher, files his own return every year. All details are fictional.",
+      "hi": "वेतनभोगी शिक्षक, हर वर्ष अपना रिटर्न स्वयं भरते हैं। सभी विवरण काल्पनिक हैं।"
+    }
+  }
+]

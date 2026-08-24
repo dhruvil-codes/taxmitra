@@ -1,0 +1,26 @@
+[
+  {
+    "id": "N-2026-001",
+    "citizen_id": "C-001",
+    "section": "143(1)(a)",
+    "issue_code": "INCOME_MISMATCH",
+    "issue_date": "2026-08-13",
+    "assessment_year": "2025-26",
+    "amount_in_question": 45000,
+    "income_source": "interest income reported by Demo Bharat Bank (fictional)",
+    "official_reference": "DIN-DEMO-2026-000001 (fictional)",
+    "official_text": "Office of the Assessing Officer (Centralized Processing Centre - DEMO)\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000001 (fictional)   |   Date of issue: 13/08/2026\n\nSubject: Intimation under section 143(1)(a) of the Income-tax Act, 1961 - adjustment on account of information mismatch for Assessment Year 2025-26\n\nSir/Madam,\n\n1. On processing of your return of income for Assessment Year 2025-26, information received under section 285BA of the Income-tax Act, 1961 from Demo Bharat Bank (fictional) reflects aggregate receipts of Rs. 45,000 (interest income) which is not found to be consistent with the income returned by you.\n\n2. The said sum has accordingly been included in computing your total income, and tax, interest and fee, if any, have been computed accordingly as per the intimation enclosed.\n\n3. In case you do not agree with the adjustment, you may furnish an online response through the 'Pending Actions' tab on the e-Filing portal within 30 days of issue of this intimation, failing which the adjustment shall be treated as accepted and the demand, if any, shall become payable.\n\n4. This is a computer-generated demonstration document and does not require a signature.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  },
+  {
+    "id": "N-2026-002",
+    "citizen_id": "C-001",
+    "section": "148",
+    "issue_code": "REASSESSMENT",
+    "issue_date": "2026-08-20",
+    "assessment_year": "2021-22",
+    "amount_in_question": 120000,
+    "income_source": "reasons recorded under section 148(2) (fictional)",
+    "official_reference": "DIN-DEMO-2026-000002 (fictional)",
+    "official_text": "Notice under section 148 of the Income-tax Act, 1961 (fictional demonstration document)\n\nWhereas I have reason to believe that income chargeable to tax for Assessment Year 2021-22 has escaped assessment within the meaning of section 147, notice is hereby issued requiring you to furnish a return of income in the prescribed form within 30 days of service of this notice. The reasons for issue of this notice are recorded separately and may be requested in writing.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  }
+]

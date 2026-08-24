@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-saffron: #c2410c;
+  --color-saffron-soft: #fff7ed;
+  --color-india-green: #166534;
+  --color-india-green-soft: #f0fdf4;
+  --color-ink: #1c1917;
+  --font-sans: system-ui, "Noto Sans", "Noto Sans Devanagari", "Noto Sans Tamil", "Noto Sans Bengali", "Noto Sans Telugu", sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-stone-50 text-ink font-sans;
+}

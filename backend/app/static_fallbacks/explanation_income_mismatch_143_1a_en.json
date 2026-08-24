@@ -1,0 +1,23 @@
+{
+  "kind": "explanation",
+  "category": "income_mismatch_143_1a",
+  "locale": "en",
+  "plain_language": "The Income Tax Department compared your return for Assessment Year {assessment_year} with the information that {income_source} reported to it. The Department's records show {amount} that does not appear in your return, so it has proposed adding this amount to your income and recomputing the tax.",
+  "what_this_does_not_mean": "This does not automatically mean you owe tax on {amount} — it means the Department's records and your return don't match, and you are being asked to explain the difference.",
+  "possible_reasons": [
+    "The income was received but was not included in your return",
+    "The income was already included in your return under a different head",
+    "The same income was reported twice by the payer",
+    "The information belongs to someone else's account (for example, a family member's)",
+    "The payer reported the amount incorrectly"
+  ],
+  "citations": [
+    "kb-143-1-overview",
+    "kb-143-1a-mismatch",
+    "kb-285ba-information-sources",
+    "kb-ecampaign-response"
+  ],
+  "generated_at": "2026-08-24",
+  "generator": "hand-authored static fallback (reviewed)",
+  "verification": "pending"
+}

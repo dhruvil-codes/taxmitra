@@ -272,7 +272,9 @@ Mobile-first 360px · large type, strong contrast · keyboard navigation · scre
 
 ## 16. Current implementation status (read this first when resuming)
 
-**Committed & pushed:** skeleton + README (commit `bc84bc8` on `main`).
+> **UPDATE (Aug 24, late session): Backend + frontend RC are COMPLETE and verified — 34/34 pytest, clean `npm run build`, E2E check passed (SPA served by FastAPI, EN/HI cited explanations, full resolve journey, refusal path). Remaining for a stranger-ready RC: (1) deploy to Railway (user account) with `OPENAI_API_KEY` + `DEMO_MODE=true`; (2) optional: run `python -m scripts.build_kb` + `pregenerate.py` with the real key (vectors.json + AI-generated fallbacks — hand-authored fallbacks already work without this); (3) Day-2/3 items in §15 (mobile QA pass, legal verification, stranger test, DEMO_MODE drill on prod, video).**
+
+**Committed & pushed:** skeleton + README (commit `bc84bc8`), PRD (commit `1502176`), Day 0/1 build (see git log).
 
 **Written to disk, uncommitted (Day 0/1 backend work):**
 - `backend/requirements.txt`, `backend/app/config.py`
