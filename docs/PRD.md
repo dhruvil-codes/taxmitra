@@ -272,33 +272,24 @@ Mobile-first 360px · large type, strong contrast · keyboard navigation · scre
 
 ## 16. Current implementation status (read this first when resuming)
 
-> **UPDATE (Aug 24, late session): Backend + frontend RC are COMPLETE and verified — 34/34 pytest, clean `npm run build`, E2E check passed (SPA served by FastAPI, EN/HI cited explanations, full resolve journey, refusal path). Remaining for a stranger-ready RC: (1) deploy to Railway (user account) with `OPENAI_API_KEY` + `DEMO_MODE=true`; (2) optional: run `python -m scripts.build_kb` + `pregenerate.py` with the real key (vectors.json + AI-generated fallbacks — hand-authored fallbacks already work without this); (3) Day-2/3 items in §15 (mobile QA pass, legal verification, stranger test, DEMO_MODE drill on prod, video).**
+> **UPDATE (Aug 25): Backend HARDENED and frozen on the API contract — 47/47 pytest, live E2E verified, pushed (`e8b25bd`). Frontend is being rebuilt by the human against `docs/FRONTEND_CONTRACT.md` (input flow, every endpoint, i18n rules, DEMO_MODE semantics, error matrix, localStorage keys). No OCR/PDF upload — deliberate scope decision, documented in the contract. Remaining: (1) user rebuilds frontend → reconnect (contract §7 checklist); (2) deploy to Railway (`OPENAI_API_KEY` + `DEMO_MODE=true`, verify `/api/health` shows `static_integrity: ok`); (3) Day-3 items in §15 (legal verification, stranger test, DEMO_MODE drill on prod, video).**
+>
+> **Hardening pass contents (Aug 25):** lexical grounding fallback (confidence floor enforceable with no vectors.json, no API key, and in DEMO_MODE — embeddings never touched); `grounding {method, confidence, below_floor}` on every explanation; GZip + security headers + request logging; SPA path-traversal containment; enriched `/api/health` with `static_integrity` self-check (regression guard for the Day-0 dropped-citation-id bug class); locale validated (422); bilingual `income_source` ({en, hi}) with locale-aware rendering — fixed raw-English-in-Hindi seam; +13 tests.
 
-**Committed & pushed:** skeleton + README (commit `bc84bc8`), PRD (commit `1502176`), Day 0/1 build (see git log).
-
-**Written to disk, uncommitted (Day 0/1 backend work):**
-- `backend/requirements.txt`, `backend/app/config.py`
-- `backend/app/rules/` — ALL six modules complete: `__init__`, `notice_types`, `deadlines`, `decision_trees`, `checklists`, `response_paths`, `refusal`
-- `backend/app/data/` — `citizens.json`, `notices.json`, `draft_templates.json` (complete)
-- `backend/app/knowledge/corpus/` — 6 of ~12 chunks (all `verification: pending`)
+**Committed & pushed:** skeleton + README (`bc84bc8`), PRD (`1502176`), Day 0/1 build (`f168a98`), backend hardening pass (`e8b25bd`).
 
 **Next steps, in order (next session starts here):**
-1. Create Python venv, `pip install -r requirements.txt`, run a smoke import of the rules package; fix anything broken.
-2. Write remaining corpus chunks (~6) — see §7 inventory.
-3. `knowledge/`: `corpus_loader.py` (frontmatter parser), `embedder.py`, `retriever.py` (+ confidence floor).
-4. `ai/`: `provider.py`, `cache.py`, `prompts.py`; write `static_fallbacks/explanation_income_mismatch_143_1a_{en,hi}.json`.
-5. `routers/` + `main.py` (+ static mount for `frontend/dist`, `/api/health`).
-6. `tests/` — pytest suite (rules 27-combo totality, deadlines, checklists, API contract, DEMO_MODE never calls provider). **Log this module in BUILD_LOG as the Codex-evidence example.**
-7. `scripts/build_kb.py` + `pregenerate.py` (needs OPENAI_API_KEY; generates vectors.json + static content).
-8. Frontend scaffold + Day-1 screens (§4.1–4.4 + components list in §11).
-9. Start `BUILD_LOG.md` retroactively for Day 0/1 entries, commit everything, push, deploy hello-world to Railway.
-10. `.env.example` + `Procfile` (Railway start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`).
+1. Human rebuilds the frontend against `docs/FRONTEND_CONTRACT.md`; reconnect per contract §7 (Vite proxy → uvicorn :8000, verify `/api/health`).
+2. Deploy to Railway (user): env `OPENAI_API_KEY` + `DEMO_MODE=true`; verify `/api/health` → `status: ok`, `static_integrity: ok`, `retrieval_method: lexical`.
+3. Optional: run `python -m scripts.build_kb` + `pregenerate.py` with the real key (vectors.json + RAG-grounded fallbacks; hand-authored fallbacks already work — after this, health flips to `retrieval_method: embedding` outside DEMO_MODE).
+4. Day-3 items in §15: manual legal verification (flip corpus `verification: pending → verified`), stranger test + top-3 fixes, demo-condition citation test, kill-the-key drill on prod, QA sweep.
+5. Day-4: 10 AM freeze, video (§17), 250-word summary, README honesty tables, submit by 6 PM IST.
 
 **Known issues / session notes:**
 - `.gov.in` sites block automated fetches — corpus verification is a manual Day-3 task (user can download official pages/PDFs into the corpus folder for exact quoting).
 - Model names: config/env only, never hardcoded (explicit user requirement).
 - Drafts stay in English; UI + explanations localized (explicit product decision).
-- Environment check (`python --version` etc.) was blocked once — verify Python 3.12/Node 20 availability first thing next session.
+- Dev environment: Python 3.11.9 + Node 24 on Windows/Git Bash, deps installed globally (no venv in repo) — works as-is; Railway installs from `requirements.txt`.
 
 ---
 

@@ -31,3 +31,16 @@ suite (2026-08-24, below).
 - **[X]** AI-generated SPA mount used an invalid `mount(html=...)` kwarg — caught in the E2E check, fixed by hand to `StaticFiles(directory=...)`.
 - **Verification:** `npm run build` clean (63 KB gzipped — low-bandwidth friendly). TestClient E2E: SPA served at `/` (200, text/html), Hindi explanation served static with 4 provenance citations, resolve → `disagree_already_reported` + checklist + deadline + boundary line, s.148 refusal payload OK. **34/34 pytest passing.**
 
+## 2026-08-25 (Day 1/2 — backend hardening pass)
+
+Scope: backend only; frontend handed to the human (contract: `docs/FRONTEND_CONTRACT.md`).
+
+- **[G]** `knowledge/lexical.py` — IDF-weighted lexical retriever over the same corpus (tokenizer keeps section refs like `143(1)(a)` whole; EN+HI stopwords). Exists so the confidence floor is enforceable with **no** vectors.json and **no** API key. **[R]** First suite run caught a missing stopword (`section` was asserted filtered but wasn't in the list) — fixed by hand, not by weakening the test.
+- **[G]** `knowledge/grounding.py` — `ground()` prefers embeddings, degrades to lexical, and forces lexical in DEMO_MODE so the demo never touches the network **including embeddings** (previous kill-the-key drill only exploded the chat provider — now the embedder too).
+- **[G]** `routers/ai.py` rewrite — every explanation now reports `grounding {method, confidence, below_floor}`; corrected `source`/`degraded` semantics (static is the designed path, `degraded` only for stale-cache-while-live-off).
+- **[G]** `main.py` hardening — GZip, security headers, request logging, SPA path-traversal containment, enriched `/api/health` (retrieval method, static-fallback count, and a `static_integrity` self-check that every static citation id resolves in the corpus — regression guard for the Day-0 dropped-id bug class).
+- **[X]** AI draft of the new `/api/ai` endpoint used a bottom-of-file late import for `AIUnavailableError` with a false "avoids a cycle" justification — import cycle didn't exist; moved to the top by hand.
+- **[G + X]** Bilingual `income_source`: AI first pass left raw English phrases mid-sentence in Hindi output ("जो interest income reported by... ने दी थी") and a doubled verb in English ("information that *interest income reported by X* reported to it"). Fixed by making the field `{en, hi}` in data, locale-aware `render_text`, and rephrasing both fallback openers by hand. Draft templates stay English (official letters).
+- **[G]** New tests (+13 → **47/47**): lexical ranking/refusal/top-k, grounding method reporting, health dashboard fields, security headers, 404 matrix across all four id-bearing endpoints, invalid locale 422s, non-string-answer 422 (not 500), locale-appropriate income_source regression.
+- **Live E2E (DEMO_MODE=true):** health 200 with `static_integrity: ok`; Hindi explanation static + lexical-grounded (0.349, above floor) + 4 citations; invalid locale → 422; SPA gzip 575 B index. Committed and pushed as `e8b25bd`.
+
