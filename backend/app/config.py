@@ -42,6 +42,10 @@ class Settings(BaseSettings):
     retrieval_top_k: int = 4
     # Below this cosine-similarity score we refuse instead of guessing.
     retrieval_confidence_floor: float = 0.30
+    # Lexical fallback runs when embeddings are unavailable (no vectors.json,
+    # no API key, or DEMO_MODE). Its scores are token-coverage, not cosine,
+    # so it carries its own floor.
+    lexical_confidence_floor: float = 0.25
 
     # --- Rate limiting for live-AI routes (public-link abuse guard) ---
     ai_rate_limit: str = "10/minute"

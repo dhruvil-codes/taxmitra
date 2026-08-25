@@ -1,4 +1,14 @@
-"""AI explanation endpoint — static-first, DEMO_MODE-aware, cited."""
+"""AI explanation endpoint — static-first, DEMO_MODE-aware, cited, grounded.
+
+Serving chain (per request):
+  1. in-memory cache   -> source: "cache"
+  2. static fallback   -> source: "static"   (the designed path; DEMO_MODE stops here)
+  3. live OpenAI call  -> source: "live"     (dev-time only; grounded + confidence-gated)
+
+Every response carries `grounding` metadata (method + confidence + refusal
+flag) so the frontend can always show how the answer was anchored, and
+`degraded` is True only when we serve stale cache because live AI is off.
+"""
 
 from __future__ import annotations
 
@@ -15,8 +25,9 @@ import os
 
 from app.knowledge.corpus_loader import citations_for
 from app.knowledge.embedder import AIUnavailableError
-from app.knowledge.retriever import Retriever
-from app.rules.decision_trees import render_text
+from app.knowledge.grounding import ground
+from app.knowledge.retriever import RetrievalResult
+from app.rules.decision_trees import localized_income_source, render_text
 from app.rules.notice_types import classify_notice, is_supported
 
 limiter = Limiter(key_func=get_remote_address)
@@ -25,16 +36,28 @@ router = APIRouter(prefix="/api/ai", tags=["ai"])
 _TEXT_FIELDS = ("plain_language", "what_this_does_not_mean")
 
 
-def _render_fields(content: dict, notice: dict) -> dict:
+def _render_fields(content: dict, notice: dict, locale: str) -> dict:
     rendered = dict(content)
     for field in _TEXT_FIELDS:
         if field in rendered:
-            rendered[field] = render_text(str(rendered[field]), notice)
+            rendered[field] = render_text(str(rendered[field]), notice, locale)
     if isinstance(rendered.get("possible_reasons"), list):
         rendered["possible_reasons"] = [
-            render_text(str(reason), notice) for reason in rendered["possible_reasons"]
+            render_text(str(reason), notice, locale) for reason in rendered["possible_reasons"]
         ]
     return rendered
+
+
+def _grounding_payload(result: RetrievalResult) -> dict:
+    return {
+        "method": result.method,
+        "confidence": round(result.confidence, 3),
+        "below_floor": result.below_floor,
+    }
+
+
+def _http_unavailable() -> HTTPException:
+    return HTTPException(status_code=503, detail="AI explanation temporarily unavailable; please retry later.")
 
 
 @router.get("/explanation/{notice_id}")
@@ -50,35 +73,45 @@ def explanation(request: Request, notice_id: str, locale: str = Query(default="e
     settings = get_settings()
     store = get_store()
     key = f"explanation_{category.value}_{locale}"
+    query = (
+        f"explain {notice['section']} income mismatch intimation "
+        f"{localized_income_source(notice, 'en')}"
+    )
 
-    content = store.get_memory(key) or store.get_static(key)
-    source = "static" if store.get_static(key) is not None else "cache"
-    degraded = False
+    content = store.get_memory(key)
+    source = "cache" if content is not None else None
+    if content is None:
+        content = store.get_static(key)
+        if content is not None:
+            source = "static"
+
+    grounding: RetrievalResult | None = None
 
     if content is None:
+        # Dev-time generation: grounded in retrieved official-source context,
+        # gated by the confidence floor. Never reached in DEMO_MODE.
         if not store.live_allowed():
-            raise HTTPUnavailable()
-        # Dev-time generation: grounded in retrieved official-source context.
-        retriever = Retriever.load(settings)
-        if retriever is None:
-            raise HTTPUnavailable()
+            raise _http_unavailable()
+        grounding = ground(settings, query)
+        if grounding.below_floor:
+            raise _http_unavailable()
+        if not grounding.chunks:
+            raise _http_unavailable()
         try:
             provider = ChatProvider(settings)
-            query = f"explain {notice['section']} income mismatch intimation {notice['income_source']}"
-            from app.knowledge.embedder import Embedder
-
-            vector = Embedder(settings).embed_texts([query])[0]
-            result = retriever.retrieve(vector)
-            if result.below_floor:
-                raise HTTPUnavailable()
-            system, user = build_explanation_prompt(notice, result.chunks, locale)
+            system, user = build_explanation_prompt(notice, grounding.chunks, locale)
             content = provider.chat_json(system, user)
             store.put_memory(key, content)
             source = "live"
-        except AIUnavailableError as exc:
-            raise HTTPUnavailable() from exc
+        except AIUnavailableError:
+            raise _http_unavailable()
 
-    payload = _render_fields(content, notice)
+    if grounding is None:
+        # Static/cache path: grounding is still computed (lexical, zero cost,
+        # zero network) so every response reports how it is anchored.
+        grounding = ground(settings, query)
+
+    payload = _render_fields(content, notice, locale)
     citation_ids = tuple(payload.get("citations", ()))
     return {
         "content": {
@@ -92,10 +125,7 @@ def explanation(request: Request, notice_id: str, locale: str = Query(default="e
             "hi": "केवल सूचीबद्ध नोटिस प्रकारों को शामिल करता है। आधिकारिक आयकर पोर्टल ही प्रमाणिक स्रोत है।",
         },
         "source": source,
-        "degraded": degraded,
+        "degraded": source == "cache" and not store.live_allowed(),
         "demo_mode": settings.demo_mode,
+        "grounding": _grounding_payload(grounding),
     }
-
-
-def HTTPUnavailable():  # small helper for consistent 503s
-    return HTTPException(status_code=503, detail="AI explanation temporarily unavailable; please retry later.")

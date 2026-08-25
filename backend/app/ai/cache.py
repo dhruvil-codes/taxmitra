@@ -26,16 +26,21 @@ class ContentStore:
         self._settings = settings
         self._static: dict[str, dict] = {}
         self._memory: dict[str, dict] = {}
-        for name in os.listdir(settings.static_fallbacks_dir):
-            if not name.endswith(".json"):
-                continue
-            with open(os.path.join(settings.static_fallbacks_dir, name), encoding="utf-8") as fh:
-                payload = json.load(fh)
-            key = name[: -len(".json")]
-            self._static[key] = payload
+        if os.path.isdir(settings.static_fallbacks_dir):
+            for name in os.listdir(settings.static_fallbacks_dir):
+                if not name.endswith(".json"):
+                    continue
+                with open(os.path.join(settings.static_fallbacks_dir, name), encoding="utf-8") as fh:
+                    payload = json.load(fh)
+                key = name[: -len(".json")]
+                self._static[key] = payload
 
     def get_static(self, key: str) -> dict | None:
         return self._static.get(key)
+
+    def static_items(self) -> tuple[tuple[str, dict], ...]:
+        """Snapshot for integrity checks (citation ids must resolve in corpus)."""
+        return tuple(self._static.items())
 
     def put_memory(self, key: str, content: dict) -> None:
         self._memory[key] = content

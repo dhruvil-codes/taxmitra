@@ -24,6 +24,7 @@ class RetrievalResult:
     scores: tuple[float, ...]
     confidence: float
     below_floor: bool
+    method: str = "embedding"
 
 
 class Retriever:

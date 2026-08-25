@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from app.data_store import get_citizen, get_notice, load_draft_templates
@@ -24,7 +24,10 @@ class Answers(BaseModel):
 
 
 @router.get("/questions/{notice_id}")
-def questions(notice_id: str, locale: str = "en"):
+def questions(
+    notice_id: str,
+    locale: str = Query(default="en", pattern="^(en|hi)$"),
+):
     notice = get_notice(notice_id)
     if notice is None:
         raise HTTPException(status_code=404, detail="Notice not found")

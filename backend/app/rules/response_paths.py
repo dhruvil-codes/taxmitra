@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 
-from app.rules.decision_trees import Question, render_text
+from app.rules.decision_trees import Question, localized_income_source, render_text
 from app.rules.notice_types import NoticeCategory
 
 Text = dict[str, str]
@@ -187,7 +187,7 @@ def build_draft(
         "din": notice.get("official_reference", ""),
         "assessment_year": str(notice.get("assessment_year", "")),
         "amount": f"₹{notice.get('amount_in_question', 0):,}",
-        "income_source": notice.get("income_source", ""),
+        "income_source": localized_income_source(notice, "en"),  # drafts are English official letters
         "issue_date": notice.get("issue_date", ""),
         "deadline_date": due_date.isoformat() if due_date else "",
         "documents_sentence": _DOCUMENT_SENTENCES[evidence_from_answers(answers)],
@@ -206,8 +206,8 @@ def questions_payload(questions: tuple[Question, ...], notice: dict, locale: str
         payload.append(
             {
                 "id": q.id,
-                "text": render_text(q.text.get(locale, q.text["en"]), notice),
-                "help": render_text(q.help.get(locale, q.help.get("en", "")), notice),
+                "text": render_text(q.text.get(locale, q.text["en"]), notice, locale),
+                "help": render_text(q.help.get(locale, q.help.get("en", "")), notice, locale),
                 "options": [
                     {"id": o.id, "label": o.label.get(locale, o.label["en"])}
                     for o in q.options

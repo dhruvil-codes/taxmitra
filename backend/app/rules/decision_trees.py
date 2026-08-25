@@ -77,7 +77,6 @@ QUESTIONS: dict[str, tuple[Question, ...]] = {
 _PLACEHOLDER_RENDERERS = {
     "amount": lambda notice: _format_amount(notice.get("amount_in_question")),
     "assessment_year": lambda notice: str(notice.get("assessment_year", "")),
-    "income_source": lambda notice: str(notice.get("income_source", "")),
 }
 
 
@@ -88,8 +87,17 @@ def _format_amount(value: Any) -> str:
         return "₹0"
 
 
-def render_text(text: str, notice: dict) -> str:
-    """Replace {amount}-style placeholders in question/help text."""
+def localized_income_source(notice: dict, locale: str = "en") -> str:
+    """income_source may be a bilingual {en, hi} map or a plain string."""
+    source = notice.get("income_source", "")
+    if isinstance(source, dict):
+        return str(source.get(locale) or source.get("en") or "")
+    return str(source)
+
+
+def render_text(text: str, notice: dict, locale: str = "en") -> str:
+    """Replace {amount}-style placeholders; bilingual fields resolve per locale."""
+    text = text.replace("{income_source}", localized_income_source(notice, locale))
     for key, renderer in _PLACEHOLDER_RENDERERS.items():
         text = text.replace("{" + key + "}", renderer(notice))
     return text

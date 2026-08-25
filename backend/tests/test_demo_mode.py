@@ -7,6 +7,7 @@ OpenAI during these tests, they fail loudly. This is the kill-the-key drill.
 from fastapi.testclient import TestClient
 
 from app.ai import provider as provider_module
+from app.knowledge import embedder as embedder_module
 from app.main import app
 
 client = TestClient(app)
@@ -17,11 +18,18 @@ class _ExplodingProvider:
         raise AssertionError("DEMO_MODE must never trigger a live AI call")
 
 
+class _ExplodingEmbedder:
+    def __init__(self, *args, **kwargs):
+        raise AssertionError("DEMO_MODE must never trigger a live embedding call")
+
+
 def test_explanation_never_touches_live_ai_in_demo_mode(monkeypatch):
     monkeypatch.setattr(provider_module, "ChatProvider", _ExplodingProvider)
+    monkeypatch.setattr(embedder_module, "Embedder", _ExplodingEmbedder)
     body = client.get("/api/ai/explanation/N-2026-001", params={"locale": "en"}).json()
     assert body["source"] == "static"
     assert body["content"]["plain_language"]
+    assert body["grounding"]["method"] == "lexical"  # grounded without the network
 
 
 def test_kill_the_key_drill_hi():

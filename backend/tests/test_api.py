@@ -13,6 +13,18 @@ def test_health():
     assert body["status"] == "ok"
     assert body["demo_mode"] is True  # conftest forces DEMO_MODE
     assert body["chat_model"] == get_settings().openai_chat_model
+    # Deployment-dashboard fields.
+    assert body["embedding_model"] == get_settings().openai_embedding_model
+    assert body["retrieval_method"] in ("lexical", "embedding")
+    assert body["static_fallbacks"] >= 2
+    assert body["static_integrity"] == "ok"
+
+
+def test_security_and_gzip_headers():
+    response = client.get("/api/health")
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+    assert response.headers["X-Frame-Options"] == "DENY"
+    assert response.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
 
 
 def test_citizens():
@@ -103,3 +115,51 @@ def test_explanation_static_en_and_hi_with_citations():
 
 def test_explanation_unsupported_notice_is_400():
     assert client.get("/api/ai/explanation/N-2026-002").status_code == 400
+
+
+def test_explanation_reports_grounding_metadata():
+    body = client.get("/api/ai/explanation/N-2026-001", params={"locale": "en"}).json()
+    grounding = body["grounding"]
+    assert grounding["method"] in ("lexical", "embedding")
+    assert 0.0 <= grounding["confidence"] <= 1.0
+    assert grounding["below_floor"] is False  # hero notice must ground confidently
+
+
+def test_unknown_ids_are_404_everywhere():
+    missing = "N-DOES-NOT-EXIST"
+    assert client.get(f"/api/notices/{missing}").status_code == 404
+    assert client.get(f"/api/notices/{missing}/refusal").status_code == 404
+    assert client.get(f"/api/workflow/questions/{missing}").status_code == 404
+    assert client.get(f"/api/ai/explanation/{missing}").status_code == 404
+    response = client.post("/api/workflow/resolve", json={"notice_id": missing, "answers": {}})
+    assert response.status_code == 404
+
+
+def test_invalid_locale_is_422():
+    assert client.get("/api/workflow/questions/N-2026-001", params={"locale": "fr"}).status_code == 422
+    assert client.get("/api/ai/explanation/N-2026-001", params={"locale": "fr"}).status_code == 422
+
+
+def test_non_string_answer_is_422_not_500():
+    payload = {
+        "notice_id": "N-2026-001",
+        "answers": {"q1_received": ["yes"], "q2_in_return": "yes", "q3_documents": "yes"},
+    }
+    assert client.post("/api/workflow/resolve", json=payload).status_code == 422
+
+
+def test_notices_list_without_filter_returns_all():
+    body = client.get("/api/notices").json()
+    assert len(body) == 2
+
+
+def test_explanation_income_source_is_locale_appropriate():
+    # HI must carry the Hindi income source, not a raw English phrase mid-sentence.
+    hi = client.get("/api/ai/explanation/N-2026-001", params={"locale": "hi"}).json()
+    assert "ब्याज आय" in hi["content"]["plain_language"]
+    assert "reported by" not in hi["content"]["plain_language"]
+    en = client.get("/api/ai/explanation/N-2026-001", params={"locale": "en"}).json()
+    assert "interest income reported by Demo Bharat Bank" in en["content"]["plain_language"]
+    # Bilingual shape is exposed on the notice itself.
+    detail = client.get("/api/notices/N-2026-001").json()
+    assert set(detail["income_source"].keys()) == {"en", "hi"}
