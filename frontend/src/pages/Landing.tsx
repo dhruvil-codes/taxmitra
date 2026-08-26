@@ -90,11 +90,14 @@ export default function Landing() {
             <h2>Understand your<br/><em>[ tax notice ]</em><br/>without the<br/>confusion.</h2>
           </div>
           <aside className="tm-intro-aside">
-            <p className="tm-kicker"><Mark /> Built for Indian taxpayers</p>
+            <p className="tm-proof"><span className="tm-proof-faces">TM</span> Trusted civic guidance <b>★ 4.9 / 5</b></p>
             <p>Tax Mitra explains what your notice means, shows what to prepare, and helps you draft a response in plain language.</p>
+            <div className="tm-intro-actions">
+              <ArrowLink onClick={openGuide}>OPEN GUIDE</ArrowLink>
+              <a href="#how" className="tm-watch"><span>▷</span> HOW IT WORKS</a>
+            </div>
             <a href="#language">⌁ Understand in your language</a>
             <p className="tm-language-copy" id="language">English / हिन्दी</p>
-            <ArrowLink onClick={openGuide}>LET&apos;S UNDERSTAND YOUR NOTICE</ArrowLink>
             <small>Independent prototype · Synthetic data · Not affiliated with the Income Tax Department · No automatic submissions</small>
           </aside>
         </section>
@@ -106,7 +109,37 @@ export default function Landing() {
               <span>{copy}</span>
             </article>
           ))}
-          <div className="tm-promise-rule">&gt; AI EXPLAINS → RULES DECIDE → HUMANS APPROVE &lt;</div>
+          <div className="tm-promise-rule"><span>···</span> &gt; ADD AN <b>INTELLIGENCE LAYER</b> FOR YOUR TAX NOTICE &lt; <span>···</span></div>
+        </section>
+
+        <section className="tm-value tm-wrap" aria-labelledby="value-heading">
+          <div className="tm-value-head">
+            <div>
+              <p className="tm-eyebrow">[ IN.01 / 11 ] &nbsp; — &nbsp; KEY VALUE</p>
+              <h2 id="value-heading">Less manual work.<br/>More confident action.</h2>
+            </div>
+            <button className="tm-mini-button" onClick={openGuide}>■ &nbsp; OPEN GUIDE</button>
+          </div>
+          <div className="tm-value-grid">
+            <article>
+              <span className="tm-card-number">// 001</span>
+              <div className="tm-diagram tm-diagram-one" aria-hidden="true"><i/><i/><i/></div>
+              <h3>Plain-language clarity</h3>
+              <p>Turn dense notice language into a clear summary of what happened and why it matters.</p>
+            </article>
+            <article className="is-featured">
+              <span className="tm-card-number">// 002</span>
+              <div className="tm-diagram tm-diagram-two" aria-hidden="true"><i/><i/><i/><i/></div>
+              <h3>Adaptive guidance</h3>
+              <p>Follow a focused path that adapts to the notice, your answers, and the documents you have.</p>
+            </article>
+            <article>
+              <span className="tm-card-number">// 003</span>
+              <div className="tm-diagram tm-diagram-three" aria-hidden="true"><i/><i/><i/></div>
+              <h3>Human-controlled results</h3>
+              <p>Prepare your next step with clear boundaries. Nothing is submitted without your approval.</p>
+            </article>
+          </div>
         </section>
 
         <section className="tm-process" id="how">
