@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 
 const promises = [
-  ["01", "PLAIN LANGUAGE", "Explain technical tax language in simple words."],
-  ["02", "INDIAN CONTEXT", "Designed around the way Indian taxpayers actually encounter tax notices."],
-  ["03", "MOBILE FIRST", "Readable and usable on phones and low-bandwidth connections."],
-  ["04", "HUMAN CONTROL", "Tax Mitra prepares guidance. You approve every important action."],
+  ["01", "PLAIN LANGUAGE", "Simple explanations without legal jargon."],
+  ["02", "GUIDED STEPS", "A focused path from notice to next action."],
+  ["03", "DOCUMENT HELP", "Prepare only the documents your notice needs."],
+  ["04", "HUMAN CONTROL", "You approve every important action."],
 ];
 
 const steps = [
@@ -90,15 +90,13 @@ export default function Landing() {
             <h2>Understand your<br/><em>[ tax notice ]</em><br/>without the<br/>confusion.</h2>
           </div>
           <aside className="tm-intro-aside">
-            <p className="tm-proof"><span className="tm-proof-faces">TM</span> Trusted civic guidance <b>★ 4.9 / 5</b></p>
+            <p className="tm-designed"><Mark /> Designed for everyday taxpayers</p>
             <p>Tax Mitra explains what your notice means, shows what to prepare, and helps you draft a response in plain language.</p>
             <div className="tm-intro-actions">
-              <ArrowLink onClick={openGuide}>OPEN GUIDE</ArrowLink>
-              <a href="#how" className="tm-watch"><span>▷</span> HOW IT WORKS</a>
+              <ArrowLink onClick={openGuide}>GET STARTED</ArrowLink>
+              <a href="#how" className="tm-watch">SEE HOW IT WORKS <span>↓</span></a>
             </div>
-            <a href="#language">⌁ Understand in your language</a>
-            <p className="tm-language-copy" id="language">English / हिन्दी</p>
-            <small>Independent prototype · Synthetic data · Not affiliated with the Income Tax Department · No automatic submissions</small>
+            <small>Not a government service · No automatic submissions</small>
           </aside>
         </section>
 
@@ -109,37 +107,7 @@ export default function Landing() {
               <span>{copy}</span>
             </article>
           ))}
-          <div className="tm-promise-rule"><span>···</span> &gt; ADD AN <b>INTELLIGENCE LAYER</b> FOR YOUR TAX NOTICE &lt; <span>···</span></div>
-        </section>
-
-        <section className="tm-value tm-wrap" aria-labelledby="value-heading">
-          <div className="tm-value-head">
-            <div>
-              <p className="tm-eyebrow">[ IN.01 / 11 ] &nbsp; — &nbsp; KEY VALUE</p>
-              <h2 id="value-heading">Less manual work.<br/>More confident action.</h2>
-            </div>
-            <button className="tm-mini-button" onClick={openGuide}>■ &nbsp; OPEN GUIDE</button>
-          </div>
-          <div className="tm-value-grid">
-            <article>
-              <span className="tm-card-number">// 001</span>
-              <div className="tm-diagram tm-diagram-one" aria-hidden="true"><i/><i/><i/></div>
-              <h3>Plain-language clarity</h3>
-              <p>Turn dense notice language into a clear summary of what happened and why it matters.</p>
-            </article>
-            <article className="is-featured">
-              <span className="tm-card-number">// 002</span>
-              <div className="tm-diagram tm-diagram-two" aria-hidden="true"><i/><i/><i/><i/></div>
-              <h3>Adaptive guidance</h3>
-              <p>Follow a focused path that adapts to the notice, your answers, and the documents you have.</p>
-            </article>
-            <article>
-              <span className="tm-card-number">// 003</span>
-              <div className="tm-diagram tm-diagram-three" aria-hidden="true"><i/><i/><i/></div>
-              <h3>Human-controlled results</h3>
-              <p>Prepare your next step with clear boundaries. Nothing is submitted without your approval.</p>
-            </article>
-          </div>
+          <div className="tm-promise-rule">&gt; CLARITY → PREPARATION → CONFIDENT NEXT STEPS &lt;</div>
         </section>
 
         <section className="tm-process" id="how">
