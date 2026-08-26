@@ -17,6 +17,7 @@ export default function App() {
         <main className="min-h-[80vh]">
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/guide" element={<Login />} />
             <Route path="/login" element={<Login />} />
             <Route path="/notices" element={<Dashboard />} />
             <Route path="/notices/:id" element={<Notice />} />

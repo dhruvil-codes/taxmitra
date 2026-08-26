@@ -1,8 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import { useI18n } from "../i18n";
 import { Card, PrimaryButton } from "../components";
 
 export default function Landing() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const four = [
     ["landing.q1", "landing.q1.sub"],
     ["landing.q2", "landing.q2.sub"],
@@ -19,7 +21,7 @@ export default function Landing() {
         </h1>
         <p className="mt-3 text-stone-600 leading-relaxed">{t("landing.sub")}</p>
         <div className="mt-6">
-          <PrimaryButton href="#/login">{t("landing.cta")} →</PrimaryButton>
+          <PrimaryButton onClick={() => navigate("/guide")}>{t("landing.cta")} →</PrimaryButton>
         </div>
       </section>
 
