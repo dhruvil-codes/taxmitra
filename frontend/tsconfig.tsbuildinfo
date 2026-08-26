@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/components.tsx","./src/i18n.tsx","./src/lib.ts","./src/main.tsx","./src/pages/dashboard.tsx","./src/pages/journey.tsx","./src/pages/landing.tsx","./src/pages/login.tsx","./src/pages/notice.tsx","./src/pages/unsupported.tsx"],"version":"5.6.3"}
+{"root":["./src/App.tsx","./src/components.tsx","./src/i18n.tsx","./src/lib.ts","./src/main.tsx","./src/pages/Dashboard.tsx","./src/pages/Journey.tsx","./src/pages/Landing.tsx","./src/pages/Login.tsx","./src/pages/Notice.tsx","./src/pages/Unsupported.tsx"],"version":"5.6.3"}
