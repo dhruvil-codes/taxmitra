@@ -6,21 +6,21 @@
   --color-india-green: #166534;
   --color-india-green-soft: #f0fdf4;
   --color-ink: #111215;
-  --font-sans: Arial, "Noto Sans", "Noto Sans Devanagari", sans-serif;
+  --font-sans: "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Courier New", monospace;
 }
 
 :root { --tm-blue: #0757ff; --tm-black: #101115; --tm-paper: #fbfbfc; --tm-line: #d9dce2; --tm-muted: #5f6572; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; background: var(--tm-paper); }
-body { margin: 0; background: var(--tm-paper); color: var(--tm-black); font-family: Arial, "Noto Sans", sans-serif; }
+body { margin: 0; background: var(--tm-paper); color: var(--tm-black); font-family: var(--font-sans); }
 button, a { font: inherit; }
 .tm-site { min-height: 100vh; background: var(--tm-paper); overflow: hidden; }
 .tm-wrap { width: min(1024px, calc(100% - 48px)); margin-inline: auto; }
 .tm-nav { height: 48px; display: flex; align-items: stretch; padding-left: max(24px, calc((100vw - 1024px)/2)); background: var(--tm-black); color: white; border-bottom: 1px solid #333842; font-family: var(--font-mono); font-size: 10px; }
 .tm-brand { display: flex; align-items: center; gap: 9px; color: inherit; text-decoration: none; white-space: nowrap; }
-.tm-brand strong { font-family: Arial, sans-serif; font-size: 14px; }
+.tm-brand strong { font-family: var(--font-sans); font-size: 14px; }
 .tm-brand > span:last-child { color: #7f8796; font-size: 7px; margin-right: 32px; }
-.tm-mark { display: inline-flex; align-items: center; justify-content: center; width: 21px; height: 21px; background: var(--tm-blue); color: white; font-weight: 700; font-family: Arial, sans-serif; }
+.tm-mark { display: inline-flex; align-items: center; justify-content: center; width: 21px; height: 21px; background: var(--tm-blue); color: white; font-weight: 700; font-family: var(--font-sans); }
 .tm-nav nav { display: flex; }
 .tm-nav nav a, .tm-languages > *, .tm-open { display: flex; align-items: center; padding: 0 21px; color: white; text-decoration: none; border-left: 1px solid #292c33; }
 .tm-nav nav a:hover { background: #1a1c22; }
