@@ -89,15 +89,18 @@ export default function Landing() {
             <p className="tm-eyebrow">[ TM / GUIDE / 01 ]</p>
             <h2>Understand your<br/><em>[ tax notice ]</em><br/>without the<br/>confusion.</h2>
           </div>
-          <aside className="tm-intro-aside">
-            <p className="tm-designed"><Mark /> Designed for everyday taxpayers</p>
-            <p>Tax Mitra explains what your notice means, shows what to prepare, and helps you draft a response in plain language.</p>
+          <aside className="tm-intro-aside" aria-label="Start using Tax Mitra">
+            <p className="tm-start-label"><Mark /> START HERE · <span lang="hi">यहाँ से शुरू करें</span></p>
             <div className="tm-intro-actions">
-              <ArrowLink onClick={openGuide}>USE TAX MITRA →</ArrowLink>
-              <a href="#how" className="tm-watch">SEE HOW IT WORKS <span>↓</span></a>
+              <ArrowLink onClick={openGuide}>USE TAX MITRA</ArrowLink>
+              <a href="/upload" className="tm-upload-action">
+                <span>USE MY PDF NOTICE</span>
+                <small>अपना नोटिस चुनें</small>
+                <b aria-hidden="true">→</b>
+              </a>
             </div>
-            <small>Not a government service · No automatic submissions</small>
-            <a href="/upload">Have your own notice? Choose a PDF →</a>
+            <a href="#how" className="tm-watch">See how it works <span aria-hidden="true">↓</span></a>
+            <small className="tm-start-note">You stay in control. Nothing is submitted automatically.</small>
           </aside>
         </section>
 
