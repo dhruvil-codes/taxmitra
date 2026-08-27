@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel
 
 from app.config import get_settings
@@ -20,6 +20,8 @@ from app.rules.scrutiny import (
     resolve_scrutiny,
     scrutiny_questions,
 )
+from app.extraction.pdf import MAX_PDF_BYTES, extract_pdf
+from app.extraction.sessions import confirm_session, create_session, get_session
 
 router = APIRouter(prefix="/api/scrutiny", tags=["scrutiny"])
 
@@ -30,13 +32,80 @@ class ScrutinyResolveRequest(BaseModel):
     extraction_confirmed: bool = True
 
 
+class ExtractionConfirmation(BaseModel):
+    extraction_id: str
+    fingerprint: str
+    confirmed: bool
+
+
+def _session_notice(extraction_id: str) -> dict | None:
+    session = get_session(extraction_id)
+    if not session or not session.get("confirmed"):
+        return None
+    metadata = session["metadata"]
+    return {
+        "id": extraction_id,
+        "section": metadata["section"],
+        "assessment_year": metadata.get("assessment_year"),
+        "response_due_date": metadata.get("response_deadline"),
+        "issue_date": metadata.get("issue_date"),
+        "official_reference": metadata.get("notice_reference"),
+        "synthetic_extraction": {"source_type": "pdf", "requires_human_confirmation": True, "requests": session["requests"]},
+    }
+
+
 def _scrutiny_notice(notice_id: str) -> dict:
     notice = get_notice(notice_id)
+    if notice is None:
+        session = get_session(notice_id)
+        if session is not None and not session.get("confirmed"):
+            raise HTTPException(status_code=409, detail="Human confirmation is required before scrutiny guidance")
+        notice = _session_notice(notice_id)
     if notice is None:
         raise HTTPException(status_code=404, detail="Notice not found")
     if classify_notice(notice) != NoticeCategory.SCRUTINY_142_1:
         raise HTTPException(status_code=400, detail="Notice is not a supported 142(1) scrutiny notice")
     return notice
+
+
+@router.post("/extract")
+async def extract(file: UploadFile = File(...)):
+    if file.content_type != "application/pdf":
+        raise HTTPException(status_code=415, detail="Only application/pdf is accepted")
+    content = await file.read(MAX_PDF_BYTES + 1)
+    settings = get_settings()
+    result = extract_pdf(content, lambda query: ground(settings, query))
+    preview_notice = {
+        "section": result.metadata.get("section"),
+        "synthetic_extraction": {"source_type": "pdf", "requires_human_confirmation": True, "requests": list(result.requests)},
+    }
+    enriched = build_scrutiny_requests(preview_notice, True) if not result.refusal_reason else ()
+    payload = {
+        "metadata": result.metadata,
+        "requests": request_payload(enriched, _citations_by_request(enriched)),
+        "extraction": {
+            "status": "refused" if result.refusal_reason else "needs_confirmation",
+            "confidence": result.extraction_confidence,
+            "warnings": list(result.warnings),
+            "refusal_reason": result.refusal_reason,
+        },
+        "grounding": {"method": result.grounding_method, "confidence": result.grounding_confidence, "below_floor": result.grounding_below_floor},
+    }
+    if result.refusal_reason:
+        return {**payload, "supported": False}
+    extraction_id, fingerprint = create_session(payload)
+    return {**payload, "supported": True, "extraction_id": extraction_id, "fingerprint": fingerprint, "requires_human_confirmation": True}
+
+
+@router.post("/confirm")
+def confirm(payload: ExtractionConfirmation):
+    if not payload.confirmed:
+        return {"supported": False, "status": "refused", "reason": "Human confirmation was not provided."}
+    session = confirm_session(payload.extraction_id, payload.fingerprint)
+    if session is None:
+        raise HTTPException(status_code=409, detail="Extraction session or fingerprint is invalid or expired")
+    notice = _session_notice(payload.extraction_id)
+    return {"supported": True, "status": "confirmed", "extraction_id": payload.extraction_id, "notice_id": payload.extraction_id, "requests": request_payload(build_scrutiny_requests(notice, True), _citations_by_request(build_scrutiny_requests(notice, True)))}
 
 
 def _citations_by_request(requests) -> dict[str, list[dict]]:

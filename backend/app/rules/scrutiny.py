@@ -26,6 +26,9 @@ class ScrutinyRequest:
     required_evidence: tuple[Text, ...]
     response_section: str
     citations: tuple[str, ...]
+    confidence: float = 1.0
+    warnings: tuple[str, ...] = ()
+    grounding: dict | None = None
 
 
 @dataclass(frozen=True)
@@ -147,7 +150,7 @@ def build_scrutiny_requests(notice: dict, extraction_confirmed: bool = True) -> 
 
 
 def _enrich_request(item: ExtractedRequest) -> ScrutinyRequest:
-    configured = _REQUEST_LIBRARY.get(item.id)
+    configured = _REQUEST_LIBRARY.get(item.classification_id or item.id)
     if configured is None:
         raise KeyError(f"Unknown scrutiny request id: {item.id}")
     return ScrutinyRequest(
@@ -158,6 +161,9 @@ def _enrich_request(item: ExtractedRequest) -> ScrutinyRequest:
         required_evidence=tuple(configured["evidence"]),
         response_section=item.response_section,
         citations=item.citations,
+        confidence=float(getattr(item, "confidence", 1.0)),
+        warnings=tuple(getattr(item, "warnings", ())),
+        grounding=getattr(item, "grounding", None),
     )
 
 
@@ -200,12 +206,19 @@ def request_payload(requests: tuple[ScrutinyRequest, ...], citations_by_id: dict
     return [
         {
             "id": request.id,
+            "request_id": request.id,
+            "classification_id": next((key for key, value in _REQUEST_LIBRARY.items() if value.get("plain") == request.plain_language_explanation), request.id),
             "original_text": request.original_text,
             "plain_language_explanation": request.plain_language_explanation,
             "why_required": request.why_required,
             "required_evidence": list(request.required_evidence),
+            "what_department_is_asking": request.response_section,
+            "expected_evidence": list(request.required_evidence),
             "response_section": request.response_section,
             "citations": citations_by_id.get(request.id, []),
+            "confidence": request.confidence,
+            "warnings": list(request.warnings),
+            "grounding": request.grounding,
         }
         for request in requests
     ]

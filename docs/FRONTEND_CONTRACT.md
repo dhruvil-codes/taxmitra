@@ -12,7 +12,7 @@ code around it.
 
 ## 1. The user input flow — what a citizen actually gives Tax Mitra
 
-**No OCR. No PDF upload. No typing (except optional draft edits). ~5 taps total.**
+**PDF upload is supported for ordinary text-based Section 142(1) notices. OCR is not supported in V1.**
 
 | # | Screen | What the user gives | Tap cost |
 |---|--------|--------------------|----------|
@@ -27,7 +27,7 @@ code around it.
 **Landing-page copy angle:** "No forms to fill. Answer 3 questions in your
 language — we handle the rest."
 
-**Why no OCR/PDF (the honest scope decision):** notice PDFs vary wildly in
+**V1 PDF scope:** notice PDFs vary wildly in
 layout; a misparse means wrong guidance, which is our worst failure mode.
 The prototype uses pre-loaded demo notices and says so. "Drop your notice
 PDF" with OCR → DIN extraction → auto-classify is on the post-hackathon
@@ -192,6 +192,38 @@ Errors: **404** unknown notice, **422** missing/invalid/non-string answers.
 Same shape as above. **400** if the notice *is* supported.
 
 ---
+
+### 3.9 POST /api/scrutiny/extract - PDF extraction
+
+Send multipart form data with field `file` and content type `application/pdf`.
+Files are limited to 10 MB. V1 supports ordinary text PDFs only; OCR is not
+supported. Uploaded bytes are processed in memory and are never persisted or
+logged.
+
+Success returns `supported: true`, `extraction.status: "needs_confirmation"`,
+an ephemeral `extraction_id`, a server-generated `fingerprint`, notice
+metadata, and requests containing `request_id`, `original_text`,
+`classification_id`, `response_section`, `citations`, `confidence`,
+`warnings`, and per-request `grounding` metadata. Top-level `grounding` has
+`method`, `confidence`, and `below_floor`.
+
+Malformed, empty, scanned/image-only, unrelated, unsupported, unclassifiable,
+or below-grounding-floor PDFs return `supported: false` and
+`extraction.status: "refused"` with a machine-readable `refusal_reason`.
+
+### 3.10 POST /api/scrutiny/confirm
+
+After reviewing the extraction, send
+`{"extraction_id":"...", "fingerprint":"...", "confirmed":true}`.
+The fingerprint is checked against an ephemeral in-memory session, so arbitrary
+client-created requests are not trusted. The response returns `notice_id`
+equal to the opaque extraction id. Use it with the existing scrutiny requests,
+questions, and resolve endpoints. Before confirmation those endpoints refuse;
+no questions, checklist, or draft can be generated. Sessions expire after 30
+minutes and contain no PDF bytes.
+
+The enforced flow is: PDF extraction -> human confirmation -> deterministic
+rules/questions -> checklist/draft. Tax Mitra never submits anything.
 
 ## 4. Journey state (localStorage)
 

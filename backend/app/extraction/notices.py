@@ -16,6 +16,10 @@ class ExtractedRequest:
     original_text: str
     response_section: str
     citations: tuple[str, ...]
+    classification_id: str | None = None
+    confidence: float = 1.0
+    warnings: tuple[str, ...] = ()
+    grounding: dict | None = None
 
 
 @dataclass(frozen=True)
@@ -36,10 +40,14 @@ def extract_notice_requests(notice: dict) -> ExtractedNotice:
     extraction = notice.get("synthetic_extraction") or {}
     requests = tuple(
         ExtractedRequest(
-            id=str(item["id"]),
+            id=str(item.get("id", item.get("request_id", ""))),
             original_text=str(item["original_text"]),
             response_section=str(item["response_section"]),
             citations=tuple(str(cid) for cid in item.get("citations", ())),
+            classification_id=item.get("classification_id"),
+            confidence=float(item.get("confidence", 1.0)),
+            warnings=tuple(str(w) for w in item.get("warnings", ())),
+            grounding=item.get("grounding"),
         )
         for item in extraction.get("requests", ())
     )
