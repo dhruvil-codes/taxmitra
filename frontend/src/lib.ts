@@ -89,14 +89,58 @@ export class ApiError extends Error {
   }
 }
 
+export interface Grounding {
+  method: string;
+  confidence: number;
+  below_floor: boolean;
+}
+
 export interface ScrutinyRequest {
   id: string;
+  request_id: string;
+  classification_id: string;
   original_text: string;
   plain_language_explanation: Record<string, string>;
   why_required: Record<string, string>;
   required_evidence: Record<string, string>[];
+  what_department_is_asking?: string;
+  expected_evidence?: Record<string, string>[];
   response_section: string;
   citations: Citation[];
+  confidence: number;
+  warnings: string[];
+  grounding: Grounding;
+}
+
+export interface ExtractionResult {
+  supported: boolean;
+  metadata: {
+    notice_reference: string | null;
+    section: string | null;
+    assessment_year: string | null;
+    response_deadline: string | null;
+    issue_date: string | null;
+  };
+  requests: ScrutinyRequest[];
+  extraction: {
+    status: "needs_confirmation" | "refused";
+    confidence: number;
+    warnings: string[];
+    refusal_reason: string | null;
+  };
+  grounding: Grounding;
+  extraction_id?: string;
+  fingerprint?: string;
+  requires_human_confirmation?: boolean;
+}
+
+export interface ExtractionConfirmationResult {
+  supported: boolean;
+  status: "confirmed" | "refused";
+  extraction_id?: string;
+  notice_id?: string;
+  requests?: ScrutinyRequest[];
+  reason?: string;
 }
 
 export interface ScrutinyRequestsResult {
@@ -160,6 +204,13 @@ export const api = {
   resolve: (noticeId: string, answers: Record<string, string>) =>
     post<ResolveResult>("/api/workflow/resolve", { notice_id: noticeId, answers }),
   refusal: (id: string) => get<ResolveResult>(`/api/notices/${id}/refusal`),
+  extractScrutiny: (file: File, signal?: AbortSignal) => {
+    const body = new FormData();
+    body.append("file", file);
+    return request<ExtractionResult>("/api/scrutiny/extract", { method: "POST", body, signal });
+  },
+  confirmExtraction: (extractionId: string, fingerprint: string, confirmed: boolean, signal?: AbortSignal) =>
+    post<ExtractionConfirmationResult>("/api/scrutiny/confirm", { extraction_id: extractionId, fingerprint, confirmed }, signal),
   scrutinyRequests: (id: string, locale: Locale, extractionConfirmed = true, signal?: AbortSignal) =>
     get<ScrutinyRequestsResult>(`/api/scrutiny/${id}/requests?locale=${locale}&extraction_confirmed=${extractionConfirmed}`, signal),
   scrutinyQuestions: (id: string, locale: Locale, extractionConfirmed = true, signal?: AbortSignal) =>
@@ -215,6 +266,12 @@ export const store = {
   },
   setExtractionConfirmed(noticeId: string, confirmed: boolean) {
     localStorage.setItem(`taxmitra.scrutiny.confirmed.${noticeId}`, String(confirmed));
+  },
+  uploadedNoticeId(): string | null {
+    return read("taxmitra.scrutiny.uploadedNoticeId");
+  },
+  setUploadedNoticeId(noticeId: string) {
+    localStorage.setItem("taxmitra.scrutiny.uploadedNoticeId", noticeId);
   },
   reset() {
     Object.keys(localStorage)

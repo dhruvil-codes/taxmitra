@@ -16,6 +16,7 @@ export default function Scrutiny() {
   const { id = "" } = useParams();
   const { locale, t } = useI18n();
   const restored = store.scrutinyStage(id) as Stage;
+  const isUploaded = store.uploadedNoticeId() === id;
   const [stage, setStageState] = useState<Stage>(restored === "questions" && !store.extractionConfirmed(id) ? "requests" : restored);
   const [notice, setNotice] = useState<NoticeCard | null>(null);
   const [data, setData] = useState<ScrutinyRequestsResult | null>(null);
@@ -31,7 +32,10 @@ export default function Scrutiny() {
 
   const load = () => {
     const controller = new AbortController(); setLoading(true); setError(null);
-    Promise.all([api.notice(id), api.scrutinyRequests(id, locale, true, controller.signal)])
+    Promise.all([
+      isUploaded ? Promise.resolve(null) : api.notice(id),
+      api.scrutinyRequests(id, locale, true, controller.signal),
+    ])
       .then(([n, r]) => { setNotice(n); setData(r); setLoading(false); })
       .catch((e) => { if (e.name !== "AbortError") { setError(e); setLoading(false); } });
     return () => controller.abort();
@@ -61,8 +65,8 @@ export default function Scrutiny() {
   const ensureQuestions = async () => { if (!questions.length) { const r = await api.scrutinyQuestions(id, locale, true); setQuestions(r.questions); } setStage("questions"); };
 
   if (loading && !data) return <div className="app-page"><div className="app-loading">READING REQUESTED ITEMS</div></div>;
-  if (error && !data) return <div className="app-page"><ErrorState error={error} retry={load} /><Link to="/notices" className="app-back">← BACK TO NOTICES</Link></div>;
-  if (!data || !notice) return null;
+  if (error && !data) return <div className="app-page"><ErrorState error={error} retry={load} />{isUploaded ? <Link to="/upload" className="app-primary mt-5">START A NEW PDF SESSION →</Link> : <Link to="/notices" className="app-back">← BACK TO NOTICES</Link>}</div>;
+  if (!data || (!notice && !isUploaded)) return null;
   const requests = data.requests ?? [];
   const q = questions[index];
   const step = stage === "requests" || stage === "confirm" ? 0 : stage === "questions" ? 1 : stage === "result" || stage === "draft" ? 2 : 3;
@@ -73,7 +77,7 @@ export default function Scrutiny() {
 
     {stage === "requests" && <>
       <p className="app-eyebrow">[ TM / SCRUTINY / REQUESTS ]</p><h1 className="app-title">{locale === "hi" ? "अधिकारी ने क्या मांगा है" : "What the officer has asked for"}</h1>
-      <div className="scrutiny-meta"><span>{notice.section}</span><span>AY {notice.assessment_year}</span><span>{notice.official_reference}</span><span>{notice.due_date ?? "2026-09-18"}</span></div>
+      <div className="scrutiny-meta"><span>{notice?.section ?? "142(1)"}</span>{notice?.assessment_year && <span>AY {notice.assessment_year}</span>}{notice?.official_reference && <span>{notice.official_reference}</span>}{notice?.due_date && <span>{notice.due_date}</span>}</div>
       <p className="app-lead">{locale === "hi" ? `${requests.length} अनुरोध नोटिस के अनुलग्नक से निकाले गए हैं। पुष्टि से पहले हर अनुरोध जांचें।` : `${requests.length} requests were extracted from the notice annexure. Review every item before confirming.`}</p>
       <div className="scrutiny-list">{requests.map((r, i) => <Card key={r.id}>
         <p className="app-section-label">[ REQUEST {String(i + 1).padStart(2, "0")} / {r.response_section.toUpperCase()} ]</p>
@@ -82,11 +86,11 @@ export default function Scrutiny() {
         <details><summary>{locale === "hi" ? "अपेक्षित प्रमाण देखें" : "See expected evidence"}</summary><ul>{r.required_evidence.map((e, j) => <li key={j}>{text(e, locale)}</li>)}</ul></details>
         {r.citations.map(c => <a key={c.id} className="scrutiny-source" href={c.official_url} target="_blank" rel="noreferrer">{c.source_name} · {c.section} ↗</a>)}
       </Card>)}</div>
-      <div className="notice-boundary"><p className="app-section-label">[ HUMAN CONFIRMATION REQUIRED ]</p><p className="app-body">{locale === "hi" ? "यह काल्पनिक PDF निष्कर्ष है। Tax Mitra तब तक आगे नहीं बढ़ेगा जब तक आप अनुरोधों की पुष्टि नहीं करते।" : "This is a synthetic PDF extraction. Tax Mitra will not guide a response until you confirm the requested items."}</p></div>
-      <PrimaryButton onClick={() => setStage("confirm")}>{locale === "hi" ? "सूची की पुष्टि करें" : "CONFIRM REQUEST LIST"} →</PrimaryButton>
+      <div className="notice-boundary"><p className="app-section-label">[ {isUploaded ? "CONFIRMED EXTRACTION" : "HUMAN CONFIRMATION REQUIRED"} ]</p><p className="app-body">{isUploaded ? (locale === "hi" ? "आपने PDF निष्कर्षण की पुष्टि की है। अब backend इन्हीं अनुरोधों से सवाल तैयार करेगा।" : "You confirmed this PDF extraction. The backend will now build questions from these exact requests.") : (locale === "hi" ? "यह काल्पनिक PDF निष्कर्ष है। Tax Mitra तब तक आगे नहीं बढ़ेगा जब तक आप अनुरोधों की पुष्टि नहीं करते।" : "This is a synthetic PDF extraction. Tax Mitra will not guide a response until you confirm the requested items.")}</p></div>
+      <PrimaryButton onClick={isUploaded ? ensureQuestions : () => setStage("confirm")}>{isUploaded ? (locale === "hi" ? "रिकॉर्ड जांचें" : "CHECK YOUR RECORDS") : (locale === "hi" ? "सूची की पुष्टि करें" : "CONFIRM REQUEST LIST")} →</PrimaryButton>
     </>}
 
-    {stage === "confirm" && <Card className="confirmation-card app-dots"><p className="app-section-label">[ CHECKPOINT ]</p><h1>{locale === "hi" ? "क्या निकाली गई सूची नोटिस से मेल खाती है?" : "Does the extracted list match the notice?"}</h1><p className="app-body">{locale === "hi" ? "सभी 6 अनुरोधों की तुलना मूल शब्दों से करें। अनुमान न लगाएं।" : "Compare all 6 requests with the original wording. Do not confirm if anything is missing or incorrect."}</p><div className="confirmation-actions"><PrimaryButton onClick={confirm}>{locale === "hi" ? "हाँ, सही है" : "YES, IT LOOKS CORRECT"} →</PrimaryButton><button onClick={reject}>{locale === "hi" ? "कुछ गलत है" : "SOMETHING LOOKS WRONG"}</button></div><button className="app-back" onClick={() => setStage("requests")}>← {t("j.back")}</button></Card>}
+    {stage === "confirm" && <Card className="confirmation-card app-dots"><p className="app-section-label">[ CHECKPOINT ]</p><h1>{locale === "hi" ? "क्या निकाली गई सूची नोटिस से मेल खाती है?" : "Does the extracted list match the notice?"}</h1><p className="app-body">{locale === "hi" ? `सभी ${requests.length} अनुरोधों की तुलना मूल शब्दों से करें। अनुमान न लगाएं।` : `Compare all ${requests.length} requests with the original wording. Do not confirm if anything is missing or incorrect.`}</p><div className="confirmation-actions"><PrimaryButton onClick={confirm}>{locale === "hi" ? "हाँ, सही है" : "YES, IT LOOKS CORRECT"} →</PrimaryButton><button onClick={reject}>{locale === "hi" ? "कुछ गलत है" : "SOMETHING LOOKS WRONG"}</button></div><button className="app-back" onClick={() => setStage("requests")}>← {t("j.back")}</button></Card>}
 
     {stage === "questions" && q && <><p className="app-eyebrow">[ EVIDENCE CHECK / {String(index + 1).padStart(2, "0")} ]</p><h1 className="app-title">{locale === "hi" ? "अपने रिकॉर्ड जांचें" : "Check your records"}</h1><Card><div className="question-progress"><span>QUESTION {index + 1}</span><span>{index + 1} / {questions.length}</span></div><div className="question-meter"><i style={{width:`${((index + 1) / questions.length) * 100}%`}} /></div><h2 className="question-title">{q.text}</h2><p className="app-body mt-3">{q.help}</p><div className="answer-grid">{q.options.map(o => <button className={answers[q.id] === o.id ? "is-selected" : ""} key={o.id} onClick={() => answer(o.id)}>{o.label}<span>→</span></button>)}</div></Card>{index > 0 && <button className="app-back" onClick={() => setIndex(index - 1)}>← {t("j.back")}</button>}</>}
 

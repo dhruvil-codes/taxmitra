@@ -104,10 +104,12 @@ export function PrimaryButton({
   children,
   onClick,
   href,
+  disabled = false,
 }: {
   children: ReactNode;
   onClick?: () => void;
   href?: string;
+  disabled?: boolean;
 }) {
   const cls = "app-primary";
   if (href) {
@@ -118,7 +120,7 @@ export function PrimaryButton({
     );
   }
   return (
-    <button onClick={onClick} className={cls}>
+    <button onClick={onClick} className={cls} disabled={disabled}>
       {children}
     </button>
   );
