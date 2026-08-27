@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useI18n } from "../i18n";
-import { api, Question, ResolveResult, formatINR, store } from "../lib";
+import { api, Question, ResolveResult, formatINR, OFFICIAL_EFILING_PORTAL_URL, store } from "../lib";
 import { Card, PrimaryButton, Stepper } from "../components";
 
 type Phase = "questions" | "checklist" | "draft" | "review" | "final";
@@ -10,7 +10,8 @@ export default function Journey() {
   const { id } = useParams<{ id: string }>();
   const { t, locale } = useI18n();
   const [phase, setPhase] = useState<Phase>("questions");
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<Question[] | null>(null);
+  const [notice, setNotice] = useState<Awaited<ReturnType<typeof api.notice>> | null>(null);
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>(() => (id ? store.answers(id) : {}));
   const [result, setResult] = useState<ResolveResult | null>(null);
@@ -20,10 +21,11 @@ export default function Journey() {
   useEffect(() => {
     if (!id) return;
     api.questions(id, locale).then((r) => setQuestions(r.questions)).catch(() => setQuestions([]));
+    api.notice(id).then(setNotice).catch(() => setNotice(null));
   }, [id, locale]);
 
   const answer = (optionId: string) => {
-    if (!id || questions.length === 0) return;
+    if (!id || !questions || questions.length === 0) return;
     const q = questions[qIndex];
     const next = { ...answers, [q.id]: optionId };
     setAnswers(next);
@@ -43,31 +45,31 @@ export default function Journey() {
     p === "questions" ? 1 : p === "checklist" ? 2 : p === "draft" ? 2 : 3;
 
   if (!id) return null;
+  if (!questions) return <div className="app-page"><div className="app-loading">PREPARING GUIDED QUESTIONS</div></div>;
   const q = questions[qIndex];
   const positionLabel = (pos?: string) =>
-    pos === "agree" ? "✓ Agree" : pos === "disagree" ? "✕ Disagree" : "? Not sure";
+    pos === "agree" ? "AGREE" : pos === "disagree" ? "DISAGREE" : "NOT SURE";
 
   return (
-    <div className="px-4 max-w-xl mx-auto py-6">
+    <div className="app-page">
       <Stepper current={stepperFor(phase)} />
 
       {phase === "questions" && (
         <div>
-          <h1 className="text-xl font-extrabold">{t("j.qTitle")}</h1>
+          <h1 className="app-title">{t("j.qTitle")}</h1>
           <p className="text-sm text-stone-600 mt-1 mb-5">{t("j.qHelp")}</p>
           {q && (
             <Card>
-              <p className="text-xs text-stone-400 mb-1">
-                {qIndex + 1} / {questions.length}
-              </p>
-              <h2 className="text-lg font-bold leading-snug">{q.text}</h2>
+              <div className="question-progress"><span>QUESTION {String(qIndex + 1).padStart(2, "0")}</span><span>{qIndex + 1} / {questions.length}</span></div>
+              <div className="question-meter" aria-hidden="true"><i style={{ width: `${((qIndex + 1) / questions.length) * 100}%` }} /></div>
+              <h2 className="question-title">{q.text}</h2>
               {q.help && <p className="text-sm text-stone-500 mt-2">{q.help}</p>}
               <div className="mt-5 grid gap-2">
                 {q.options.map((o) => (
                   <button
                     key={o.id}
                     onClick={() => answer(o.id)}
-                    className="text-left border-2 border-stone-200 hover:border-saffron hover:bg-saffron-soft rounded-xl px-4 py-3 font-semibold transition"
+                    className={`journey-answer${answers[q.id] === o.id ? " is-selected" : ""}`}
                   >
                     {o.label}
                   </button>
@@ -75,52 +77,43 @@ export default function Journey() {
               </div>
             </Card>
           )}
-          {qIndex > 0 && (
-            <button
-              onClick={() => setQIndex(qIndex - 1)}
-              className="mt-4 text-sm text-stone-500 underline"
-            >
+          {qIndex > 0 ? (
+            <button onClick={() => setQIndex(qIndex - 1)} className="app-back">
               ← {t("j.back")}
             </button>
+          ) : (
+            <Link to={`/notices/${id}`} className="app-back">← {t("j.back")}</Link>
           )}
         </div>
       )}
 
       {phase === "checklist" && result?.checklist && (
         <div>
-          <h1 className="text-xl font-extrabold">{t("j.checklistTitle")}</h1>
+          <h1 className="app-title">{t("j.checklistTitle")}</h1>
           <p className="text-sm text-stone-600 mt-1 mb-4">{t("j.checklistSub")}</p>
-          <Card className="mb-4 bg-india-green-soft border-green-200">
-            <p className="font-bold text-india-green leading-snug">
-              {result.path?.headline[locale] ?? result.path?.headline.en}
-            </p>
-            <p className="text-sm text-stone-700 mt-1.5 leading-relaxed">
-              {result.path?.guidance[locale] ?? result.path?.guidance.en}
-            </p>
+          <Card className="mb-4 workflow-guidance app-dots">
+            <p className="app-section-label">[ YOUR GUIDED PATH ]</p>
+            <h2>{result.path?.headline[locale] ?? result.path?.headline.en}</h2>
+            <p className="app-body">{result.path?.guidance[locale] ?? result.path?.guidance.en}</p>
           </Card>
-          {result.checklist.map((item) => (
-            <Card key={item.id} className="mb-3">
-              <p className="font-semibold flex items-start gap-2">
-                <span className="text-india-green font-bold" aria-hidden>✓</span>
-                {item.title[locale] ?? item.title.en}
-              </p>
-              <details className="mt-1.5">
-                <summary className="text-sm text-saffron font-medium cursor-pointer">
-                  {t("j.why")}
-                </summary>
-                <p className="text-sm text-stone-600 mt-1.5 leading-relaxed">
-                  {item.why_needed[locale] ?? item.why_needed.en}
-                </p>
-              </details>
-            </Card>
-          ))}
-          <PrimaryButton onClick={() => setPhase("draft")}>{t("j.next")} →</PrimaryButton>
+          <div className="checklist-list">
+            {result.checklist.map((item, index) => (
+              <Card key={item.id}>
+                <p className="checklist-title"><span>{String(index + 1).padStart(2, "0")}</span>{item.title[locale] ?? item.title.en}</p>
+                <details><summary>{t("j.why")} ↓</summary><p className="app-body">{item.why_needed[locale] ?? item.why_needed.en}</p></details>
+              </Card>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <PrimaryButton onClick={() => setPhase("draft")}>{t("j.next")} →</PrimaryButton>
+            <button className="app-back !mt-0" onClick={() => setPhase("questions")}>← {t("j.back")}</button>
+          </div>
         </div>
       )}
 
       {phase === "draft" && (
         <div>
-          <h1 className="text-xl font-extrabold">{t("j.draftTitle")}</h1>
+          <h1 className="app-title">{t("j.draftTitle")}</h1>
           <p className="text-sm text-stone-600 mt-1 mb-4">{t("j.draftSub")}</p>
           <textarea
             value={draft}
@@ -128,9 +121,9 @@ export default function Journey() {
             onBlur={() => store.setDraft(id, draft)}
             placeholder={t("j.draftPlaceholder")}
             rows={14}
-            className="w-full border-2 border-stone-200 focus:border-saffron rounded-xl p-4 text-sm leading-relaxed font-mono"
+            className="w-full border border-stone-300 focus:border-blue-600 p-4 text-sm leading-relaxed font-mono outline-none"
           />
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <PrimaryButton
               onClick={() => {
                 store.setDraft(id, draft);
@@ -139,22 +132,23 @@ export default function Journey() {
             >
               {t("j.acceptDraft")} →
             </PrimaryButton>
+            <button className="app-back !mt-0" onClick={() => setPhase("checklist")}>← {t("j.back")}</button>
           </div>
         </div>
       )}
 
       {phase === "review" && result?.path && (
         <div>
-          <h1 className="text-xl font-extrabold">{t("j.reviewTitle")}</h1>
+          <h1 className="app-title">{t("j.reviewTitle")}</h1>
           <Card className="my-4">
             <dl className="text-sm divide-y divide-stone-100">
               <div className="py-2 flex justify-between gap-4">
                 <dt className="text-stone-500">{t("j.reviewIssue")}</dt>
-                <dd className="font-semibold text-right">143(1)(a) income mismatch</dd>
+                <dd className="font-semibold text-right">{notice ? `${notice.section} · ${notice.title[locale] ?? notice.title.en}` : "—"}</dd>
               </div>
               <div className="py-2 flex justify-between gap-4">
                 <dt className="text-stone-500">{t("j.reviewAmount")}</dt>
-                <dd className="font-semibold">{formatINR(45000)}</dd>
+                <dd className="font-semibold">{notice ? formatINR(notice.amount_in_question) : "—"}</dd>
               </div>
               <div className="py-2 flex justify-between gap-4">
                 <dt className="text-stone-500">{t("j.reviewPosition")}</dt>
@@ -171,13 +165,17 @@ export default function Journey() {
             </dl>
           </Card>
           <p className="text-sm text-stone-600 mb-4">{t("j.reviewNote")}</p>
-          <PrimaryButton onClick={() => setPhase("final")}>{t("j.next")} →</PrimaryButton>
+          <div className="flex flex-wrap items-center gap-3">
+            <PrimaryButton onClick={() => setPhase("final")}>{t("j.next")} →</PrimaryButton>
+            <button className="app-back !mt-0" onClick={() => setPhase("draft")}>← {t("j.back")}</button>
+          </div>
         </div>
       )}
 
       {phase === "final" && result?.official_step && (
         <div>
-          <h1 className="text-xl font-extrabold text-saffron">{t("j.finalTitle")}</h1>
+          <p className="app-eyebrow">[ TM / OFFICIAL HANDOFF / 04 ]</p>
+          <h1 className="app-title">{t("j.finalTitle")}</h1>
           <Card className="my-4 space-y-4">
             <div>
               <p className="text-xs font-bold uppercase text-stone-500">{t("j.finalWhat")}</p>
@@ -203,15 +201,13 @@ export default function Journey() {
               </ul>
             </div>
           </Card>
-          <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 text-sm text-amber-900 font-semibold leading-relaxed mb-4">
-            ⚠️ {result.official_step.boundary[locale] ?? result.official_step.boundary.en}
-          </div>
+          <div className="notice-boundary mb-4"><p className="app-section-label">[ IMPORTANT BOUNDARY ]</p><p className="app-body font-medium">{t("j.finalBoundary")}</p><p className="app-body mt-2">{t("j.finalInstruction")}</p></div>
           <div className="grid gap-2">
             <a
-              href={result.official_step.url}
+              href={OFFICIAL_EFILING_PORTAL_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-center bg-india-green text-white font-bold rounded-xl px-5 py-3.5"
+              className="app-primary text-center"
             >
               {t("j.continuePortal")}
             </a>
@@ -225,9 +221,12 @@ export default function Journey() {
               {copied ? t("j.finalCopied") : t("j.finalCopy")}
             </button>
           </div>
-          <Link to="/notices" className="block text-center text-sm text-stone-400 underline mt-6">
-            {t("j.restart")}
-          </Link>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-5">
+            <button className="app-back !mt-0" onClick={() => setPhase("review")}>← {t("j.back")}</button>
+            <Link to="/notices" className="text-sm text-stone-500 underline">
+              {t("j.restart")}
+            </Link>
+          </div>
         </div>
       )}
     </div>

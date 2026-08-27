@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { useI18n } from "../i18n";
 import { api, Explanation, NoticeCard as NoticeCardT } from "../lib";
 import { Card, CitationChips, SavedGuidanceBadge, Stepper } from "../components";
@@ -18,15 +18,16 @@ export default function Notice() {
     api.explanation(id, locale).then(setExplanation).catch(() => setExplanation(null));
   }, [id, locale]);
 
-  if (error) return <p className="p-6 text-center text-stone-500">Notice not found.</p>;
-  if (!notice) return <p className="p-6 text-center text-stone-500">…</p>;
+  if (error) return <div className="app-page"><div className="app-empty"><p className="app-section-label">[ NOTICE UNAVAILABLE ]</p><p>We could not load this notice. Return to your notices and try again.</p></div><Link className="app-back" to="/notices">← Back to notices</Link></div>;
+  if (!notice) return <div className="app-page"><div className="app-loading">LOADING NOTICE</div></div>;
+  if (notice.section.replace(/\s/g, "").startsWith("142(1)")) return <Navigate to={`/notices/${id}/scrutiny`} replace />;
 
   return (
-    <div className="px-4 max-w-xl mx-auto py-6">
+    <div className="app-page">
+      <p className="app-eyebrow">[ TM / NOTICE / 01 ]</p>
+      <h1 className="app-title">{notice.title[locale] ?? notice.title.en}</h1>
       <Stepper current={0} />
-      <h1 className="text-lg font-extrabold leading-snug mb-1">
-        {notice.title[locale] ?? notice.title.en}
-      </h1>
+      <h2 className="text-2xl font-medium leading-snug mb-1">{t("notice.plain")}</h2>
       <p className="text-sm text-stone-500 mb-4">
         {notice.section} · AY {notice.assessment_year}
       </p>
@@ -35,45 +36,36 @@ export default function Notice() {
         <SavedGuidanceBadge show={explanation?.demo_mode || explanation?.source === "static"} />
       </div>
 
-      <Card className="mb-4">
-        <h2 className="font-bold text-base mb-2">{t("notice.plain")}</h2>
+      <Card className="mb-4 app-dots">
+        <p className="app-section-label">[ IN PLAIN LANGUAGE ]</p>
         <p className="text-stone-700 leading-relaxed">
           {explanation?.content.plain_language ?? "…"}
         </p>
-        <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-3.5">
-          <p className="text-xs font-bold text-amber-800 uppercase tracking-wide mb-1">
-            {t("notice.notMean")}
-          </p>
-          <p className="text-sm text-amber-900 leading-relaxed">
-            {explanation?.content.what_this_does_not_mean ?? "…"}
-          </p>
+        <div className="notice-boundary">
+          <p className="app-section-label">[ {t("notice.notMean")} ]</p>
+          <p className="app-body">{explanation?.content.what_this_does_not_mean ?? "…"}</p>
         </div>
       </Card>
 
       {explanation && explanation.content.possible_reasons.length > 0 && (
         <Card className="mb-4">
-          <h2 className="font-bold text-base mb-2">{t("notice.reasons")}</h2>
-          <ul className="space-y-1.5">
-            {explanation.content.possible_reasons.map((r, i) => (
-              <li key={i} className="text-sm text-stone-700 flex gap-2">
-                <span className="text-saffron font-bold" aria-hidden>•</span>
-                {r}
-              </li>
-            ))}
-          </ul>
+          <h2 className="app-section-label">[ {t("notice.reasons")} ]</h2>
+          <ol className="reason-list">
+            {explanation.content.possible_reasons.map((r, i) => <li key={i}><span>{String(i + 1).padStart(2, "0")}</span>{r}</li>)}
+          </ol>
         </Card>
       )}
 
       <Card className="mb-4">
         <button
           onClick={() => setShowOfficial(!showOfficial)}
-          className="text-sm font-semibold text-india-green underline"
+          className="app-text-action"
           aria-expanded={showOfficial}
         >
           {showOfficial ? t("notice.officialHide") : t("notice.officialShow")}
         </button>
         {showOfficial && (
-          <div className="mt-3 text-xs text-stone-600 bg-stone-50 border border-stone-200 rounded-xl p-3 whitespace-pre-line max-h-72 overflow-y-auto">
+          <div className="mt-3 text-xs text-stone-600 bg-stone-50 border border-stone-200  p-3 whitespace-pre-line max-h-72 overflow-y-auto">
             {notice.official_text}
           </div>
         )}
@@ -90,7 +82,7 @@ export default function Notice() {
 
       <Link
         to={`/notices/${id}/journey`}
-        className="flex items-center justify-center bg-saffron text-white font-semibold rounded-xl px-5 py-3"
+        className="app-primary"
       >
         {t("notice.continue")} →
       </Link>

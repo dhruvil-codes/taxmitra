@@ -10,10 +10,10 @@ venv/
 .env
 .env.*
 !.env.example
+!.env.production
 
 # Node
 node_modules/
-frontend/dist/
 *.log
 
 # OS
