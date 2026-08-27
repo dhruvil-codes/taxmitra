@@ -4,7 +4,14 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const backend = (env.BACKEND || env.BACKEND_2 || "http://127.0.0.1:8000").replace(/\/$/, "");
+  const configuredBackend = [env.BACKEND, env.BACKEND_2].find((value) => {
+    try {
+      return ["http:", "https:"].includes(new URL(value).protocol);
+    } catch {
+      return false;
+    }
+  });
+  const backend = (configuredBackend || "http://127.0.0.1:8000").replace(/\/$/, "");
 
   return {
     plugins: [react(), tailwindcss()],
