@@ -98,8 +98,30 @@ export interface ResolveResult {
 }
 
 export class ApiError extends Error {
-  constructor(public status: number, public detail: string) {
-    super(detail);
+  status: number;
+  detail: unknown;
+
+  constructor(url: string, status: number, detail: unknown) {
+    let message: string;
+    if (typeof detail === "string") {
+      message = detail;
+    } else if (detail && typeof detail === "object") {
+      if ("detail" in detail) {
+        message = String((detail as { detail: unknown }).detail);
+      } else if ("error" in detail) {
+        message = String((detail as { error: unknown }).error);
+      } else if ("message" in detail) {
+        message = String((detail as { message: unknown }).message);
+      } else {
+        message = `${url} -> ${status}`;
+      }
+    } else {
+      message = `${url} -> ${status}`;
+    }
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.detail = detail;
   }
 }
 
@@ -184,12 +206,45 @@ export interface ScrutinyResolveResult extends Omit<ResolveResult, "checklist" |
   checklist?: ScrutinyChecklistItem[];
 }
 
+function configuredApiBase(value: string | undefined): string {
+  const trimmed = value?.trim();
+  if (!trimmed) return "";
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    throw new Error("VITE_API_BASE_URL must be an absolute http(s) URL");
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error("VITE_API_BASE_URL must use http:// or https://");
+  }
+  if (parsed.username || parsed.password || parsed.search || parsed.hash) {
+    throw new Error("VITE_API_BASE_URL must be an API origin without credentials, query, or hash");
+  }
+  return parsed.origin;
+}
+
+const apiBase = configuredApiBase(import.meta.env.VITE_API_BASE_URL);
+
+// Export for debugging in development
+if (import.meta.env.DEV) {
+  (window as any).__TAXMITRA_API_BASE__ = apiBase;
+}
+
+function apiUrl(url: string): string {
+  return `${apiBase}${url}`;
+}
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, init);
+  const fullUrl = apiUrl(url);
+  const res = await fetch(fullUrl, init);
   if (!res.ok) {
     let detail = `Request failed (${res.status})`;
     try { detail = (await res.json()).detail ?? detail; } catch { /* non-JSON response */ }
-    throw new ApiError(res.status, detail);
+    if (import.meta.env.DEV) {
+      console.error("API request failed:", { url: fullUrl, status: res.status, detail });
+    }
+    throw new ApiError(url, res.status, detail);
   }
   return res.json();
 }
@@ -221,7 +276,17 @@ export const api = {
   extractScrutiny: (file: File, signal?: AbortSignal) => {
     const body = new FormData();
     body.append("file", file);
-    return request<ExtractionResult>("/api/scrutiny/extract", { method: "POST", body, signal });
+    const url = "/api/scrutiny/extract";
+    if (import.meta.env.DEV) {
+      console.log("Extraction request:", {
+        url,
+        method: "POST",
+        file: file.name,
+        size: file.size,
+        type: file.type,
+      });
+    }
+    return request<ExtractionResult>(url, { method: "POST", body, signal });
   },
   confirmExtraction: (extractionId: string, fingerprint: string, confirmed: boolean, signal?: AbortSignal) =>
     post<ExtractionConfirmationResult>("/api/scrutiny/confirm", { extraction_id: extractionId, fingerprint, confirmed }, signal),

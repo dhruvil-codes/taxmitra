@@ -49,7 +49,14 @@ export default function Upload() {
     if (!file || uploading) return;
     controller.current?.abort(); controller.current = new AbortController(); setUploading(true); setError(""); setResult(null);
     try { setResult(await api.extractScrutiny(file, controller.current.signal)); }
-    catch (e) { if ((e as Error).name !== "AbortError") setError(e instanceof ApiError ? e.detail : (locale === "hi" ? "सेवा उपलब्ध नहीं है। फिर प्रयास करें।" : "The extraction service is unavailable. Try again.")); }
+    catch (e) {
+      if ((e as Error).name !== "AbortError") {
+        if (import.meta.env.DEV) {
+          console.error("Extraction error:", e);
+        }
+        setError(e instanceof ApiError ? e.message : (locale === "hi" ? "सेवा उपलब्ध नहीं है। फिर प्रयास करें।" : "The extraction service is unavailable. Try again."));
+      }
+    }
     finally { setUploading(false); }
   };
   const confirm = async (confirmed: boolean) => {
@@ -60,7 +67,12 @@ export default function Upload() {
       if (!response.supported || !response.notice_id) { setResult(null); setFile(null); setError(locale === "hi" ? "पुष्टि नहीं की गई। सही PDF चुनकर फिर शुरू करें।" : "The extraction was not confirmed. Choose the correct PDF and start again."); return; }
       store.setUploadedNoticeId(response.notice_id); store.setExtractionConfirmed(response.notice_id, true); store.setScrutinyStage(response.notice_id, "requests");
       navigate(`/notices/${response.notice_id}/scrutiny`, { state: { uploaded: true } });
-    } catch (e) { setError(e instanceof ApiError && e.status === 409 ? (locale === "hi" ? "निष्कर्षण सत्र अमान्य या समाप्त हो गया। PDF फिर से अपलोड करें।" : "The extraction session is invalid or expired. Upload the PDF again.") : e instanceof ApiError ? e.detail : (locale === "hi" ? "पुष्टि नहीं हो सकी।" : "Confirmation failed.")); }
+    } catch (e) {
+      if (import.meta.env.DEV) {
+        console.error("Confirmation error:", e);
+      }
+      setError(e instanceof ApiError && e.status === 409 ? (locale === "hi" ? "निष्कर्षण सत्र अमान्य या समाप्त हो गया। PDF फिर से अपलोड करें।" : "The extraction session is invalid or expired. Upload the PDF again.") : e instanceof ApiError ? e.message : (locale === "hi" ? "पुष्टि नहीं हो सकी।" : "Confirmation failed."));
+    }
     finally { setConfirming(false); }
   };
   const reset = () => { controller.current?.abort(); setFile(null); setResult(null); setError(""); setUploading(false); };
