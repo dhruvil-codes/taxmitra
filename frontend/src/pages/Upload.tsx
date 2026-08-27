@@ -25,6 +25,7 @@ export default function Upload() {
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [dragging, setDragging] = useState(false);
 
   const choose = (candidate?: File) => {
     if (!candidate) return;
@@ -32,7 +33,9 @@ export default function Upload() {
     if (candidate.size > MAX_SIZE) { setError(locale === "hi" ? "PDF 10 MB से छोटी होनी चाहिए।" : "The PDF must be no larger than 10 MB."); return; }
     setError(""); setResult(null); setFile(candidate);
   };
-  const drop = (event: DragEvent<HTMLLabelElement>) => { event.preventDefault(); choose(event.dataTransfer.files[0]); };
+  const drop = (event: DragEvent<HTMLLabelElement>) => { event.preventDefault(); setDragging(false); choose(event.dataTransfer.files[0]); };
+  const dragOver = (event: DragEvent<HTMLLabelElement>) => { event.preventDefault(); setDragging(true); };
+  const dragLeave = (event: DragEvent<HTMLLabelElement>) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragging(false); };
   const change = (event: ChangeEvent<HTMLInputElement>) => choose(event.target.files?.[0]);
   const extract = async () => {
     if (!file || uploading) return;
@@ -60,9 +63,9 @@ export default function Upload() {
     <h1 className="app-title">{locale === "hi" ? "अपना नोटिस समझें" : "Understand your own notice"}</h1>
     <p className="app-lead">{locale === "hi" ? "साधारण टेक्स्ट वाली धारा 142(1) PDF अपलोड करें। Tax Mitra अनुरोध निकालेगा—आपकी पुष्टि के बाद ही मार्गदर्शन खुलेगा।" : "Upload an ordinary text-based Section 142(1) PDF. Tax Mitra extracts the requests—guidance unlocks only after your confirmation."}</p>
 
-    {!result && <><label className="upload-zone" onDragOver={e=>e.preventDefault()} onDrop={drop}>
+    {!result && <><label className={`upload-zone${dragging ? " is-dragging" : ""}${uploading ? " is-processing" : ""}`} onDragEnter={dragOver} onDragOver={dragOver} onDragLeave={dragLeave} onDrop={drop}>
       <input type="file" accept="application/pdf,.pdf" onChange={change} disabled={uploading} />
-      <span className="upload-icon">PDF</span><strong>{locale === "hi" ? "PDF यहाँ छोड़ें या चुनें" : "Drop a PDF here or choose a file"}</strong><small>{locale === "hi" ? "अधिकतम 10 MB · केवल टेक्स्ट PDF · OCR नहीं" : "Maximum 10 MB · text PDFs only · no OCR"}</small>
+      <span className="upload-icon">{uploading ? "···" : "PDF"}</span><strong>{dragging ? (locale === "hi" ? "PDF यहाँ छोड़ें" : "Release to choose this PDF") : (locale === "hi" ? "PDF यहाँ छोड़ें या चुनें" : "Drop a PDF here or choose a file")}</strong><small>{locale === "hi" ? "अधिकतम 10 MB · केवल टेक्स्ट PDF · OCR नहीं" : "Maximum 10 MB · text PDFs only · no OCR"}</small>
     </label>
     {file && <Card className="upload-file"><div><p className="app-section-label">[ READY TO PROCESS ]</p><strong>{file.name}</strong><small>{(file.size / 1024 / 1024).toFixed(2)} MB</small></div><button onClick={reset} disabled={uploading}>{locale === "hi" ? "हटाएँ" : "REMOVE"}</button></Card>}
     <div className="upload-actions">{file && <PrimaryButton onClick={extract} disabled={uploading}>{uploading ? (locale === "hi" ? "पढ़ा जा रहा है…" : "READING PDF…") : (locale === "hi" ? "अनुरोध निकालें" : "EXTRACT REQUESTS")} →</PrimaryButton>}{uploading && <button className="app-back !mt-0" onClick={()=>controller.current?.abort()}>{locale === "hi" ? "रोकें" : "CANCEL"}</button>}<Link className="app-back !mt-0" to="/">← {locale === "hi" ? "होम" : "HOME"}</Link></div></>}

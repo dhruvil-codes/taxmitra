@@ -173,7 +173,7 @@ export default function Landing() {
         <section className="tm-final tm-wrap">
           <p className="tm-eyebrow">[ READY WHEN YOU ARE ]</p>
           <h2>Understand your notice.<br/><em>Know what to do next.</em></h2>
-          <ArrowLink onClick={openGuide}>OPEN GUIDE</ArrowLink>
+          <ArrowLink onClick={openGuide}>USE TAX MITRA →</ArrowLink>
           <p>Independent civic prototype. Synthetic data. Not affiliated with the Income Tax Department. Tax Mitra does not submit anything.</p>
         </section>
       </main>
@@ -181,7 +181,7 @@ export default function Landing() {
       <footer className="tm-footer tm-wrap">
         <a className="tm-brand" href="#top"><Mark /><strong>Tax Mitra</strong></a>
         <p>Independent civic prototype.</p>
-        <nav><a href="#how">How it works</a><a href="#india">Built for India</a><a href="#trust">Trust</a><button onClick={openGuide}>Open Guide</button></nav>
+        <nav><a href="#how">How it works</a><a href="#india">Built for India</a><a href="#trust">Trust</a><button onClick={openGuide}>Use Tax Mitra</button></nav>
       </footer>
     </div>
   );

@@ -1,4 +1,5 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useI18n } from "./i18n";
 import { Citation, Locale } from "./lib";
 
@@ -22,10 +23,12 @@ export function LanguageSelector() {
 
 export function Header() {
   const { t } = useI18n();
+  const { pathname, hash } = useLocation();
+  const isHome = pathname === "/";
   return (
     <header className="app-header">
-      <a href="/" className="app-brand"><span className="app-brand-mark">त</span><strong>{t("app.name")}</strong><small>INDEPENDENT PROTOTYPE</small></a>
-      <nav aria-label="Primary"><a href="/#how">HOW IT WORKS</a><a href="/#trust">SAFETY</a></nav>
+      <a href="/" className="app-brand" aria-current={isHome && !hash ? "page" : undefined}><span className="app-brand-mark">त</span><strong>{t("app.name")}</strong><small>INDEPENDENT PROTOTYPE</small></a>
+      <nav aria-label="Primary"><a href="/#how" aria-current={isHome && hash === "#how" ? "location" : undefined}>HOW IT WORKS</a><a href="/#trust" aria-current={isHome && hash === "#trust" ? "location" : undefined}>SAFETY</a></nav>
       <LanguageSelector />
     </header>
   );
@@ -53,6 +56,12 @@ export function SavedGuidanceBadge({ show }: { show: boolean }) {
 
 export function SourcePanel({ citation, onClose }: { citation: Citation | null; onClose: () => void }) {
   const { t } = useI18n();
+  useEffect(() => {
+    if (!citation) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [citation, onClose]);
   if (!citation) return null;
   return (
     <div className="source-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={citation.title}>
