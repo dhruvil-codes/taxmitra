@@ -15,10 +15,10 @@ export default function Unsupported() {
   }, [id]);
 
   return (
-    <div className="px-4 max-w-md mx-auto py-8">
-      <div className="text-center mb-6">
-        <p className="text-4xl mb-2" aria-hidden>🛑</p>
-        <h1 className="text-xl font-extrabold leading-snug">
+    <div className="app-page">
+      <div className="mb-8">
+        <p className="app-eyebrow">[ OUTSIDE GUIDED SCOPE ]</p>
+        <h1 className="app-title">
           {refusal?.headline?.[locale] ?? refusal?.headline?.en ?? t("unsupported.title")}
         </h1>
       </div>
@@ -51,8 +51,8 @@ export default function Unsupported() {
         </Card>
       )}
 
-      <Card className="mb-6 bg-amber-50 border-amber-200">
-        <h2 className="font-bold text-sm uppercase tracking-wide text-amber-800 mb-1">
+      <Card className="mb-6 app-dots">
+        <h2 className="app-section-label">
           {t("unsupported.suggestionTitle")}
         </h2>
         <p className="text-sm text-amber-900 leading-relaxed">

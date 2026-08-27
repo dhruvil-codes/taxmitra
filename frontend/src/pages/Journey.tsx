@@ -45,15 +45,15 @@ export default function Journey() {
   if (!id) return null;
   const q = questions[qIndex];
   const positionLabel = (pos?: string) =>
-    pos === "agree" ? "✓ Agree" : pos === "disagree" ? "✕ Disagree" : "? Not sure";
+    pos === "agree" ? "AGREE" : pos === "disagree" ? "DISAGREE" : "NOT SURE";
 
   return (
-    <div className="px-4 max-w-xl mx-auto py-6">
+    <div className="app-page">
       <Stepper current={stepperFor(phase)} />
 
       {phase === "questions" && (
         <div>
-          <h1 className="text-xl font-extrabold">{t("j.qTitle")}</h1>
+          <h1 className="app-title">{t("j.qTitle")}</h1>
           <p className="text-sm text-stone-600 mt-1 mb-5">{t("j.qHelp")}</p>
           {q && (
             <Card>
@@ -67,7 +67,7 @@ export default function Journey() {
                   <button
                     key={o.id}
                     onClick={() => answer(o.id)}
-                    className="text-left border-2 border-stone-200 hover:border-saffron hover:bg-saffron-soft rounded-xl px-4 py-3 font-semibold transition"
+                    className="text-left border border-stone-200 hover:border-blue-600 hover:text-blue-600 px-4 py-3 font-semibold transition-colors"
                   >
                     {o.label}
                   </button>
@@ -88,7 +88,7 @@ export default function Journey() {
 
       {phase === "checklist" && result?.checklist && (
         <div>
-          <h1 className="text-xl font-extrabold">{t("j.checklistTitle")}</h1>
+          <h1 className="app-title">{t("j.checklistTitle")}</h1>
           <p className="text-sm text-stone-600 mt-1 mb-4">{t("j.checklistSub")}</p>
           <Card className="mb-4 bg-india-green-soft border-green-200">
             <p className="font-bold text-india-green leading-snug">
@@ -120,7 +120,7 @@ export default function Journey() {
 
       {phase === "draft" && (
         <div>
-          <h1 className="text-xl font-extrabold">{t("j.draftTitle")}</h1>
+          <h1 className="app-title">{t("j.draftTitle")}</h1>
           <p className="text-sm text-stone-600 mt-1 mb-4">{t("j.draftSub")}</p>
           <textarea
             value={draft}
@@ -128,7 +128,7 @@ export default function Journey() {
             onBlur={() => store.setDraft(id, draft)}
             placeholder={t("j.draftPlaceholder")}
             rows={14}
-            className="w-full border-2 border-stone-200 focus:border-saffron rounded-xl p-4 text-sm leading-relaxed font-mono"
+            className="w-full border border-stone-300 focus:border-blue-600 p-4 text-sm leading-relaxed font-mono outline-none"
           />
           <div className="mt-4">
             <PrimaryButton
@@ -145,7 +145,7 @@ export default function Journey() {
 
       {phase === "review" && result?.path && (
         <div>
-          <h1 className="text-xl font-extrabold">{t("j.reviewTitle")}</h1>
+          <h1 className="app-title">{t("j.reviewTitle")}</h1>
           <Card className="my-4">
             <dl className="text-sm divide-y divide-stone-100">
               <div className="py-2 flex justify-between gap-4">
@@ -203,15 +203,15 @@ export default function Journey() {
               </ul>
             </div>
           </Card>
-          <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 text-sm text-amber-900 font-semibold leading-relaxed mb-4">
-            ⚠️ {result.official_step.boundary[locale] ?? result.official_step.boundary.en}
+          <div className="bg-stone-50 border border-stone-300 p-4 text-sm text-stone-800 font-semibold leading-relaxed mb-4">
+            [ IMPORTANT BOUNDARY ] {result.official_step.boundary[locale] ?? result.official_step.boundary.en}
           </div>
           <div className="grid gap-2">
             <a
               href={result.official_step.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-center bg-india-green text-white font-bold rounded-xl px-5 py-3.5"
+              className="app-primary text-center"
             >
               {t("j.continuePortal")}
             </a>

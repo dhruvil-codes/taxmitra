@@ -4,26 +4,17 @@ import { Citation, Locale } from "./lib";
 
 export function DisclaimerBanner() {
   const { t } = useI18n();
-  return (
-    <div className="bg-amber-100 text-amber-900 text-[11px] sm:text-xs text-center px-3 py-1.5 leading-snug">
-      {t("banner")}
-    </div>
-  );
+  return <div className="app-disclaimer">[ PUBLIC BETA ] &nbsp; {t("banner")}</div>;
 }
 
 export function LanguageSelector() {
   const { locale, setLocale, t } = useI18n();
   return (
-    <label className="flex items-center gap-1.5 text-sm">
+    <label className="app-language">
       <span className="sr-only">{t("lang.label")}</span>
-      <select
-        aria-label={t("lang.label")}
-        value={locale}
-        onChange={(e) => setLocale(e.target.value as Locale)}
-        className="border border-stone-300 rounded-lg px-2 py-1 bg-white text-ink font-medium"
-      >
-        <option value="en">English</option>
-        <option value="hi">हिंदी</option>
+      <select aria-label={t("lang.label")} value={locale} onChange={(e) => setLocale(e.target.value as Locale)}>
+        <option value="en">EN</option>
+        <option value="hi">हिन्दी</option>
       </select>
     </label>
   );
@@ -32,11 +23,9 @@ export function LanguageSelector() {
 export function Header() {
   const { t } = useI18n();
   return (
-    <header className="flex items-center justify-between gap-3 px-4 py-3 bg-white border-b border-stone-200">
-      <a href="/" className="flex items-baseline gap-2">
-        <span className="font-bold text-lg text-saffron">{t("app.name")}</span>
-        <span className="hidden sm:inline text-xs text-stone-500">{t("app.tagline")}</span>
-      </a>
+    <header className="app-header">
+      <a href="/" className="app-brand"><span className="app-brand-mark">त</span><strong>{t("app.name")}</strong><small>INDEPENDENT PROTOTYPE</small></a>
+      <nav aria-label="Primary"><a href="/#how">HOW IT WORKS</a><a href="/#trust">SAFETY</a></nav>
       <LanguageSelector />
     </header>
   );
@@ -46,29 +35,10 @@ export function Stepper({ current }: { current: 0 | 1 | 2 | 3 }) {
   const { t } = useI18n();
   const steps = ["step.understand", "step.answer", "step.prepare", "step.act"];
   return (
-    <ol className="flex items-center w-full max-w-xl mx-auto mb-6" aria-label="Progress">
+    <ol className="app-stepper" aria-label="Progress">
       {steps.map((key, i) => (
-        <li key={key} className="flex-1 flex items-center">
-          <div className="flex flex-col items-center gap-1">
-            <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
-                i < current
-                  ? "bg-india-green text-white border-india-green"
-                  : i === current
-                    ? "bg-white text-saffron border-saffron"
-                    : "bg-white text-stone-400 border-stone-300"
-              }`}
-              aria-current={i === current ? "step" : undefined}
-            >
-              {i < current ? "✓" : i + 1}
-            </div>
-            <span
-              className={`text-[10px] sm:text-xs ${i === current ? "text-saffron font-semibold" : "text-stone-500"}`}
-            >
-              {t(key)}
-            </span>
-          </div>
-          {i < steps.length - 1 && <div className="flex-1 h-0.5 bg-stone-300 mx-1 -mt-4" />}
+        <li key={key} className={i === current ? "is-current" : i < current ? "is-done" : ""} aria-current={i === current ? "step" : undefined}>
+          <span>{String(i + 1).padStart(2, "0")}</span><strong>{t(key)}</strong>
         </li>
       ))}
     </ol>
@@ -78,28 +48,15 @@ export function Stepper({ current }: { current: 0 | 1 | 2 | 3 }) {
 export function SavedGuidanceBadge({ show }: { show: boolean }) {
   const { t } = useI18n();
   if (!show) return null;
-  return (
-    <span className="inline-flex items-center gap-1 text-xs font-medium text-india-green bg-india-green-soft border border-green-200 rounded-full px-2.5 py-1">
-      {t("notice.savedGuidance")}
-    </span>
-  );
+  return <span className="app-saved">■ {t("notice.savedGuidance")}</span>;
 }
 
 export function SourcePanel({ citation, onClose }: { citation: Citation | null; onClose: () => void }) {
   const { t } = useI18n();
   if (!citation) return null;
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={citation.title}
-    >
-      <div
-        className="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full p-5 max-h-[85vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="source-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={citation.title}>
+      <div className="source-panel" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-wide text-stone-500">{citation.source_name}</p>
@@ -170,11 +127,7 @@ export function CitationChips({ citations }: { citations: Citation[] }) {
 }
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={`bg-white border border-stone-200 rounded-2xl p-5 shadow-sm ${className}`}>
-      {children}
-    </div>
-  );
+  return <section className={`app-card ${className}`}>{children}</section>;
 }
 
 export function PrimaryButton({
@@ -186,8 +139,7 @@ export function PrimaryButton({
   onClick?: () => void;
   href?: string;
 }) {
-  const cls =
-    "inline-flex items-center justify-center gap-2 bg-saffron text-white font-semibold rounded-xl px-5 py-3 hover:bg-saffron/90 transition";
+  const cls = "app-primary";
   if (href) {
     return (
       <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className={cls}>
@@ -212,22 +164,12 @@ export function StatusChip({ status, daysRemaining }: { status: string; daysRema
         : daysRemaining === 0
           ? t("dash.dueToday")
           : t("dash.daysLeft", { n: String(daysRemaining) });
-  const tone =
-    status === "expired"
-      ? "bg-red-50 text-red-700 border-red-200"
-      : status === "due_soon"
-        ? "bg-amber-50 text-amber-800 border-amber-200"
-        : "bg-india-green-soft text-india-green border-green-200";
+  const tone = status === "expired" ? "is-expired" : status === "due_soon" ? "is-due" : "is-open";
   const text =
     status === "expired"
       ? t("dash.overdue")
       : status === "due_soon"
         ? t("dash.dueSoon")
         : t("dash.actionRequired");
-  return (
-    <div className="flex flex-wrap gap-2">
-      <span className={`text-xs font-semibold border rounded-full px-2.5 py-1 ${tone}`}>{text}</span>
-      {label && <span className="text-xs font-medium text-stone-600 self-center">{label}</span>}
-    </div>
-  );
+  return <div className="app-status"><span className={tone}>{text}</span>{label && <small>{label}</small>}</div>;
 }

@@ -22,11 +22,11 @@ export default function Notice() {
   if (!notice) return <p className="p-6 text-center text-stone-500">…</p>;
 
   return (
-    <div className="px-4 max-w-xl mx-auto py-6">
+    <div className="app-page">
+      <p className="app-eyebrow">[ TM / NOTICE / 01 ]</p>
+      <h1 className="app-title">{notice.title[locale] ?? notice.title.en}</h1>
       <Stepper current={0} />
-      <h1 className="text-lg font-extrabold leading-snug mb-1">
-        {notice.title[locale] ?? notice.title.en}
-      </h1>
+      <h2 className="text-2xl font-medium leading-snug mb-1">{t("notice.plain")}</h2>
       <p className="text-sm text-stone-500 mb-4">
         {notice.section} · AY {notice.assessment_year}
       </p>
@@ -35,12 +35,12 @@ export default function Notice() {
         <SavedGuidanceBadge show={explanation?.demo_mode || explanation?.source === "static"} />
       </div>
 
-      <Card className="mb-4">
-        <h2 className="font-bold text-base mb-2">{t("notice.plain")}</h2>
+      <Card className="mb-4 app-dots">
+        <p className="app-section-label">[ IN PLAIN LANGUAGE ]</p>
         <p className="text-stone-700 leading-relaxed">
           {explanation?.content.plain_language ?? "…"}
         </p>
-        <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-3.5">
+        <div className="mt-4 bg-stone-50 border border-stone-200 p-3.5">
           <p className="text-xs font-bold text-amber-800 uppercase tracking-wide mb-1">
             {t("notice.notMean")}
           </p>
@@ -73,7 +73,7 @@ export default function Notice() {
           {showOfficial ? t("notice.officialHide") : t("notice.officialShow")}
         </button>
         {showOfficial && (
-          <div className="mt-3 text-xs text-stone-600 bg-stone-50 border border-stone-200 rounded-xl p-3 whitespace-pre-line max-h-72 overflow-y-auto">
+          <div className="mt-3 text-xs text-stone-600 bg-stone-50 border border-stone-200  p-3 whitespace-pre-line max-h-72 overflow-y-auto">
             {notice.official_text}
           </div>
         )}
@@ -90,7 +90,7 @@ export default function Notice() {
 
       <Link
         to={`/notices/${id}/journey`}
-        className="flex items-center justify-center bg-saffron text-white font-semibold rounded-xl px-5 py-3"
+        className="app-primary"
       >
         {t("notice.continue")} →
       </Link>

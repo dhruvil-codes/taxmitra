@@ -19,43 +19,24 @@ export default function Dashboard() {
   }, [citizenId, navigate]);
 
   return (
-    <div className="px-4 max-w-md mx-auto py-6">
-      <h1 className="text-xl font-extrabold mb-4">{t("dash.title")}</h1>
-      {notices.map((n) => (
-        <Card key={n.id} className="mb-4">
-          <h2 className="font-bold text-ink leading-snug">{n.title[locale] ?? n.title.en}</h2>
-          <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <p className="text-xs text-stone-500">{t("dash.amount")}</p>
-              <p className="font-bold">{formatINR(n.amount_in_question)}</p>
+    <div className="app-page">
+      <p className="app-eyebrow">[ TM / NOTICE INDEX ]</p>
+      <h1 className="app-title">{t("dash.title")}</h1>
+      <p className="app-lead">Select a fictional notice to understand what it means and prepare the next step.</p>
+      <div className="app-grid">
+        {notices.map((n) => (
+          <Card key={n.id}>
+            <p className="app-section-label">[ NOTICE / {n.id.toUpperCase()} ]</p>
+            <h2 className="text-2xl font-medium leading-tight">{n.title[locale] ?? n.title.en}</h2>
+            <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
+              <div><p className="app-eyebrow">{t("dash.amount")}</p><p className="font-semibold mt-1">{formatINR(n.amount_in_question)}</p></div>
+              <div><p className="app-eyebrow">{t("dash.respondBy")}</p><p className="font-semibold mt-1">{n.due_date ?? "—"}</p></div>
             </div>
-            <div>
-              <p className="text-xs text-stone-500">{t("dash.respondBy")}</p>
-              <p className="font-bold">{n.due_date ?? "—"}</p>
-            </div>
-          </div>
-          <div className="mt-3">
-            <StatusChip status={n.status} daysRemaining={n.days_remaining} />
-          </div>
-          <div className="mt-4">
-            {n.supported ? (
-              <Link
-                to={`/notices/${n.id}`}
-                className="inline-flex bg-saffron text-white font-semibold rounded-xl px-4 py-2.5"
-              >
-                {t("dash.start")} →
-              </Link>
-            ) : (
-              <Link
-                to={`/notices/${n.id}/unsupported`}
-                className="inline-flex bg-stone-800 text-white font-semibold rounded-xl px-4 py-2.5"
-              >
-                {t("dash.unsupported")}
-              </Link>
-            )}
-          </div>
-        </Card>
-      ))}
+            <div className="mt-5"><StatusChip status={n.status} daysRemaining={n.days_remaining} /></div>
+            <div className="mt-6">{n.supported ? <Link to={`/notices/${n.id}`} className="app-primary">{t("dash.start")} →</Link> : <Link to={`/notices/${n.id}/unsupported`} className="app-primary">{t("dash.unsupported")} →</Link>}</div>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
