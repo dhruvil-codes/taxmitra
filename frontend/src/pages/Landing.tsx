@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useI18n } from "../i18n";
 
 const promises = [
   ["01", "PLAIN LANGUAGE", "Simple explanations without legal jargon."],
@@ -47,6 +48,7 @@ function ArrowLink({ children, onClick, light = false }: { children: React.React
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { locale, setLocale } = useI18n();
   const openGuide = () => navigate("/guide");
 
   return (
@@ -62,7 +64,10 @@ export default function Landing() {
           <a href="#india">BUILT FOR INDIA</a>
           <a href="#trust">TRUST</a>
         </nav>
-        <div className="tm-languages" aria-label="Languages"><b>EN</b><span>हिन्दी</span></div>
+        <div className="tm-languages" aria-label="Languages">
+          <button className={locale === "en" ? "is-active" : ""} onClick={() => setLocale("en")} aria-pressed={locale === "en"}>EN</button>
+          <button className={locale === "hi" ? "is-active" : ""} onClick={() => setLocale("hi")} aria-pressed={locale === "hi"} lang="hi">हिन्दी</button>
+        </div>
         <button className="tm-open" onClick={openGuide}>USE TAX MITRA <span>→</span></button>
       </header>
 
@@ -90,12 +95,12 @@ export default function Landing() {
             <h2>Understand your<br/><em>[ tax notice ]</em><br/>without the<br/>confusion.</h2>
           </div>
           <aside className="tm-intro-aside" aria-label="Start using Tax Mitra">
-            <p className="tm-start-label"><Mark /> START HERE · <span lang="hi">यहाँ से शुरू करें</span></p>
+            <p className="tm-start-label"><Mark /> {locale === "hi" ? <span lang="hi">यहाँ से शुरू करें</span> : "START HERE"}</p>
             <div className="tm-intro-actions">
               <ArrowLink onClick={openGuide}>USE TAX MITRA</ArrowLink>
               <a href="/upload" className="tm-upload-action">
                 <span>USE MY PDF NOTICE</span>
-                <small>अपना नोटिस चुनें</small>
+                <small lang={locale === "hi" ? "hi" : "en"}>{locale === "hi" ? "अपना नोटिस चुनें" : "Choose your notice PDF"}</small>
                 <b aria-hidden="true">→</b>
               </a>
             </div>
