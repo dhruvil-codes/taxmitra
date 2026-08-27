@@ -59,8 +59,8 @@ export default function Upload() {
   const refused = result && !result.supported;
 
   return <div className="app-page upload-page">
-    <p className="app-eyebrow">[ TM / PDF SCRUTINY ]</p>
-    <h1 className="app-title">{locale === "hi" ? "अपना नोटिस समझें" : "Understand your own notice"}</h1>
+    <p className="app-eyebrow">[ UPLOAD / NOTICE ]</p>
+    <h1 className="app-title">{locale === "hi" ? "अपना PDF यहाँ छोड़ें" : "Drop your PDF here"}</h1>
     <p className="app-lead">{locale === "hi" ? "साधारण टेक्स्ट वाली धारा 142(1) PDF अपलोड करें। Tax Mitra अनुरोध निकालेगा—आपकी पुष्टि के बाद ही मार्गदर्शन खुलेगा।" : "Upload an ordinary text-based Section 142(1) PDF. Tax Mitra extracts the requests—guidance unlocks only after your confirmation."}</p>
 
     {!result && <><label className={`upload-zone${dragging ? " is-dragging" : ""}${uploading ? " is-processing" : ""}`} onDragEnter={dragOver} onDragOver={dragOver} onDragLeave={dragLeave} onDrop={drop}>

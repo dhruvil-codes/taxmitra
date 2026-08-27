@@ -22,7 +22,7 @@ export default function Login() {
 
   return (
     <div className="app-page">
-      <p className="app-eyebrow">[ TM / GUIDE / 00 ]</p>
+      <p className="app-eyebrow">[ TM / SYNTHETIC LOGIN / 01 ]</p>
       <h1 className="app-title">{t("login.title")}</h1>
       <p className="app-lead">{t("login.sub")}</p>
       {citizens.length === 0 ? <div className="app-empty mt-8"><p className="app-section-label">[ PROFILES UNAVAILABLE ]</p><p>Demo profiles could not be loaded. Refresh to try again.</p></div> : <div className="app-grid">

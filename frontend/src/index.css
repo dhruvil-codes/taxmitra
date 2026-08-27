@@ -251,3 +251,70 @@ button:disabled { cursor: wait; opacity: .55; }
   html { scroll-behavior: auto; }
   *,*::before,*::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Readable product entry and application typography */
+.start-page { max-width: 1030px; }
+.start-page .app-lead { max-width: 680px; }
+.start-options { display: grid; grid-template-columns: 1fr 52px 1fr; align-items: stretch; margin-top: 42px; }
+.start-option { min-width: 0; min-height: 390px; display: flex; flex-direction: column; padding: 30px; border: 1px solid var(--tm-line); background: #fff; transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.start-option:hover,.start-option:focus-within { z-index: 1; border-color: var(--tm-blue); box-shadow: inset 0 -4px var(--tm-blue), 0 14px 35px rgba(16,17,21,.06); transform: translateY(-3px); }
+.start-number { margin: 0 0 52px; color: var(--tm-blue); font: 700 14px/1 var(--font-mono); }
+.start-option h2 { max-width: 390px; margin: 0; font-size: clamp(32px,3.2vw,44px); line-height: .98; letter-spacing: -.045em; font-weight: 500; text-wrap: balance; }
+.start-option > div > p:last-child { max-width: 410px; margin: 22px 0 0; color: var(--tm-muted); font-size: 16px; line-height: 1.6; }
+.start-action { min-height: 54px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: auto; padding: 0 18px; border: 1px solid var(--tm-black); background: var(--tm-black); color: #fff; text-decoration: none; font: 700 13px/1.2 var(--font-mono); }
+.start-action.is-blue,.start-action:hover { border-color: var(--tm-blue); background: var(--tm-blue); }
+.start-action span { font-size: 20px; transition: transform .2s ease; }
+.start-action:hover span,.start-action:focus-visible span { transform: translateX(5px); }
+.start-or { display: grid; place-items: center; color: #737a88; font: 700 12px var(--font-mono); }
+.start-boundary { max-width: 680px; margin-top: 32px; }
+
+.app-disclaimer { font-size: 12px; line-height: 1.55; }
+.app-brand small { font-size: 11px; }
+.app-header nav a,.app-language select { font-size: 12px; }
+.app-eyebrow { font-size: 12px; line-height: 1.5; }
+.app-section-label { font-size: 12px; line-height: 1.45; }
+.app-lead { font-size: 17px; line-height: 1.65; }
+.app-body { font-size: 16px; line-height: 1.7; }
+.app-primary { min-height: 50px; font-size: 13px; }
+.app-back { font-size: 12px; }
+.app-status span { font-size: 11px; }
+.app-status small { font-size: 12px; }
+.app-stepper span { font-size: 11px; }
+.app-stepper strong { font-size: 12px; }
+.app-text-action,.official-links a,.source-footer a { font-size: 12px; }
+.reason-list li { font-size: 15px; line-height: 1.65; }
+.reason-list li span,.citation-list span,.citation-list b { font-size: 11px; }
+.citation-list button { min-height: 62px; font-size: 14px; }
+.question-progress,.checklist-title span,.checklist-list summary,.source-section,.source-verification,.source-footer p { font-size: 11px; }
+.question-title { font-size: clamp(30px,3.4vw,42px); }
+.workflow-guidance h2 { font-size: 30px; }
+.checklist-title { font-size: 16px; line-height: 1.5; }
+.app-empty p { font-size: 15px; line-height: 1.6; }
+.app-loading { font-size: 12px; }
+.app-footer p { font-size: 11px; }
+.app-footer small { font-size: 10px; }
+.scrutiny-meta span { font-size: 12px; }
+.scrutiny-list blockquote { font-size: 19px; line-height: 1.55; }
+.scrutiny-explain b,.scrutiny-list summary,.scrutiny-source,.upload-file button { font-size: 11px; }
+.scrutiny-explain p,.review-row p { font-size: 15px; line-height: 1.6; }
+.answer-grid button { min-height: 68px; font-size: 15px; }
+.confirmation-actions > button:last-child,.final-actions > button { min-height: 50px; font-size: 12px; }
+.upload-zone small,.upload-file small,.upload-error { font-size: 13px; }
+
+body:has(option[value="hi"]:checked) .start-option h2,
+body:has(option[value="hi"]:checked) .start-option p,
+body:has(option[value="hi"]:checked) .start-action { line-height: 1.6; }
+
+@media (max-width: 700px) {
+  .start-options { grid-template-columns: 1fr; margin-top: 32px; }
+  .start-option { min-height: 340px; padding: 24px; }
+  .start-option:hover,.start-option:focus-within { transform: none; }
+  .start-number { margin-bottom: 38px; }
+  .start-option h2 { font-size: 34px; }
+  .start-option > div > p:last-child { font-size: 16px; }
+  .start-or { min-height: 52px; }
+  .start-action { min-height: 56px; font-size: 12px; }
+  .app-lead { font-size: 16px; }
+  .app-stepper strong { font-size: 10px; }
+  .app-stepper span { font-size: 10px; }
+}

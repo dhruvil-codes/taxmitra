@@ -9,6 +9,7 @@ import Journey from "./pages/Journey";
 import Unsupported from "./pages/Unsupported";
 import Scrutiny from "./pages/Scrutiny";
 import Upload from "./pages/Upload";
+import Start from "./pages/Start";
 
 function AppShell() {
   const { pathname } = useLocation();
@@ -21,7 +22,7 @@ function AppShell() {
       <main className={isLanding ? undefined : "min-h-[80vh]"}>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/guide" element={<Login />} />
+          <Route path="/guide" element={<Start />} />
           <Route path="/login" element={<Login />} />
           <Route path="/notices" element={<Dashboard />} />
           <Route path="/notices/:id" element={<Notice />} />
