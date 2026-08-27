@@ -1,4 +1,4 @@
-import { ChangeEvent, DragEvent, useRef, useState } from "react";
+import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useI18n } from "../i18n";
 import { api, ApiError, ExtractionResult, store } from "../lib";
@@ -26,6 +26,14 @@ export default function Upload() {
   const [uploading, setUploading] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
+
+  useEffect(() => {
+    if (!file) { setPreviewUrl(""); return; }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
 
   const choose = (candidate?: File) => {
     if (!candidate) return;
@@ -59,24 +67,35 @@ export default function Upload() {
   const refused = result && !result.supported;
 
   return <div className="app-page upload-page">
-    <p className="app-eyebrow">[ UPLOAD / NOTICE ]</p>
-    <h1 className="app-title">{locale === "hi" ? "अपना PDF यहाँ छोड़ें" : "Drop your PDF here"}</h1>
-    <p className="app-lead">{locale === "hi" ? "साधारण टेक्स्ट वाली धारा 142(1) PDF अपलोड करें। Tax Mitra अनुरोध निकालेगा—आपकी पुष्टि के बाद ही मार्गदर्शन खुलेगा।" : "Upload an ordinary text-based Section 142(1) PDF. Tax Mitra extracts the requests—guidance unlocks only after your confirmation."}</p>
+    <p className="app-eyebrow">[ TM / UPLOAD / NOTICE ]</p>
+    <h1 className="app-title">{locale === "hi" ? "अपना कर नोटिस अपलोड करें।" : "Upload your tax notice."}</h1>
+    <p className="app-lead">{locale === "hi" ? "साधारण टेक्स्ट वाली धारा 142(1) PDF अपलोड करें। Tax Mitra अधिकारी के हर अनुरोध को अलग करेगा, लेकिन आपके मिलान और पुष्टि के बाद ही मार्गदर्शन खुलेगा।" : "Upload a text-based Section 142(1) PDF. Tax Mitra separates every request from the officer, but guidance opens only after you match and confirm the extraction."}</p>
+    <ol className="upload-process" aria-label={locale === "hi" ? "दस्तावेज़ प्रक्रिया" : "Document process"}>
+      <li className={!result ? "is-current" : "is-done"}><span>01</span><strong>{locale === "hi" ? "पढ़ें" : "READ"}</strong></li>
+      <li className={result ? "is-current" : ""}><span>02</span><strong>{locale === "hi" ? "जाँचें" : "CHECK"}</strong></li>
+      <li><span>03</span><strong>{locale === "hi" ? "पुष्टि" : "CONFIRM"}</strong></li>
+      <li><span>04</span><strong>{locale === "hi" ? "मार्गदर्शन" : "GUIDE"}</strong></li>
+    </ol>
 
     {!result && <><label className={`upload-zone${dragging ? " is-dragging" : ""}${uploading ? " is-processing" : ""}`} onDragEnter={dragOver} onDragOver={dragOver} onDragLeave={dragLeave} onDrop={drop}>
       <input type="file" accept="application/pdf,.pdf" onChange={change} disabled={uploading} />
       <span className="upload-icon">{uploading ? "···" : "PDF"}</span><strong>{dragging ? (locale === "hi" ? "PDF यहाँ छोड़ें" : "Release to choose this PDF") : (locale === "hi" ? "PDF यहाँ छोड़ें या चुनें" : "Drop a PDF here or choose a file")}</strong><small>{locale === "hi" ? "अधिकतम 10 MB · केवल टेक्स्ट PDF · OCR नहीं" : "Maximum 10 MB · text PDFs only · no OCR"}</small>
     </label>
-    {file && <Card className="upload-file"><div><p className="app-section-label">[ READY TO PROCESS ]</p><strong>{file.name}</strong><small>{(file.size / 1024 / 1024).toFixed(2)} MB</small></div><button onClick={reset} disabled={uploading}>{locale === "hi" ? "हटाएँ" : "REMOVE"}</button></Card>}
-    <div className="upload-actions">{file && <PrimaryButton onClick={extract} disabled={uploading}>{uploading ? (locale === "hi" ? "पढ़ा जा रहा है…" : "READING PDF…") : (locale === "hi" ? "अनुरोध निकालें" : "EXTRACT REQUESTS")} →</PrimaryButton>}{uploading && <button className="app-back !mt-0" onClick={()=>controller.current?.abort()}>{locale === "hi" ? "रोकें" : "CANCEL"}</button>}<Link className="app-back !mt-0" to="/">← {locale === "hi" ? "होम" : "HOME"}</Link></div></>}
+    {file && <div className="upload-receipt">
+      <Card className="upload-file"><div><p className="app-section-label">[ DOCUMENT RECEIVED ]</p><strong>{file.name}</strong><small>PDF · {(file.size / 1024 / 1024).toFixed(2)} MB · {locale === "hi" ? "जाँच के लिए तैयार" : "READY TO INSPECT"}</small></div><button onClick={reset} disabled={uploading}>{locale === "hi" ? "हटाएँ" : "REMOVE"}</button></Card>
+      {previewUrl && <section className="pdf-preview" aria-label={locale === "hi" ? "चुनी गई PDF का पूर्वावलोकन" : "Selected PDF preview"}><object data={previewUrl} type="application/pdf"><p>{locale === "hi" ? "इस ब्राउज़र में PDF पूर्वावलोकन उपलब्ध नहीं है।" : "PDF preview is unavailable in this browser."}</p></object></section>}
+    </div>}
+    {uploading && <section className="extraction-status" aria-live="polite"><span className="status-pulse"/><div><p className="app-section-label">[ EXTRACTION IN PROGRESS ]</p><h2>{locale === "hi" ? "आपका नोटिस पढ़ा जा रहा है" : "Reading your notice"}</h2><p>{locale === "hi" ? "दस्तावेज़ मिल गया है। क्रमांकित अनुरोध और आधार निकाले जा रहे हैं।" : "Document received. Numbered requests and their grounding are being extracted."}</p></div></section>}
+    <div className="upload-actions">{file && <PrimaryButton onClick={extract} disabled={uploading}>{uploading ? (locale === "hi" ? "पढ़ा जा रहा है…" : "READING PDF…") : (locale === "hi" ? "अन��रोध निकालें" : "EXTRACT REQUESTS")} →</PrimaryButton>}{uploading && <button className="app-back !mt-0" onClick={()=>controller.current?.abort()}>{locale === "hi" ? "रोकें" : "CANCEL"}</button>}<Link className="app-back !mt-0" to="/">← {locale === "hi" ? "होम" : "HOME"}</Link></div></>}
 
     {result?.supported && <section aria-labelledby="review-title">
       <p className="app-section-label">[ EXTRACTION NEEDS CONFIRMATION ]</p><h2 id="review-title" className="question-title">{locale === "hi" ? "मूल PDF से हर अनुरोध मिलाएँ" : "Match every request to the original PDF"}</h2>
       <div className="scrutiny-meta"><span>{result.metadata.section ?? "—"}</span><span>AY {result.metadata.assessment_year ?? "—"}</span><span>{result.metadata.notice_reference ?? "—"}</span><span>{result.metadata.response_deadline ?? "—"}</span></div>
       <p className="app-body">{locale === "hi" ? `निष्कर्षण विश्वास ${Math.round(result.extraction.confidence*100)}% · आधार विश्वास ${Math.round(result.grounding.confidence*100)}%` : `Extraction confidence ${Math.round(result.extraction.confidence*100)}% · grounding confidence ${Math.round(result.grounding.confidence*100)}%`}</p>
       {[...result.extraction.warnings, ...result.requests.flatMap(r=>r.warnings)].map((warning,i)=><div className="notice-boundary" key={i}><p className="app-section-label">[ REVIEW WARNING ]</p><p className="app-body">{warning}</p></div>)}
-      <div className="scrutiny-list">{result.requests.map((request,index)=><Card key={request.request_id}><p className="app-section-label">[ REQUEST {String(index+1).padStart(2,"0")} / {request.classification_id} ]</p><blockquote>{request.original_text}</blockquote><div className="scrutiny-explain"><div><b>{locale === "hi" ? "आसान भाषा" : "Plain language"}</b><p>{pick(request.plain_language_explanation,locale)}</p></div><div><b>{locale === "hi" ? "उत्तर खंड" : "Response section"}</b><p>{request.response_section}</p></div></div><p className="app-body">{locale === "hi" ? "विश्वास" : "Confidence"}: {Math.round(request.confidence*100)}% · {request.grounding.method} {Math.round(request.grounding.confidence*100)}%</p>{request.citations.map(c=><a key={c.id} className="scrutiny-source" href={c.official_url} target="_blank" rel="noreferrer">{c.source_name} · {c.section} ↗</a>)}</Card>)}</div>
-      <div className="notice-boundary"><p className="app-section-label">[ HUMAN CHECKPOINT ]</p><p className="app-body">{locale === "hi" ? "पुष्टि तभी करें जब सूची PDF से पूरी तरह मेल खाती हो। PDF bytes memory में process होते हैं, store या log नहीं होते; session 30 मिनट में समाप्त होता है।" : "Confirm only if this list matches the PDF. PDF bytes are processed in memory and are not stored or logged; the session expires after 30 minutes."}</p></div>
+      <p className="request-count">{String(result.requests.length).padStart(2,"0")} {locale === "hi" ? "अनुरोध मिले" : "REQUESTS FOUND"}</p>
+      <div className="document-requests">{result.requests.map((request,index)=><details className="document-request" key={request.request_id} open={index===0}><summary><span>{String(index+1).padStart(2,"0")}</span><strong>{request.original_text}</strong><i>{locale === "hi" ? "खोलें" : "OPEN"}</i></summary><div className="document-request-body"><div className="official-wording"><b>{locale === "hi" ? "अधिकारी के मूल शब्द" : "OFFICIAL REQUEST WORDING"}</b><blockquote>{request.original_text}</blockquote></div><div className="scrutiny-explain"><div><b>{locale === "hi" ? "Tax Mitra की आसान भाषा" : "TAX MITRA EXPLANATION"}</b><p>{pick(request.plain_language_explanation,locale)}</p></div><div><b>{locale === "hi" ? "क्यों माँगा गया" : "WHY REQUIRED"}</b><p>{pick(request.why_required,locale) || request.response_section}</p></div></div>{request.required_evidence.length>0&&<div className="request-evidence"><b>{locale === "hi" ? "संभावित रिकॉर्ड" : "POSSIBLE RECORDS"}</b><ul>{request.required_evidence.map((item,i)=><li key={i}>{pick(item,locale)}</li>)}</ul></div>}<div className="request-grounding"><span>{request.classification_id}</span><span>{locale === "hi" ? "अनुरोध विश्वास" : "REQUEST CONFIDENCE"} {Math.round(request.confidence*100)}%</span><span>{request.grounding.method} {Math.round(request.grounding.confidence*100)}%</span></div>{request.warnings.map((warning,i)=><p className="request-warning" key={i}>{warning}</p>)}{request.citations.map(c=><a key={c.id} className="scrutiny-source" href={c.official_url} target="_blank" rel="noreferrer">{c.source_name} · {c.section} ↗</a>)}</div></details>)}</div>
+      <div className="human-check"><p className="app-section-label">[ HUMAN CHECK / 02 ]</p><p className="app-body">{locale === "hi" ? "पुष्टि तभी करें जब सूची PDF से पूरी तरह मेल खाती हो। PDF bytes memory में process होते हैं, store या log नहीं होते; session 30 मिनट में समाप्त होता है।" : "Confirm only if this list matches the PDF. PDF bytes are processed in memory and are not stored or logged; the session expires after 30 minutes."}</p></div>
       <div className="confirmation-actions"><PrimaryButton onClick={()=>confirm(true)} disabled={confirming}>{confirming ? (locale === "hi" ? "पुष्टि हो रही है…" : "CONFIRMING…") : (locale === "hi" ? "हाँ, सूची सही है" : "YES, THE LIST MATCHES")} →</PrimaryButton><button onClick={()=>confirm(false)} disabled={confirming}>{locale === "hi" ? "नहीं, फिर से शुरू करें" : "NO, START AGAIN"}</button></div>
     </section>}
 
