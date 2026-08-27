@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useI18n } from "../i18n";
-import { api, Question, ResolveResult, formatINR, store } from "../lib";
+import { api, Question, ResolveResult, formatINR, OFFICIAL_EFILING_PORTAL_URL, store } from "../lib";
 import { Card, PrimaryButton, Stepper } from "../components";
 
 type Phase = "questions" | "checklist" | "draft" | "review" | "final";
@@ -199,10 +199,10 @@ export default function Journey() {
               </ul>
             </div>
           </Card>
-          <div className="notice-boundary mb-4"><p className="app-section-label">[ IMPORTANT BOUNDARY ]</p><p className="app-body">{result.official_step.boundary[locale] ?? result.official_step.boundary.en}</p></div>
+          <div className="notice-boundary mb-4"><p className="app-section-label">[ IMPORTANT BOUNDARY ]</p><p className="app-body font-medium">{t("j.finalBoundary")}</p><p className="app-body mt-2">{t("j.finalInstruction")}</p></div>
           <div className="grid gap-2">
             <a
-              href={result.official_step.url}
+              href={OFFICIAL_EFILING_PORTAL_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="app-primary text-center"

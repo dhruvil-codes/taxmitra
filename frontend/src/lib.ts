@@ -2,6 +2,20 @@
 
 export type Locale = "en" | "hi";
 
+export const OFFICIAL_EFILING_PORTAL_URL = "https://www.incometax.gov.in/iec/foportal/";
+
+export function verifiedIncomeTaxUrl(url: string): string {
+  try {
+    const candidate = new URL(url);
+    if (candidate.hostname === "www.incometax.gov.in" && candidate.pathname.startsWith("/iec/forservices")) {
+      return OFFICIAL_EFILING_PORTAL_URL;
+    }
+  } catch {
+    return url;
+  }
+  return url;
+}
+
 export interface Citizen {
   id: string;
   name: string;

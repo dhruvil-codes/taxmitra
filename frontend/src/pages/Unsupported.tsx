@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useI18n } from "../i18n";
-import { api, ResolveResult } from "../lib";
+import { api, ResolveResult, verifiedIncomeTaxUrl } from "../lib";
 import { Card } from "../components";
 
 export default function Unsupported() {
@@ -34,7 +34,7 @@ export default function Unsupported() {
           <Card>
             <h2 className="app-section-label">[ {t("unsupported.links")} ]</h2>
             <ul className="official-links">
-              {refusal.official_links.map((l) => <li key={l.url}><a href={l.url} target="_blank" rel="noopener noreferrer">{l.label[locale] ?? l.label.en} ↗</a></li>)}
+              {refusal.official_links.map((l) => <li key={l.url}><a href={verifiedIncomeTaxUrl(l.url)} target="_blank" rel="noopener noreferrer">{l.label[locale] ?? l.label.en} ↗</a></li>)}
             </ul>
           </Card>
         )}
