@@ -57,45 +57,21 @@ export function SourcePanel({ citation, onClose }: { citation: Citation | null; 
   return (
     <div className="source-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={citation.title}>
       <div className="source-panel" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-start justify-between gap-3">
+        <div className="source-head">
           <div>
-            <p className="text-xs uppercase tracking-wide text-stone-500">{citation.source_name}</p>
-            <h3 className="font-bold text-ink leading-snug">{citation.title}</h3>
-            <p className="text-sm text-saffron font-medium">{citation.section}</p>
+            <p className="app-section-label">[ OFFICIAL SOURCE ]</p>
+            <h3>{citation.title}</h3>
+            <p className="source-section">{citation.source_name} · {citation.section}</p>
           </div>
-          <button
-            onClick={onClose}
-            className="text-stone-500 hover:text-ink text-sm border border-stone-300 rounded-lg px-2 py-1"
-          >
-            {t("notice.close")}
-          </button>
+          <button onClick={onClose} className="source-close">{t("notice.close")} ×</button>
         </div>
-        <div
-          className={`mt-3 text-xs rounded-lg px-2.5 py-1.5 inline-block ${
-            citation.verification === "verified"
-              ? "bg-india-green-soft text-india-green"
-              : "bg-amber-50 text-amber-800"
-          }`}
-        >
-          {citation.verification === "verified"
-            ? t("notice.verification.verified")
-            : t("notice.verification.pending")}
-        </div>
-        <blockquote className="mt-3 text-sm text-stone-700 leading-relaxed border-l-4 border-saffron/40 pl-3 whitespace-pre-line">
-          {citation.excerpt}
-        </blockquote>
-        <div className="mt-4 flex flex-col gap-2">
-          <a
-            href={citation.official_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-semibold text-india-green underline"
-          >
-            {t("notice.viewSource")}
-          </a>
-          <p className="text-[11px] text-stone-400">
-            {citation.source_name} · accessed {citation.accessed_date}
-          </p>
+        <p className={`source-verification ${citation.verification === "verified" ? "is-verified" : ""}`}>
+          ■ {citation.verification === "verified" ? t("notice.verification.verified") : t("notice.verification.pending")}
+        </p>
+        <blockquote className="source-excerpt">{citation.excerpt}</blockquote>
+        <div className="source-footer">
+          <a href={citation.official_url} target="_blank" rel="noopener noreferrer">{t("notice.viewSource")} ↗</a>
+          <p>{citation.source_name} · accessed {citation.accessed_date}</p>
         </div>
       </div>
     </div>
@@ -107,17 +83,11 @@ export function CitationChips({ citations }: { citations: Citation[] }) {
   const [open, setOpen] = useState<Citation | null>(null);
   return (
     <div>
-      <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
-        {t("notice.basedOn")}
-      </p>
-      <div className="flex flex-wrap gap-2">
-        {citations.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setOpen(c)}
-            className="text-xs font-medium bg-white border border-stone-300 hover:border-saffron rounded-full px-3 py-1.5 text-left"
-          >
-            {c.section || c.title}
+      <p className="app-section-label">[ {t("notice.basedOn")} ]</p>
+      <div className="citation-list">
+        {citations.map((c, index) => (
+          <button key={c.id} onClick={() => setOpen(c)}>
+            <span>{String(index + 1).padStart(2, "0")}</span>{c.section || c.title}<b>↗</b>
           </button>
         ))}
       </div>

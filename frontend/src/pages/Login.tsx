@@ -7,7 +7,7 @@ import { Card, PrimaryButton } from "../components";
 export default function Login() {
   const { t, locale } = useI18n();
   const navigate = useNavigate();
-  const [citizens, setCitizens] = useState<Citizen[]>([]);
+  const [citizens, setCitizens] = useState<Citizen[] | null>(null);
 
   useEffect(() => {
     api.citizens().then(setCitizens).catch(() => setCitizens([]));
@@ -18,12 +18,14 @@ export default function Login() {
     navigate("/notices");
   };
 
+  if (!citizens) return <div className="app-page"><div className="app-loading">LOADING DEMO PROFILES</div></div>;
+
   return (
     <div className="app-page">
       <p className="app-eyebrow">[ TM / GUIDE / 00 ]</p>
       <h1 className="app-title">{t("login.title")}</h1>
       <p className="app-lead">{t("login.sub")}</p>
-      <div className="app-grid">
+      {citizens.length === 0 ? <div className="app-empty mt-8"><p className="app-section-label">[ PROFILES UNAVAILABLE ]</p><p>Demo profiles could not be loaded. Refresh to try again.</p></div> : <div className="app-grid">
         {citizens.map((c) => (
           <Card key={c.id}>
             <p className="app-section-label">[ FICTIONAL DEMO PROFILE ]</p>
@@ -33,7 +35,7 @@ export default function Login() {
             <div className="mt-6"><PrimaryButton onClick={() => pick(c)}>{t("login.cta", { name: c.name })} →</PrimaryButton></div>
           </Card>
         ))}
-      </div>
+      </div>}
       <p className="app-eyebrow mt-5">{t("login.note")}</p>
     </div>
   );

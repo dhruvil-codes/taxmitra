@@ -28,9 +28,10 @@ function AppShell() {
         </Routes>
       </main>
       {!isLanding && (
-        <footer className="text-center text-[11px] text-stone-400 px-4 py-6">
-          Tax Mitra — independent hackathon prototype. All data fictional. Not an official
-          Income Tax Department service. AI explains. Rules decide. Humans approve.
+        <footer className="app-footer">
+          <span><b>त</b> Tax Mitra</span>
+          <p>Independent prototype · Fictional data · Not an official Income Tax Department service</p>
+          <small>AI EXPLAINS → RULES DECIDE → HUMANS APPROVE</small>
         </footer>
       )}
     </>

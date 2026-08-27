@@ -7,7 +7,7 @@ import { Card, StatusChip } from "../components";
 export default function Dashboard() {
   const { t, locale } = useI18n();
   const navigate = useNavigate();
-  const [notices, setNotices] = useState<NoticeCardT[]>([]);
+  const [notices, setNotices] = useState<NoticeCardT[] | null>(null);
   const citizenId = store.citizenId();
 
   useEffect(() => {
@@ -18,12 +18,14 @@ export default function Dashboard() {
     api.notices(citizenId).then(setNotices).catch(() => setNotices([]));
   }, [citizenId, navigate]);
 
+  if (!notices) return <div className="app-page"><div className="app-loading">LOADING NOTICES</div></div>;
+
   return (
     <div className="app-page">
       <p className="app-eyebrow">[ TM / NOTICE INDEX ]</p>
       <h1 className="app-title">{t("dash.title")}</h1>
       <p className="app-lead">Select a fictional notice to understand what it means and prepare the next step.</p>
-      <div className="app-grid">
+      {notices.length === 0 ? <div className="app-empty mt-8"><p className="app-section-label">[ NO NOTICES FOUND ]</p><p>There are no demo notices available for this profile.</p></div> : <div className="app-grid">
         {notices.map((n) => (
           <Card key={n.id}>
             <p className="app-section-label">[ NOTICE / {n.id.toUpperCase()} ]</p>
@@ -36,7 +38,7 @@ export default function Dashboard() {
             <div className="mt-6">{n.supported ? <Link to={`/notices/${n.id}`} className="app-primary">{t("dash.start")} →</Link> : <Link to={`/notices/${n.id}/unsupported`} className="app-primary">{t("dash.unsupported")} →</Link>}</div>
           </Card>
         ))}
-      </div>
+      </div>}
     </div>
   );
 }
