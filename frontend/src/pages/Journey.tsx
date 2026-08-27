@@ -75,13 +75,12 @@ export default function Journey() {
               </div>
             </Card>
           )}
-          {qIndex > 0 && (
-            <button
-              onClick={() => setQIndex(qIndex - 1)}
-              className="mt-4 text-sm text-stone-500 underline"
-            >
+          {qIndex > 0 ? (
+            <button onClick={() => setQIndex(qIndex - 1)} className="app-back">
               ← {t("j.back")}
             </button>
+          ) : (
+            <Link to={`/notices/${id}`} className="app-back">← {t("j.back")}</Link>
           )}
         </div>
       )}
@@ -103,7 +102,10 @@ export default function Journey() {
               </Card>
             ))}
           </div>
-          <PrimaryButton onClick={() => setPhase("draft")}>{t("j.next")} →</PrimaryButton>
+          <div className="flex flex-wrap items-center gap-3">
+            <PrimaryButton onClick={() => setPhase("draft")}>{t("j.next")} →</PrimaryButton>
+            <button className="app-back !mt-0" onClick={() => setPhase("questions")}>← {t("j.back")}</button>
+          </div>
         </div>
       )}
 
@@ -119,7 +121,7 @@ export default function Journey() {
             rows={14}
             className="w-full border border-stone-300 focus:border-blue-600 p-4 text-sm leading-relaxed font-mono outline-none"
           />
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <PrimaryButton
               onClick={() => {
                 store.setDraft(id, draft);
@@ -128,6 +130,7 @@ export default function Journey() {
             >
               {t("j.acceptDraft")} →
             </PrimaryButton>
+            <button className="app-back !mt-0" onClick={() => setPhase("checklist")}>← {t("j.back")}</button>
           </div>
         </div>
       )}
@@ -160,7 +163,10 @@ export default function Journey() {
             </dl>
           </Card>
           <p className="text-sm text-stone-600 mb-4">{t("j.reviewNote")}</p>
-          <PrimaryButton onClick={() => setPhase("final")}>{t("j.next")} →</PrimaryButton>
+          <div className="flex flex-wrap items-center gap-3">
+            <PrimaryButton onClick={() => setPhase("final")}>{t("j.next")} →</PrimaryButton>
+            <button className="app-back !mt-0" onClick={() => setPhase("draft")}>← {t("j.back")}</button>
+          </div>
         </div>
       )}
 
@@ -213,9 +219,12 @@ export default function Journey() {
               {copied ? t("j.finalCopied") : t("j.finalCopy")}
             </button>
           </div>
-          <Link to="/notices" className="block text-center text-sm text-stone-400 underline mt-6">
-            {t("j.restart")}
-          </Link>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-5">
+            <button className="app-back !mt-0" onClick={() => setPhase("review")}>← {t("j.back")}</button>
+            <Link to="/notices" className="text-sm text-stone-500 underline">
+              {t("j.restart")}
+            </Link>
+          </div>
         </div>
       )}
     </div>
