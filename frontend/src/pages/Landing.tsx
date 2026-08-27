@@ -63,7 +63,7 @@ export default function Landing() {
           <a href="#trust">TRUST</a>
         </nav>
         <div className="tm-languages" aria-label="Languages"><b>EN</b><span>हिन्दी</span></div>
-        <button className="tm-open" onClick={openGuide}>OPEN GUIDE <span>→</span></button>
+        <button className="tm-open" onClick={openGuide}>USE TAX MITRA <span>→</span></button>
       </header>
 
       <section className="tm-dark-hero" id="top">
