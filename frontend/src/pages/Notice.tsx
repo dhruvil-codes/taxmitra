@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { useI18n } from "../i18n";
 import { api, Explanation, NoticeCard as NoticeCardT } from "../lib";
 import { Card, CitationChips, SavedGuidanceBadge, Stepper } from "../components";
@@ -20,6 +20,7 @@ export default function Notice() {
 
   if (error) return <div className="app-page"><div className="app-empty"><p className="app-section-label">[ NOTICE UNAVAILABLE ]</p><p>We could not load this notice. Return to your notices and try again.</p></div><Link className="app-back" to="/notices">← Back to notices</Link></div>;
   if (!notice) return <div className="app-page"><div className="app-loading">LOADING NOTICE</div></div>;
+  if (notice.section.replace(/\s/g, "").startsWith("142(1)")) return <Navigate to={`/notices/${id}/scrutiny`} replace />;
 
   return (
     <div className="app-page">

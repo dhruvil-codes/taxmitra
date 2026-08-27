@@ -83,20 +83,70 @@ export interface ResolveResult {
   official_links?: { label: Record<string, string>; url: string }[];
 }
 
-async function get<T>(url: string): Promise<T> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`${url} -> ${res.status}`);
+export class ApiError extends Error {
+  constructor(public status: number, public detail: string) {
+    super(detail);
+  }
+}
+
+export interface ScrutinyRequest {
+  id: string;
+  original_text: string;
+  plain_language_explanation: Record<string, string>;
+  why_required: Record<string, string>;
+  required_evidence: Record<string, string>[];
+  response_section: string;
+  citations: Citation[];
+}
+
+export interface ScrutinyRequestsResult {
+  supported: boolean;
+  notice_id?: string;
+  extraction?: { source_type: string; requires_human_confirmation: boolean; confirmed: boolean };
+  requests?: ScrutinyRequest[];
+  grounding?: { method: string; confidence: number; below_floor: boolean };
+  headline?: Record<string, string>;
+  why?: Record<string, string>;
+  suggestion?: Record<string, string>;
+  official_links?: { label: Record<string, string>; url: string }[];
+}
+
+export interface ScrutinyQuestion extends Question { request_id: string }
+export interface ScrutinyChecklistItem {
+  id: string;
+  request_id: string;
+  status: "yes" | "no" | "unsure";
+  title: Record<string, string>;
+  required_evidence: Record<string, string>[];
+  why_needed: Record<string, string>;
+}
+export interface ScrutinyResolveResult extends Omit<ResolveResult, "checklist" | "path"> {
+  category: string;
+  path?: { path_id: "ready_to_respond" | "needs_evidence" | "needs_review"; headline: Record<string, string>; professional_help_recommended: boolean };
+  checklist?: ScrutinyChecklistItem[];
+}
+
+async function request<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, init);
+  if (!res.ok) {
+    let detail = `Request failed (${res.status})`;
+    try { detail = (await res.json()).detail ?? detail; } catch { /* non-JSON response */ }
+    throw new ApiError(res.status, detail);
+  }
   return res.json();
 }
 
-async function post<T>(url: string, body: unknown): Promise<T> {
-  const res = await fetch(url, {
+async function get<T>(url: string, signal?: AbortSignal): Promise<T> {
+  return request<T>(url, { signal });
+}
+
+async function post<T>(url: string, body: unknown, signal?: AbortSignal): Promise<T> {
+  return request<T>(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    signal,
   });
-  if (!res.ok) throw new Error(`${url} -> ${res.status}`);
-  return res.json();
 }
 
 export const api = {
@@ -110,6 +160,12 @@ export const api = {
   resolve: (noticeId: string, answers: Record<string, string>) =>
     post<ResolveResult>("/api/workflow/resolve", { notice_id: noticeId, answers }),
   refusal: (id: string) => get<ResolveResult>(`/api/notices/${id}/refusal`),
+  scrutinyRequests: (id: string, locale: Locale, extractionConfirmed = true, signal?: AbortSignal) =>
+    get<ScrutinyRequestsResult>(`/api/scrutiny/${id}/requests?locale=${locale}&extraction_confirmed=${extractionConfirmed}`, signal),
+  scrutinyQuestions: (id: string, locale: Locale, extractionConfirmed = true, signal?: AbortSignal) =>
+    get<{ supported: boolean; questions: ScrutinyQuestion[] }>(`/api/scrutiny/${id}/questions?locale=${locale}&extraction_confirmed=${extractionConfirmed}`, signal),
+  resolveScrutiny: (noticeId: string, answers: Record<string, string>, extractionConfirmed = true, signal?: AbortSignal) =>
+    post<ScrutinyResolveResult>("/api/scrutiny/resolve", { notice_id: noticeId, answers, extraction_confirmed: extractionConfirmed }, signal),
 };
 
 // --- journey state ---
@@ -147,6 +203,18 @@ export const store = {
   },
   setDraft(noticeId: string, draft: string) {
     localStorage.setItem(`taxmitra.draft.${noticeId}`, draft);
+  },
+  scrutinyStage(noticeId: string): string {
+    return read(`taxmitra.scrutiny.stage.${noticeId}`) || "requests";
+  },
+  setScrutinyStage(noticeId: string, stage: string) {
+    localStorage.setItem(`taxmitra.scrutiny.stage.${noticeId}`, stage);
+  },
+  extractionConfirmed(noticeId: string): boolean {
+    return read(`taxmitra.scrutiny.confirmed.${noticeId}`) === "true";
+  },
+  setExtractionConfirmed(noticeId: string, confirmed: boolean) {
+    localStorage.setItem(`taxmitra.scrutiny.confirmed.${noticeId}`, String(confirmed));
   },
   reset() {
     Object.keys(localStorage)

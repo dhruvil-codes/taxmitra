@@ -97,6 +97,7 @@ export default function Landing() {
               <a href="#how" className="tm-watch">SEE HOW IT WORKS <span>↓</span></a>
             </div>
             <small>Not a government service · No automatic submissions</small>
+            <a href="/upload">Have your own notice? Choose a PDF →</a>
           </aside>
         </section>
 
@@ -130,8 +131,8 @@ export default function Landing() {
           <div className="tm-questions-copy">
             <p>Tax Mitra asks only what is necessary to safely guide the taxpayer.</p>
             <div><b>CURRENT PROTOTYPE</b><span>Demo notices are pre-loaded.</span></div>
-            <div><b>FUTURE DIRECTION</b><span>Upload notice PDF → extract requests → taxpayer confirms → guided preparation</span></div>
-            <small>PDF extraction is a future direction and is not implemented in this prototype.</small>
+              <div><b>142(1) DEMO</b><span>Synthetic PDF extraction → taxpayer confirmation → guided preparation</span></div>
+              <small>Your own PDF can be selected locally, but is not uploaded or extracted in this prototype.</small>
           </div>
         </section>
 

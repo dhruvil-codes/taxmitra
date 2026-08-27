@@ -15,7 +15,10 @@ export default function Dashboard() {
       navigate("/login");
       return;
     }
-    api.notices(citizenId).then(setNotices).catch(() => setNotices([]));
+    Promise.all([
+      api.notices(citizenId),
+      api.notice("N-2026-003").catch(() => null),
+    ]).then(([owned, scrutiny]) => setNotices(scrutiny && !owned.some(n => n.id === scrutiny.id) ? [...owned, scrutiny] : owned)).catch(() => setNotices([]));
   }, [citizenId, navigate]);
 
   if (!notices) return <div className="app-page"><div className="app-loading">LOADING NOTICES</div></div>;

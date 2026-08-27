@@ -7,6 +7,8 @@ import Dashboard from "./pages/Dashboard";
 import Notice from "./pages/Notice";
 import Journey from "./pages/Journey";
 import Unsupported from "./pages/Unsupported";
+import Scrutiny from "./pages/Scrutiny";
+import Upload from "./pages/Upload";
 
 function AppShell() {
   const { pathname } = useLocation();
@@ -24,6 +26,8 @@ function AppShell() {
           <Route path="/notices" element={<Dashboard />} />
           <Route path="/notices/:id" element={<Notice />} />
           <Route path="/notices/:id/journey" element={<Journey />} />
+          <Route path="/notices/:id/scrutiny" element={<Scrutiny />} />
+          <Route path="/upload" element={<Upload />} />
           <Route path="/notices/:id/unsupported" element={<Unsupported />} />
         </Routes>
       </main>
