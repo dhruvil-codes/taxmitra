@@ -14,6 +14,7 @@ from app.rules.notice_types import (
         ("143(1)(a)", NoticeCategory.INCOME_MISMATCH_143_1A),
         ("143(1)", NoticeCategory.INCOME_MISMATCH_143_1A),
         (" 143(1)(a) ", NoticeCategory.INCOME_MISMATCH_143_1A),
+        ("142(1)", NoticeCategory.SCRUTINY_142_1),
         ("139(9)", NoticeCategory.DEFECTIVE_RETURN_139_9),
         ("148", NoticeCategory.UNSUPPORTED),
         ("245", NoticeCategory.UNSUPPORTED),
@@ -26,8 +27,11 @@ def test_classification(section, expected):
 
 
 def test_release_candidate_support_scope():
-    # RC guides exactly one notice type; anything else must refuse.
-    assert SUPPORTED_CATEGORIES == {NoticeCategory.INCOME_MISMATCH_143_1A}
+    assert SUPPORTED_CATEGORIES == {
+        NoticeCategory.INCOME_MISMATCH_143_1A,
+        NoticeCategory.SCRUTINY_142_1,
+    }
     assert is_supported(NoticeCategory.INCOME_MISMATCH_143_1A)
+    assert is_supported(NoticeCategory.SCRUTINY_142_1)
     assert not is_supported(NoticeCategory.DEFECTIVE_RETURN_139_9)
     assert not is_supported(NoticeCategory.UNSUPPORTED)

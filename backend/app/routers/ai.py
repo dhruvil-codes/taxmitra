@@ -28,7 +28,7 @@ from app.knowledge.embedder import AIUnavailableError
 from app.knowledge.grounding import ground
 from app.knowledge.retriever import RetrievalResult
 from app.rules.decision_trees import localized_income_source, render_text
-from app.rules.notice_types import classify_notice, is_supported
+from app.rules.notice_types import NoticeCategory, classify_notice, is_supported
 
 limiter = Limiter(key_func=get_remote_address)
 router = APIRouter(prefix="/api/ai", tags=["ai"])
@@ -67,6 +67,8 @@ def explanation(request: Request, notice_id: str, locale: str = Query(default="e
     if notice is None:
         raise HTTPException(status_code=404, detail="Notice not found")
     category = classify_notice(notice)
+    if category == NoticeCategory.SCRUTINY_142_1:
+        raise HTTPException(status_code=400, detail="Use /api/scrutiny endpoints for 142(1) request-level explanations")
     if not is_supported(category):
         raise HTTPException(status_code=400, detail="Notice not supported; see refusal endpoint")
 

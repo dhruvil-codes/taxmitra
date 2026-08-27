@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from app.data_store import get_citizen, get_notice, load_draft_templates
 from app.rules.decision_trees import get_questions, valid_answer
 from app.rules.response_paths import questions_payload
-from app.rules.notice_types import classify_notice, is_supported
+from app.rules.notice_types import NoticeCategory, classify_notice, is_supported
 from app.rules.refusal import build_refusal
 from app.rules.response_paths import build_draft, resolve_path
 from app.rules.checklists import checklist_for
@@ -32,6 +32,8 @@ def questions(
     if notice is None:
         raise HTTPException(status_code=404, detail="Notice not found")
     category = classify_notice(notice)
+    if category == NoticeCategory.SCRUTINY_142_1:
+        raise HTTPException(status_code=400, detail="Use /api/scrutiny endpoints for 142(1) scrutiny notices")
     if not is_supported(category):
         raise HTTPException(status_code=400, detail="Notice not supported")
     return {"questions": questions_payload(get_questions(category.value), notice, locale)}
@@ -43,6 +45,8 @@ def resolve(payload: Answers):
     if notice is None:
         raise HTTPException(status_code=404, detail="Notice not found")
     category = classify_notice(notice)
+    if category == NoticeCategory.SCRUTINY_142_1:
+        raise HTTPException(status_code=400, detail="Use /api/scrutiny/resolve for 142(1) scrutiny notices")
     if not is_supported(category):
         return build_refusal(category)
 

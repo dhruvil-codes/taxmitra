@@ -13,6 +13,7 @@ from enum import Enum
 
 class NoticeCategory(str, Enum):
     INCOME_MISMATCH_143_1A = "income_mismatch_143_1a"
+    SCRUTINY_142_1 = "scrutiny_142_1"
     DEFECTIVE_RETURN_139_9 = "defective_return_139_9"
     UNSUPPORTED = "unsupported"
 
@@ -22,6 +23,7 @@ class NoticeCategory(str, Enum):
 SUPPORTED_CATEGORIES: frozenset[NoticeCategory] = frozenset(
     {
         NoticeCategory.INCOME_MISMATCH_143_1A,
+        NoticeCategory.SCRUTINY_142_1,
     }
 )
 
@@ -35,6 +37,8 @@ def classify_notice(notice: dict) -> NoticeCategory:
     section = _normalize(notice.get("section"))
     if section.startswith("143(1)"):
         return NoticeCategory.INCOME_MISMATCH_143_1A
+    if section.startswith("142(1)"):
+        return NoticeCategory.SCRUTINY_142_1
     if section.startswith("139(9)"):
         return NoticeCategory.DEFECTIVE_RETURN_139_9
     return NoticeCategory.UNSUPPORTED

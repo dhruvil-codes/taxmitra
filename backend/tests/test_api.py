@@ -150,7 +150,7 @@ def test_non_string_answer_is_422_not_500():
 
 def test_notices_list_without_filter_returns_all():
     body = client.get("/api/notices").json()
-    assert len(body) == 2
+    assert len(body) == 3
 
 
 def test_explanation_income_source_is_locale_appropriate():

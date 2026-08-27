@@ -33,6 +33,7 @@ from app.knowledge.grounding import available_method
 from app.knowledge.retriever import Retriever
 from app.routers import ai as ai_router
 from app.routers import notices as notices_router
+from app.routers import scrutiny as scrutiny_router
 from app.routers import workflow as workflow_router
 from app.routers.ai import limiter
 
@@ -73,6 +74,7 @@ async def observability_and_security_headers(request: Request, call_next):
 app.include_router(notices_router.router)
 app.include_router(workflow_router.router)
 app.include_router(ai_router.router)
+app.include_router(scrutiny_router.router)
 
 
 def _static_integrity() -> dict:

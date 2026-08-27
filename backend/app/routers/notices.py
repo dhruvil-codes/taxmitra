@@ -18,22 +18,39 @@ def _parse_date(value: str) -> date:
     return date.fromisoformat(value)
 
 
+def _due_date_for_notice(notice: dict, category: NoticeCategory) -> date | None:
+    if notice.get("response_due_date"):
+        return _parse_date(notice["response_due_date"])
+    return compute_due_date(_parse_date(notice["issue_date"]), category)
+
+
+def _title_for_category(category: NoticeCategory) -> dict[str, str]:
+    if category == NoticeCategory.INCOME_MISMATCH_143_1A:
+        return {
+            "en": "Income mismatch - adjustment proposed",
+            "hi": "आय बेमेल - संशोधन का प्रस्ताव",
+        }
+    if category == NoticeCategory.SCRUTINY_142_1:
+        return {
+            "en": "Scrutiny notice - information requested",
+            "hi": "स्क्रूटनी नोटिस - जानकारी मांगी गई",
+        }
+    return {
+        "en": "Notice type not supported by Tax Mitra",
+        "hi": "यह नोटिस प्रकार Tax Mitra द्वारा समर्थित नहीं है",
+    }
+
+
 def notice_card(notice: dict) -> dict:
     category = classify_notice(notice)
-    due = compute_due_date(_parse_date(notice["issue_date"]), category)
+    due = _due_date_for_notice(notice, category)
     remaining = days_remaining(due)
     return {
         "id": notice["id"],
         "section": notice["section"],
         "category": category.value,
         "supported": is_supported(category),
-        "title": {
-            "en": "Income mismatch — adjustment proposed",
-            "hi": "आय बेमेल — संशोधन का प्रस्ताव",
-        } if is_supported(category) else {
-            "en": "Notice type not supported by Tax Mitra",
-            "hi": "यह नोटिस प्रकार Tax Mitra द्वारा समर्थित नहीं है",
-        },
+        "title": _title_for_category(category),
         "amount_in_question": notice["amount_in_question"],
         "issue_date": notice["issue_date"],
         "assessment_year": notice["assessment_year"],
