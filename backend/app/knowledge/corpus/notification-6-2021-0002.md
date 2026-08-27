@@ -1,0 +1,23 @@
+---
+id: "notification-6-2021-0002"
+source_id: "NOTIFICATION-6-2021"
+section: "143(2), 142(1), 142(2A), 144"
+title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_type: "CBDT notification"
+official_organization: "CBDT, Department of Revenue, Ministry of Finance"
+official_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+source_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: "faceless assessment, further evidence requests, non-compliance escalation"
+form: ""
+assessment_year: "AY 2021-22 onward as applicable"
+tax_year: ""
+effective_from: "2021-02-17"
+effective_to: ""
+status: "HISTORICAL"
+tags: "HISTORICAL, 143(2), 142(1), 142(2A), 144"
+---
+(ii) the assessee may, within fifteen days from the date of receipt of notice referred to in clause (i), file his response to the National e-Assessment Centre; (iii) where the assessee – [भाग II—खण् ड 3(ii)] भारत का रािपत्र : असाधारण ### 7 (a) has furnished his return of income under section 139 of the Actor in response to a notice issued under sub-section (1) of 142 of the Actor sub-section (1) of section 148of the Act, and a notice under sub-section (2) of section 143 of the Acthas been issued by the Assessing Officer or the prescribed income-tax authority, as the case may be; or (b) has not furnished his return of income in response to a notice issued under sub- section (1) of section 142 of the Actby the Assessing Officer; or (c) has not furnished his return of income under sub-section (1) of section 148 of the Actand a notice under sub-section (1) of section 142 of the Acthas been issued by the Assessing Officer, The National e-Assessment Centre shall intimate the assessee that assessment in his case shall be completed under this Scheme. (iv) the National e-Assessment Centre shall assign the case selected for the purposes of e- assessment under this Scheme to a specific assessment unit in any one Regional e- Assessment Centre through an automated allocation system; (v) where a case is assigned to the assessment unit, it may make a request to the National e- Assessment Centre for – (a) obtaining such further information, documents or evidence from the assessee or any other person, as it may specify; (b) conducting of certain enquiry or verification by verification unit; and (c) seeking technical assistance from the technical unit;

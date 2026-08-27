@@ -1,0 +1,23 @@
+---
+id: "notification-6-2021-0003"
+source_id: "NOTIFICATION-6-2021"
+section: "143(2), 142(1), 142(2A), 144"
+title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_type: "CBDT notification"
+official_organization: "CBDT, Department of Revenue, Ministry of Finance"
+official_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+source_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: "faceless assessment, further evidence requests, non-compliance escalation"
+form: ""
+assessment_year: "AY 2021-22 onward as applicable"
+tax_year: ""
+effective_from: "2021-02-17"
+effective_to: ""
+status: "HISTORICAL"
+tags: "HISTORICAL, 143(2), 142(1), 142(2A), 144"
+---
+(vi) where a request for obtaining further information, document or evidence from the assessee or any other person has been made by the assessment unit, the National e- Assessment Centre shall issue appropriate notice or requisition to such assessee or person, specifying a time therein, for submittingsuch information, documents or evidence; (vii) the assessee or any other person, as the case may be, shall file his response to the notice referred to in clause (vi), within the time specified therein or such extended time as may be allowed on the basis of an application in this regard, to the National e-Assessment Centre; (viii) where a request for conducting of certain enquiry or verification by the verification unit has been made by the assessment unit, the request shall be assigned by the National e- Assessment Centre to a verification unit in any one Regional e-Assessment Centre through an automated allocation system; (ix) where a request for seeking technical assistance from the technical unit has been made by the assessment unit, the request shall be assigned by the National e-Assessment Centre to a technical unit in any one Regional e-Assessment Centre through an automated allocation system; (x) the National e-Assessment Centre shall send the report received from the verification unit or the technical unit, based on the request referred to in clause (viii) or (ix) to the concerned assessment unit;

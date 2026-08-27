@@ -1,0 +1,23 @@
+---
+id: "ais-faq-0004"
+source_id: "AIS-FAQ"
+section: ""
+title: "FAQs on AIS (Annual Information Statement)"
+document_title: "FAQs on AIS (Annual Information Statement)"
+document_type: "official FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/ais-faq"
+source_url: "https://www.incometax.gov.in/iec/foportal/ais-faq"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: "AIS, TIS, Form 26AS"
+assessment_year: "AY 2023-24 onward for 26AS distinction"
+tax_year: ""
+effective_from: "2021-11-01"
+effective_to: ""
+status: "CURRENT"
+tags: "AIS, TIS, 26AS, TDS/TCS, SFT, payment and mismatch evidence"
+---
+For more information, navigate to **AIS** under **e-File/AIS** menu after login. **Q-2 What are the components of Annual Information Statement (AIS)?** The information shown on AIS is divided in two parts: **PART A- General Information** Part A displays general information pertaining to you, including PAN, Masked Aadhar Number, Name of the Taxpayer, Date of Birth/ Incorporation/ Formation, mobile number, e-mail address and address of Taxpayer. **PART B - TDS/TCS Information** Information related to tax deducted/collected at source is displayed here. The Information code of the TDS/TCS, Information description and Information value is shown. **• SFT Information:** Under this head, information received from reporting entities under Statement of Financial transaction (SFT) is displayed. The SFT code, Information description and Information value is made available. **• Payment of Taxes:** Information relating to payment of taxes during the Financial Year under different heads, such as Advance Tax and Self-Assessment Tax is shown. **• Demand and Refund:** You will be able to view the details of the demand raised and refund initiated (AY and amount) during a financial year. (Details related to Demand are not available currently). **• Other Information:** Details of the information received from the other sources, such as data pertaining to Annexure II salary, Interest on refund, Outward Foreign Remittance/Purchase of Foreign Currency etc. is displayed here. Further, Taxpayer can provide feedback on information displayed in AIS. AIS shows both reported value and modified value (i.e. value after considering taxpayer feedback or source confirmation on taxpayer’s feedback) under each section (i.e. TDS, SFT, Other information).

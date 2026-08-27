@@ -1,0 +1,23 @@
+---
+id: "notification-6-2021-0004"
+source_id: "NOTIFICATION-6-2021"
+section: "143(2), 142(1), 142(2A), 144"
+title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_type: "CBDT notification"
+official_organization: "CBDT, Department of Revenue, Ministry of Finance"
+official_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+source_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: "faceless assessment, further evidence requests, non-compliance escalation"
+form: ""
+assessment_year: "AY 2021-22 onward as applicable"
+tax_year: ""
+effective_from: "2021-02-17"
+effective_to: ""
+status: "HISTORICAL"
+tags: "HISTORICAL, 143(2), 142(1), 142(2A), 144"
+---
+(xi) where the assessee fails to comply with the notice referred to in clause (vi) or notice issued under sub-section (1), or with a direction issued under sub-section (2A), of section 142 of the Act, the National e-Assessment Centre shall serve upon such assessee a notice under section 144 of the Act giving him an opportunity to show-cause, on a date and time to be specified in the notice, why the assessment in his case should not be completed to the best of its judgment; (xii) the assessee shall, within the time specified in the notice referred to in clause (xi) or such time as may be extended on the basis of an application in this behalf, file his response to the National e-Assessment Centre; (xiii) where the assessee fails to file response to the notice referred to in clause (xi) within the time specified therein or within the extended time, if any, the National e-Assessment Centre shall intimate such failure to the assessment unit; 8 THE GAZETTE OF INDIA : EXTRAORDINARY [PART II—SEC. 3(ii)] (xiv) the assessment unit shall, after taking into account all the relevant material available on the record make in writing, a draft assessment order or, in a case where intimation referred to in clause (xiii) is received from the National e-Assessment Centre, make in writing, a draft assessment order to the best of its judgment, either accepting the income or sum payable by, or sum refundable to, the assessee as per his return or making variation to such income or sum, and send a copy of such order to the National e-Assessment Centre; (xv) the assessment unit shall, while making draft assessment order, provide details of the penalty proceedings to be initiated therein, if any;

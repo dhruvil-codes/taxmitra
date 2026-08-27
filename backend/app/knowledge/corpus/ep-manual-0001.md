@@ -1,0 +1,23 @@
+---
+id: "ep-manual-0001"
+source_id: "EP-MANUAL"
+section: "139(9), 143(1)(a), 154, 131, 133(6)"
+title: "e-Proceedings User Manual"
+document_title: "e-Proceedings User Manual"
+document_type: "official user manual web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "viewing notices, written response, attachments, transaction ID, acknowledgement, adjournment, VC, 139(9), 143(1)(a), 154, 131, 133(6)"
+---
+# e-Proceedings User Manual | Income Tax Department **URL:** https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings --- Skip to main content Call Us Login Register Home Individual/HUF Company Non-Company Tax Professionals & Others Downloads Help e-Proceedings User Manual e-Proceedings User Manual e-Proceedings User Manual 1. Overview The e-Proceedings service is available to all registered users to view and submit a response to the notices / intimations / letters issued by Assessing Officer, CPC or any other Income Tax Authority. Following notices / intimations / letters can be viewed and responded to, using the e-Proceedings service: Defective Notice u/s 139(9) Intimation u/s 245 – Adjustment against Demand Prima Facie Adjustment u/s 143(1)(a) Suo-moto Rectification u/s 154 Notices issued by Assessing Officer or any other Income Tax Authority Seek for Clarification communication Additionally, a registered user can also add or withdraw an Authorized Representative to respond to any of the above listed notice / intimations / letters. 2. Prerequisites to Avail This Service Registered user on e-Filing portal with a valid user ID and password Active PAN Notice / intimation / letter from the Department (AO / CPC / Any other Income Tax Authority) Authorized to act as Authorized Representative (in case Authorized Representative wants to respond on behalf of taxpayer) Active TAN (in case of TAN proceedings) 3.Step-by-Step Guide Step 1: Log in to the e-Filing portal using your user ID and password. Step 2: On your Dashboard, click Pending Actions > e-Proceedings. Step 3: On the e-Proceedings page, click Self. Note:

@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0013"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+### 24\. Is there a need to change the accounting periods of businesses due to the introduction of 'Tax Year' concept? No, since the Tax Year is aligned with the Financial Year i.e., is a year starting from 1st April and ending on 31st March , no change in accounting year or financial statements is required for businesses or other taxpayers. ### 25\. What has changed in provisions relating to presumptive taxation of residents in the new Income Tax Act, 2025? Under the provisions of the Income Tax Act, 1961 residents earning income from business (Section 44AD), profession (Section 44ADA), and the business of plying, hiring, or leasing goods carriages (Section 44AE) are allowed a simplified taxation regime. In the Income Tax Act, 2025, all these presumptive taxation schemes have been consolidated into one section (section 58) in a tabular form at, while adopting simplified language. ### 26\. If a person had chosen a particular tax option under the old Act (like opting for a special tax scheme), does that choice carry over to the new Act automatically? Yes. The clause (f) of Section 536(2) of the new Act specifically provides that an option exercised under a provision of the old Act as was in force immediately before the commencement of new Act, is treated as if it was made under the equivalent provision of the new Act. ### 27\. Are old approvals, registrations, and recognitions still valid under the new Income Tax Act? Yes, if such approvals are not inconsistent with the new Act, they are treated as if granted under the new Act. For example, a charitable trust recognized under the old Act will be treated as recognized under the corresponding provision of the new Act, unless there is a conflict with the provisions in the new Act.

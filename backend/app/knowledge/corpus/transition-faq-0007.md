@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0007"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+A 'Tax year' is a period of twelve months contained in a financial year. It replaces the term 'previous year' used in the Income Tax Act, 1961. The concept of "Tax Year " is applicable from 01 April 2026, i.e., for income earned during FY 2026 -27 onwards and this will be referred to as Tax Year 2026-27 under the Income Tax Act ,2025. Simply put, Tax Year concept under the new Act corresponds to Previous Year concept under the Income Tax Act, 1961. Accordingly, the income of a Tax Year continues to be assessed after the end of that Tax Year, similar to the existing system under the ITA 1961 where income of Previous Year is assessed after the end of that Previous Year. Use of the terms 'previous year' and 'assessment year' was causing confusion among taxpayers as they referred to two different financial years. This alignment of Tax Year with Previous Year/ Financial Year eliminates the confusion caused by dual -year references under theIncome Tax Act, 1961. ### 10\. Can a 'Tax year' be a period which is less than a 'Financial year'? Yes. This will happen when a business is newly set up during any financial year, or a source of income comes into existence during a financial year. In such cases, the tax year will begin from the date of setting up of the business or the source of income coming into existence, and end on the last day of that financial year. For example, if a business is set up on 1 December 2026, the Tax Year for that business will commence from 1 December 2026 to 31 March 2027 ### 11\. When the Income Tax Act, 2025 refers to a "Tax year" starting on 1st April 2025 or earlier, how should that be understood?

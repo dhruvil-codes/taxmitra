@@ -1,0 +1,23 @@
+---
+id: "ais-faq-0006"
+source_id: "AIS-FAQ"
+section: ""
+title: "FAQs on AIS (Annual Information Statement)"
+document_title: "FAQs on AIS (Annual Information Statement)"
+document_type: "official FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/ais-faq"
+source_url: "https://www.incometax.gov.in/iec/foportal/ais-faq"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: "AIS, TIS, Form 26AS"
+assessment_year: "AY 2023-24 onward for 26AS distinction"
+tax_year: ""
+effective_from: "2021-11-01"
+effective_to: ""
+status: "CURRENT"
+tags: "AIS, TIS, 26AS, TDS/TCS, SFT, payment and mismatch evidence"
+---
+Further, within an Information Category, following information is shown: • Part through which information received • Information Description • Information Source • Amount Description • Amount (Reported by Source, Processed by System, Accepted by Taxpayer/Confirmed by Source) For more information, navigate to **AIS** under **e-File/AIS** menu after login. **Q-6 What is the difference between AIS and Form 26AS (Annual Tax Statement)?** From AY 2023-24 onwards, Annual Tax Statement (Form 26AS) available on TRACES portal displays only TDS/TCS related data of the taxpayer. Other details pertaining to the taxpayer are available in the AIS (Annual Information Statement). AIS also provides the taxpayer the option to give feedback on the transactions reported. Further, the aggregation of transactions on information source level is also reported in TIS contained under AIS. For more information, navigate to **AIS** under **e-File/AIS** menu after login. **Q-7 How can I view the Annual Information Statement?** You can access the Annual Information Statement functionality by following below mentioned steps: * **Step 1:** Login to URL <https://www.incometax.gov.in/> . * **Step 2:** After login, click **Annual Information Statement (AIS)** menu on dashboard. * **Step 3:** Click on **Proceed** button which will redirect to AIS portal and click on **AIS** tile to view the Annual Information Statement. Alternatively, * Step 1: Login to URL <https://www.incometax.gov.in/> . * Step 2: After login, click **e-File** menu. * Step 3: Click **on Income Tax Return** > **View AIS.** * Step 4: C lick on **Proceed** button which will redirect to AIS portal and click on **AIS** tile to view the Annual Information Statement. **Q-8 Can I track the activity history in AIS?**

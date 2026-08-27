@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0005"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+One of the key shifts is readability and ease of understanding. Under the 1961 Act, compliance often required expert interpretation because of its layered drafting. The 2025 Act aims to: • Use simpler language • Reduce excessive cross-referencing • Consolidate scattered provisions • Improve digital integration The long-term goal is lowering compliance friction and dependency on complex interpretation. ### 5\. How has the volume and complexity of the legislation changed in the new Act? The Income Tax Act, 2025 contains 536 sections and 16 schedules compared to the 819 sections and 14 schedules of the 1961 Act. In the new Act, the overall complexity has been reduced because: (i) Explanations and provisos have been incorporated into the main text of the sections; (ii) Tables and formulas replace verbose narrative provisions; (iii) Redundant and obsolete provisions have been removed; and (iv) Cross-references are clearer and more direct. Similarly, the Income Tax Rules have been reduced from 511 rules with 399 forms to 333 rules with 190 forms. ### 6\. Is the structure of chapters reorganised in the Income Tax Act, 2025? Yes. The Income Tax Act, 2025 reorganises the chapter structure compared to the Income Tax Act, 1961 by regrouping provisions in a more logical sequence, simplifying language and integrating provisos and explanations into the main text. The Income Tax Act,1961 had a fragmented structure due to decades of amendments, while the Income Tax Act,2025 presents a cleaner, more coherent layout. ### 7\. Since the Income Tax Act,1961 is repealed and a new Income Tax Act comes into force on 01.04.2026, does everything done under the old Act become invalid?

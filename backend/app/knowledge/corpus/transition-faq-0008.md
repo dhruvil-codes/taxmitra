@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0008"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+Section 536(3) of the Income Tax Act, 2025 provides that any reference of a tax year shall be read as a reference to the corresponding 'previous year' under the old Act. This provision is transitional and does not change the tax treatment applicable to those years. Example: If the new Act refers to 'tax year 2024 -25,' it corresponds to the 'previous year 2024 -25' under the old Act, which in turn corresponds to Assessment Year 2025 -26. ### 12\. Is there a need to change the accounting periods of businesses due to the introduction of 'Tax Year' concept? No, since the Tax Year is aligned with the Financial Year, no change in accounting year or financial statements is required for businesses or other taxpayers. ### 13\. Will the existing administrative frameworks such as Permanent Account Number (PAN), Tax Deduction Account Number (TAN), faceless proceedings, etc. continue under the Income Tax Act 2025? Yes, existing Permanent Account Number, Tax Deduction Account Number (TAN) , faceless assessment, faceless appellate framework, etc., shall continue under the Income Tax Act 2025. ### 14\. How does the Income Tax Act, 2025 ensure continuity and smooth transition from theIncome Tax Act, 1961?

@@ -1,0 +1,23 @@
+---
+id: "notification-6-2021-0006"
+source_id: "NOTIFICATION-6-2021"
+section: "143(2), 142(1), 142(2A), 144"
+title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_type: "CBDT notification"
+official_organization: "CBDT, Department of Revenue, Ministry of Finance"
+official_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+source_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: "faceless assessment, further evidence requests, non-compliance escalation"
+form: ""
+assessment_year: "AY 2021-22 onward as applicable"
+tax_year: ""
+effective_from: "2021-02-17"
+effective_to: ""
+status: "HISTORICAL"
+tags: "HISTORICAL, 143(2), 142(1), 142(2A), 144"
+---
+(xix) the National e-Assessment Centre shall, upon receiving suggestions for variation from the review unit, assign the case to an assessment unit, other than the assessment unit which has prepared the draft assessment order, through an automated allocation system; (xx) the assessment unit shall, after considering the variations suggested by the review unit, send the final draft assessment order to the National e-Assessment Centre; (xxi) the National e-Assessment Centre shall, upon receiving final draft assessment order follow the procedure laid down in sub-clause (a) or sub-clause (b) of clause (xvi), as the case may be; (xxii) the assessee may, in a case where show-cause notice has been served upon him as per the procedure laid down in sub-clause (b) of clause (xvi), furnish his response to the National e-Assessment Centre on or before the date and time specified in the notice or within such time as may be extended on the basis of an application in this behalf; (xxiii) theNational e-Assessment Centre shall, - (a) where no response to the show-cause noticeas per clause (xxii) is received,— (A) in a case where the draft assessment order or the final draft assessment order is in respect of an eligible assessee and proposes to make any variation which is prejudicial to the interest of such assessee, forward the draft assessment order or final draft assessment order to such assessee; or (B) in any other case, finalise the assessment as per the draft assessment order or the final draft assessment order and serve a copy of such order and notice for [भाग II—खण् ड 3(ii)] भारत का रािपत्र : असाधारण ### 9

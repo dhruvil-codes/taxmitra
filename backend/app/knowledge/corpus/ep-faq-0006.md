@@ -1,0 +1,23 @@
+---
+id: "ep-faq-0006"
+source_id: "EP-FAQ"
+section: "139(9), 143(1)(a), 154"
+title: "e-Proceedings FAQ"
+document_title: "e-Proceedings FAQ"
+document_type: "official FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings-faq"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings-faq"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "portal workflow, deadlines, attachments, edit/withdraw limits, 139(9), 143(1)(a), 154"
+---
+**12\.Can I authorize another person to respond to my Defective Notice?** Yes, you can authorize another person to respond to the defective notice u/s 139(9). **13\.Can I correct the defect in the ITR Form online?** Yes, you can submit the response by online correcting the defect in the ITR Form. **14\. What is the time limit within which I can respond to a Defective Notice sent by Income Tax Department?** If your return is found defective, you will get 15 days of time from the date of receiving the notice or as the time duration specified in the notice to rectify the defect in the return filed by you. However, you may Seek Adjournment and request for an extension. **15\. What if I don't respond to a Defective Notice?** If you fail to respond to the defective notice within stipulated period then your return may be treated as invalid and therefore consequences such as penalty, interest, non-carry forward of losses, loss of specific exemptions may occur, as the case may be in accordance with the Income Tax Act. **16\. I have been notified about defective returns u/s 139(9). Can I file the return as fresh return for that Assessment Year?** Yes, you can either file the return as a fresh / revised return incase the time provided for filing the return in a particular Assessment Year has not lapsed or alternatively you can also choose to respond to Notice u/s139. However, once the time provided for filing the return for a particular Assessment Year has lapsed, you will not be able file the return as a fresh / revised return and you will have to respond to Notice u/s 139(9). If you are unable to respond to the notice, the return will be treated as invalid or not filed for that Assessment Year.

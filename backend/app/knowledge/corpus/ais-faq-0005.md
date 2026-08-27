@@ -1,0 +1,23 @@
+---
+id: "ais-faq-0005"
+source_id: "AIS-FAQ"
+section: ""
+title: "FAQs on AIS (Annual Information Statement)"
+document_title: "FAQs on AIS (Annual Information Statement)"
+document_type: "official FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/ais-faq"
+source_url: "https://www.incometax.gov.in/iec/foportal/ais-faq"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: "AIS, TIS, Form 26AS"
+assessment_year: "AY 2023-24 onward for 26AS distinction"
+tax_year: ""
+effective_from: "2021-11-01"
+effective_to: ""
+status: "CURRENT"
+tags: "AIS, TIS, 26AS, TDS/TCS, SFT, payment and mismatch evidence"
+---
+For more information, navigate to **AIS** under **e-File/AIS** menu after login. **Q-3 Are all information of a taxpayer available in AIS for filing return of income?** Annual Information Statement (AIS) includes information presently available with Income Tax Department. There may be other transactions relating to the taxpayer which are not presently displayed in Annual Information Statement (AIS). Taxpayer is expected to check all related information and report complete and accurate information in the Income Tax Return. **Q-4 What does General information part contain under AIS?** General information displays the general information pertaining to you, including PAN, Masked Aadhar Number, Name of the Taxpayer, Date of Birth/ Incorporation/ Formation, mobile number, e-mail address and address of Taxpayer. For more information, navigate to **AIS** under **e-File/AIS** menu after login. **Q-5 What does Taxpayer Information Summary (TIS) contain under AIS?** Taxpayer Information Summary (TIS) is an information category wise aggregated information summary for a taxpayer. It shows value processed by system (i.e. value generated after deduplication of information based on pre-defined rules) and value accepted by taxpayer/confirmed by source (i.e. value derived by taxpayer after considering the taxpayer feedback or source confirmation on taxpayer’s feedback and value processed by system) under each information category (e.g. Salary, Interest, Dividend etc.). The information accepted by taxpayer/confirmed by source in TIS will be used for pre-filling of return, if applicable. You will be shown various details within the Taxpayer Information Summary such as, • Information Category • Value processed by system • Value accepted by taxpayer/confirmed by source

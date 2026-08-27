@@ -1,0 +1,23 @@
+---
+id: "notification-6-2021-0007"
+source_id: "NOTIFICATION-6-2021"
+section: "143(2), 142(1), 142(2A), 144"
+title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_type: "CBDT notification"
+official_organization: "CBDT, Department of Revenue, Ministry of Finance"
+official_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+source_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: "faceless assessment, further evidence requests, non-compliance escalation"
+form: ""
+assessment_year: "AY 2021-22 onward as applicable"
+tax_year: ""
+effective_from: "2021-02-17"
+effective_to: ""
+status: "HISTORICAL"
+tags: "HISTORICAL, 143(2), 142(1), 142(2A), 144"
+---
+initiating penalty proceedings, if any, upon the assessee, alongwith the demand notice, specifying the sum payable by, or refund of any amount due to, the assessee on the basis of such assessment; (b) in any other case, send the response furnished by the assessee to the assessment unit; (xxiv) the assessment unit shall, after taking into account the response furnished by the assessee, as referred to in sub-clause (b) of clause (xxiii), make a revised draft assessment order and send it to the National e-Assessment Centre; (xxv) The National e-Assessment Centre shall, upon receiving the revised draft assessment order, - (a) in case the variations proposed in the revised draft assessment order are not prejudicial to the interest of the assessee in comparison to the draft assessment order or the final draft assessment order, and – (A) in case the revised draft assessment order is in respect of an eligible assessee and there is any variation prejudicial to the interest of such assessee proposed in draft assessment order or the final draft assessment order, forward such revised draft assessment order to such assessee; (B) in any other case, finalise the assessment as per the revised draft assessment order and serve a copy of such order and notice for initiating penalty proceedings, if any, upon the assessee, alongwith the demand notice, specifying the sum payable by, or refund of any amount due to, the assessee on the basis of such assessment;

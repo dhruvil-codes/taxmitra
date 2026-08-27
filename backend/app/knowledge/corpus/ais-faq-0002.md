@@ -1,0 +1,23 @@
+---
+id: "ais-faq-0002"
+source_id: "AIS-FAQ"
+section: ""
+title: "FAQs on AIS (Annual Information Statement)"
+document_title: "FAQs on AIS (Annual Information Statement)"
+document_type: "official FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/ais-faq"
+source_url: "https://www.incometax.gov.in/iec/foportal/ais-faq"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: "AIS, TIS, Form 26AS"
+assessment_year: "AY 2023-24 onward for 26AS distinction"
+tax_year: ""
+effective_from: "2021-11-01"
+effective_to: ""
+status: "CURRENT"
+tags: "AIS, TIS, 26AS, TDS/TCS, SFT, payment and mismatch evidence"
+---
+- Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads + Foreign Company - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads * Non-Company + AOP/BOI/Trust/AJP - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads + Firm/LLP - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads + Local Authority - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads * Tax Professionals & Others + Chartered Accountants - Registration - Service Available + e-Return Intermediaries - API Specifications - [ERI List](https://eportal.incometax.gov.in/iec/foservices/#/eriList) + External Agency - Central & State Government Department/Approved Undertaking Agency - RBI Approved Banks + Tax Deductor & Collector - Registration - Service Available * Downloads * Help + Salaried Employees - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Business/Profession - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Senior / Super Senior Citizen - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Non Resident - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Hindu Undivided Family (HUF)

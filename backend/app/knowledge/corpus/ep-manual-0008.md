@@ -1,0 +1,23 @@
+---
+id: "ep-manual-0008"
+source_id: "EP-MANUAL"
+section: "139(9), 143(1)(a), 154, 131, 133(6)"
+title: "e-Proceedings User Manual"
+document_title: "e-Proceedings User Manual"
+document_type: "official user manual web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "viewing notices, written response, attachments, transaction ID, acknowledgement, adjournment, VC, 139(9), 143(1)(a), 154, 131, 133(6)"
+---
+After successful validation, a success message is displayed along with a Transaction ID. Please keep a note of the Transaction ID for future reference. You will also receive a confirmation message on your email ID and mobile number registered on the e-Filing portal. 3.6.2. To withdraw Authorized Representative Step 1: Click Withdraw against the details of the respective authorized representative and the status will change to Cancelled. Note: You will only be able to withdraw an active Authorized Representative. In case the status is changed to Request Accepted, you will be required to provide the reason and the Authorized Representative will be removed. 4. Related Topics Login Dashboard and Worklist Generate EVC Register DSC Link Aadhaar Authorized Representative ITR Status Rectification Status How to e-Verify Follow us on About Us About the Portal History of Direct Taxation Vision, Mission, Values Vision, Mission, Values (Hindi) Who We Are Right to Information Organization & Functions e-Filing Calendar 2026 Tax Payer Charter Tax Payer Charter (Hindi) Contact Us Helpdesk Numbers Grievances View Grievance Help Using the Portal Website Policies Accessibility Statement Site Map Browser Support Related Sites Income Tax India Protean (previously NSDL) TRACES Last reviewed and updated on : 27-Aug-2026 This site is best viewed in 1024 * 768 resolution with latest version of Chrome, Firefox, Safari and Internet Explorer. Copyright @ Income Tax Department, Ministry of Finance, Government of India. All Rights Reserved.

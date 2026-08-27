@@ -1,0 +1,23 @@
+---
+id: "notification-6-2021-0009"
+source_id: "NOTIFICATION-6-2021"
+section: "143(2), 142(1), 142(2A), 144"
+title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_type: "CBDT notification"
+official_organization: "CBDT, Department of Revenue, Ministry of Finance"
+official_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+source_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: "faceless assessment, further evidence requests, non-compliance escalation"
+form: ""
+assessment_year: "AY 2021-22 onward as applicable"
+tax_year: ""
+effective_from: "2021-02-17"
+effective_to: ""
+status: "HISTORICAL"
+tags: "HISTORICAL, 143(2), 142(1), 142(2A), 144"
+---
+(xxix) where the eligible assessee files his objections with the Dispute Resolution Panel, the National e-Assessment Centre shall upon receipt of the directions issued by the Dispute Resolution Panel under sub-section (5) of section 144C of the Act, forward such directions to the concerned assessment unit; (xxx) the assessment unit shall in conformity of the directions issued by the Dispute Resolution panel under sub-section (5) of section 144C of the Act prepare a draft assessment order in accordance with sub-section (13) of section 144C of the Act and send a copy of such order to the National e-Assessment Centre; 10 THE GAZETTE OF INDIA : EXTRAORDINARY [PART II—SEC. 3(ii)] (xxxi) the National e-Assessment Centre shall, upon receipt of draft assessment order referred to in clause (xxx), finalise the assessment within the time allowed under sub-section (13) of section 144C of the Act and serve a copy of such order and notice for initiating penalty proceedings, if any, upon the assessee, alongwith the demand notice, specifying the sum payable by, or refund of any amount due to, the assessee on the basis of such assessment; (xxxii) The National e-Assessment Centre shall, after completion of assessment, transfer all the electronic records of the case to the Assessing Officer having jurisdiction over the said case for such action as may be required under the Act.‖ (3) In the said Scheme,in sub-paragraph (2) of paragraph (11),— (i) in the first line, for the word ―modification‖, the word ―variation‖ shall be substituted; (ii) in the first and third line, for the words ―draft assessment order‖, the words ― or final draft assessment order or revised draft assessment order‖ shall be substituted. **[** Notification No. 6/2021/F. No. 370149/154/2019-TPL] ANKIT JAIN, Under Secy.

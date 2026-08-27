@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0004"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+Frequently Asked Questions ## Objective and scope of the New Act FAQs ### 1\. What is the primary objective of replacing the Income Tax Act, 1961 with the Income Tax Act, 2025? The Income Tax Act, 2025 has been enacted to provide a streamlined, simplified, and modern tax code with reduced compliance burden, consolidated provisions, and clear definitions. Over six decades, the Income Tax Act, 1961 had accumulated numerous amendments, provisos, and explanations making it complex and difficult to navigate. The new Act aims to present the same tax policy in a more logical, accessible, and reader -friendly format.The Act further advances taxpayer centric approach by making compliance simpler, promoting ease of doing business, and aligning the Indian tax system with contemporary global standards. ### 2\. Does the Income Tax Act, 2025 completely replace the Income Tax Act, 1961? Yes. The 1961 Act stands repealed on the 01.04.2026 . However, certain transitional provisions specify continuation of proceedings under the old Act to avoid disruption in pending matters and ensure a smooth transition . ### 3\. Is the Income Tax Act 2025 introducing new taxes or increasing tax burden? No.The Income Tax Act, 2025 does not impose any new tax.The intent behind replacing the old Act with the new Act is to: • Simplify statutory language • Improve structural clarity • Reduce interpretational disputes • Align drafting style with modern legislative standards • Enhance voluntary compliance The reform is aimed at making the tax law more predictable, transparent, and easier to comply with, rather than increasing the financial or compliance burden on taxpayers. ### 4\. As a small taxpayer, how does this change help me?

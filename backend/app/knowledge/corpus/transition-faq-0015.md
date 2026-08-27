@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0015"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+All proceedings connected with such a search continue to be governed by the old Act as if the new Act had not been enacted. For example, if a search on Mr. A is initiated in the month of January 2026, assessments and all other proceedings connected with the search will be under the provisions of the old Act. ### 33\. If an assessee had signed an APA (Advance Pricing Agreement) under the old Act, does it still bind the assessee and the department under the new Act? Yes. The agreement continues to apply as long as it is not inconsistent with the corresponding provisions of the new Act. For instance, an APA signed by Company ABC in FY 2024 -25 on a specific international transaction will still guide the tax treatment under the new Act if the same rules exist in the new Act. ### 34\. If a case is pending in a High Court or the Supreme Court concerning an issue under the old Act, will the final decision affect tax liability even after the new Act has come into force? Yes. The final judgment will apply to that old period as per the old Act, and any tax payable or refundable as a result will be dealt with accordingly . For example, Company XYZ's dispute for AY 2018 -19 decided in FY 2027 -28 will still be implemented using old Act principles. ### 35\. Do General Anti -Avoidance Rules ('GAAR') continue under the ITA 2025? Yes, GAAR provisions are retained as it is. Thresholds, approval mechanisms and procedural safeguards remain unchanged. * * * Last reviewed and updated on : current time This site is best viewed in 1024 \* 768 resolution with latest version of Chrome, Firefox, Safari and Internet Explorer. Copyright @ Income Tax Department, Ministry of Finance, Government of India. All Rights Reserved. [National Emblem Indian Goverment](https://www.india.gov.in/)

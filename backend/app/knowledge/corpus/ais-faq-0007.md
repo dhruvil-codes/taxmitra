@@ -1,0 +1,23 @@
+---
+id: "ais-faq-0007"
+source_id: "AIS-FAQ"
+section: ""
+title: "FAQs on AIS (Annual Information Statement)"
+document_title: "FAQs on AIS (Annual Information Statement)"
+document_type: "official FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/ais-faq"
+source_url: "https://www.incometax.gov.in/iec/foportal/ais-faq"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: "AIS, TIS, Form 26AS"
+assessment_year: "AY 2023-24 onward for 26AS distinction"
+tax_year: ""
+effective_from: "2021-11-01"
+effective_to: ""
+status: "CURRENT"
+tags: "AIS, TIS, 26AS, TDS/TCS, SFT, payment and mismatch evidence"
+---
+Yes, you can track the activity history in AIS by clicking on the Activity History button on AIS homepage. You will be provided a summary view of activity performed on the Compliance portal. System generated ID (Activity ID) will be created for each performed activity, and the Activity date, Activity description and detail will be displayed under this tab. For more information, navigate to **AIS** under **e-File/AIS** menu after login. **Q-9 In what all formats can I download my AIS?** You can download Annual Information Statement (AIS) in PDF, JSON, CSV file formats. **Q-10 How do I submit feedback on the information?** You can submit feedback on active information displayed under **TDS/TCS Information, SFT Information** or **Other information** by following below mentioned steps: **• Step 1:** Click of the information and then Click on **Optional** button mentioned in the Feedback column for relevant information. You will be directed to **Add Feedback** screen. **• Step 2:** Choose the relevant feedback option and enter the feedback details (dependent on feedback option). **• Step 3:** Click **Submit** to submit the feedback For more information, navigate to **AIS** under **e-File/AIS** menu after login. **Q-11 What will happen once I submit the feedback?** Upon successful submission of feedback on AIS information, the feedback will be displayed with the information and the modified value of the information will also be visible with the reported value. The activity history tab will also be updated, and you will be able to download Acknowledgement Receipt. Email and SMS confirmations for submission of feedback will also be sent. For more information, navigate to **AIS** under **e-File/AIS** menu after login.

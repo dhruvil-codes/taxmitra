@@ -1,0 +1,23 @@
+---
+id: "ep-faq-0002"
+source_id: "EP-FAQ"
+section: "139(9), 143(1)(a), 154"
+title: "e-Proceedings FAQ"
+document_title: "e-Proceedings FAQ"
+document_type: "official FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings-faq"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings-faq"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "portal workflow, deadlines, attachments, edit/withdraw limits, 139(9), 143(1)(a), 154"
+---
+- Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads * Company + Domestic Company - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads + Foreign Company - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads * Non-Company + AOP/BOI/Trust/AJP - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads + Firm/LLP - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads + Local Authority - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads * Tax Professionals & Others + Chartered Accountants - Registration - Service Available + e-Return Intermediaries - API Specifications - [ERI List](https://eportal.incometax.gov.in/iec/foservices/#/eriList) + External Agency - Central & State Government Department/Approved Undertaking Agency - RBI Approved Banks + Tax Deductor & Collector - Registration - Service Available * Downloads * Help + Salaried Employees - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Business/Profession - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Senior / Super Senior Citizen - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Non Resident

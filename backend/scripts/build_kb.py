@@ -32,7 +32,9 @@ def main() -> int:
         print(f"Embedding unavailable: {exc}")
         return 1
     payload = [
-        {"id": c.id, "title": c.title, "section": c.section, "vector": vec}
+        {"id": c.id, "source_id": c.source_id, "title": c.title, "section": c.section,
+         "assessment_year": c.assessment_year, "tax_year": c.tax_year,
+         "status": c.status, "verification_status": c.verification_status, "vector": vec}
         for c, vec in zip(chunks, vectors)
     ]
     out_path = os.path.join(settings.kb_dir, "vectors.json")

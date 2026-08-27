@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0009"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+Tax law does not operate strictly within annual boundaries. While some compliances such as TDS, TCS, Advance tax payments, etc., occur within the financial year, others -such as return filing, assessments, reassessments, appeals, penalties, and refunds -often extend well beyond the year , sometimes for many years in select cases. Therefore , when a new tax law comes into force, the old and new laws must coexist for a transitional period. The Income Tax Act, 2025 acknowledges this practical reality and handles the transition through Sec tion 536, the repeal and savings clause. Section 536 of the Income Tax Act, 2025 : • Contains 22 sub clauses addressing various transitional situations . • Ensures the old tax framework continues to apply to earlier years • Aligns terminology between the two Acts, • Allows the law to be modernised without unsettling established positions. ### 15\.There may be some circumstances or situations which may not be directly covered under the specific savings clauses enumerated in Section 536? How does the Act ensure that there are no unintended gaps in handling such cases? Sub-section (2) of section 536 is broadly structured to leave as little uncertainty as possible. However, in order to cover any unforeseen situation which is not directly covered by the situations specified under sub -section (2) of section 536 of the Income Tax Act, 2025, the subsection (4) provid es that Section 6 of the General Clauses Act, 1897 shall apply with regard to the effect of the repeal of 1961 Act. This provision upholds rights and obligations even beyond what is explicitly stated. By applying broad principles that safeguard established rights and obligations, it guarantees that unforeseen circumstances are also covered.

@@ -1,0 +1,23 @@
+---
+id: "ep-faq-0005"
+source_id: "EP-FAQ"
+section: "139(9), 143(1)(a), 154"
+title: "e-Proceedings FAQ"
+document_title: "e-Proceedings FAQ"
+document_type: "official FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings-faq"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings-faq"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "portal workflow, deadlines, attachments, edit/withdraw limits, 139(9), 143(1)(a), 154"
+---
+All notices / intimations / letters issued by the Income Tax Department and CPC are made available under e-Proceedings where you can view and submit the response along with attachments by uploading the same on the e-Filing portal. You can view and submit response to the following notices through this service * Defective Notice u/s 139(9) * Prima Facie Adjustment u/s 143(1)(a) * Suo-moto Rectification u/s 154 * Notices issued by Income Tax Authorities * Seek for Clarification communication **Path** Dashboard/Pending action/E-proceeding **8\.The number/size of attachments is more than the permitted limit under the submit response functionality, what should I do?** The maximum size permitted of a single attachment is 5 MB. In case you have more than 1 document to upload, you can select number of attachmeent upto 10. The maximum size of all attachments should not be more than 50 MB. If the size of the single document exceeds the permitted limit, you can optimize the document by reducing the file size. **9\.What is a Defective Return?** A return may be treated as defective on account of incomplete or inconsistent information in the return or in the schedules or for any other reason. **10\.How do I know if my return is defective?** If your return is found defective, the Income Tax Department will send you a defective notice u/s 139(9) of the Income Tax Act via email on your registered email ID and the same can be viewed by logging in to the e-Filing portal. **11\.Can I update or withdraw my response after submitting the response on the e-Filing portal?** No, you cannot update or withdraw your response once submitted on the e-Filing portal.

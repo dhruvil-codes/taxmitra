@@ -1,0 +1,23 @@
+---
+id: "ep-faq-0007"
+source_id: "EP-FAQ"
+section: "139(9), 143(1)(a), 154"
+title: "e-Proceedings FAQ"
+document_title: "e-Proceedings FAQ"
+document_type: "official FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings-faq"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings-faq"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "portal workflow, deadlines, attachments, edit/withdraw limits, 139(9), 143(1)(a), 154"
+---
+**17\. What are some of the common errors that make a return defective?** Some of the common errors that make a return defective are as follows: * Credit for TDS has been claimed but the corresponding receipts/income has been omitted to be offered for taxation * The gross receipts shown in Form 26AS, on which credit for TDS has been claimed, are higher than the total of the receipts shown under all heads of income, in the return of income. * **Gross Total Income** and all the heads of income is entered as **nil** or 0 but tax liability has been computed and paid. * Name of taxpayer in ITR does not match with the name as per the PAN database. * Taxpayer having income under the head **Profits and Gains of Business or Profession** but has not filled Balance Sheet and Profit and Loss Account. **18\. What is Seek for Clarification communication?** Seek for Clarification communication is sent to the taxpayer, if there are instances where the information provided under a schedule or annexures of the return is insufficient or inadequate and clarification is required on certain claims made by the taxpayer. **20\. Do I need to e-Verify the response / submission made?** No, you are not required to e-Verify the response submitted by you. **21\. Can I respond to a Seek for Clarification Notice without logging on to the e-Filing portal?** **22\. Can somebody else respond on my behalf using the e-Proceedings service to the notices issued to me by the Income Tax Authority ?** Yes, you can add an Authorized Representative to respond to a notice on your behalf using the e-Proceedings service. **23\. Can I remove an already added / existing Authorized Representative?** Yes, you can remove or withdraw the representative authorized by you.

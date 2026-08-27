@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0006"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+No. The repeal of the Income Tax Act,1961 does not disturb anything relating to tax years before April 1, 2026. For example, if Taxpayer's assessment for the assessment year 2023-24 was completed under the old Act, that assessment will continue to be valid even after the new Act comes into force. Similarly, any pending proceedings relating to earlier years will continue as per the relevant transitional provisions. ### 8\. Is there any change regarding the 'basis of charge of Income tax' in the Income Tax Act, 2025? In the new Income Tax Act, 2025, the charging section has been simplified. In the Income Tax Act, 1961, the charge of income -tax is on 'total income' of the 'previous year' of a person. Further, income -tax is charged for any 'assessment year' at the rate or rates provided by any Central Act and in accordance with and subject to the provisions of theIncome Tax Act, 1961. On the other hand, in the Income tax Act, 2025, in place of the term 'previous year', the term 'tax year' has been used. Further, the use of term 'assessment year' has been discontinued. Now, the charge of income -tax is on 'total income' of the 'tax year' of a person at the rate or rates provided for such tax year by any Central Act and in accordance with and subject to the provisions of the Income Tax Act, 2025. ### 9\. What is the concept of "Tax Year" and how will the income be assessed in view of removal of "Assessment Year" ('AY') concept?

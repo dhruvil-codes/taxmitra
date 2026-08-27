@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0014"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+### 28\. Do old circulars, instructions and notifications issued by the Income tax department continue even after the new Act comes into force? Yes. As per the provisions of section 536(2)(j) of the Income Tax Act, 2025, circulars, notifications, instructions, approvals, etc, issued under the old Act will continue, provided they are not inconsistent with the provisions of the new Act. ### 29\. If an assessing officer wants to rectify an assessment order passed before 1st April 2026, can this still be done under the old Act after the new Act has come into force? Yes. Rectification proceedings under section 154 of the Income Tax Act 1961 relating to assessment years governed by that Act may be initiated and concluded in accordance with the said provisions, notwithstanding the repeal of the Income Tax Act 1961. For example, if a mistake apparent from record in the assessment order for AY 2023 -24 is found in FY 2027 -28, the officer can rectify it as per the provisions of the old Act. ### 30\. If an assessee had chosen a particular method of accounting or depreciation under the old Act, does this choice automatically continue under the new Act? Yes, if the new Act has a corresponding provision and there is no inconsistency, the earlier choice is treated as if it is made under the new Act. ### 31\. What happens to applications (such as rectification or revision requests) that were already filed before 1 st April 2026? If your application relates to a tax year starting before 1st April 2026, it will continue to be processed under the Income Tax Act, 1961. You do not need to file it again. ### 32\. If a search was initiated on a person under section 132 of the old Act before the new law came into effect, which law applies to the connected proceedings?

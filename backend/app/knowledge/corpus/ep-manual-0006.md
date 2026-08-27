@@ -1,0 +1,23 @@
+---
+id: "ep-manual-0006"
+source_id: "EP-MANUAL"
+section: "139(9), 143(1)(a), 154, 131, 133(6)"
+title: "e-Proceedings User Manual"
+document_title: "e-Proceedings User Manual"
+document_type: "official user manual web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "viewing notices, written response, attachments, transaction ID, acknowledgement, adjournment, VC, 139(9), 143(1)(a), 154, 131, 133(6)"
+---
+Step 1: If you wish to seek or view adjournment, click Seek/View Adjournment. Step 2: Select Adjourned date sought up to, Reason for seeking Adjournment, enter remark/reason, attach file (if any) and click Submit. On successful submission, a Transaction ID will be displayed. Please keep a note of the Transaction ID for future reference. You will also receive a confirmation message on the email ID registered on the e-Filing portal. To Seek Video Conferencing Step 1: If you want to request for video conferencing, click Seek Video Conferencing. Note: This will be available only if Assessing Officer has flagged the notice for raising a video conferencing request. Step 2: Select the Reason for Seeking Video Conferencing, enter Reason/Remarks, Attach File (if any) and click Submit. On successful submission, a Transaction ID will be displayed. Please keep a note of the Transaction ID for future reference. You will receive a confirmation message on the email ID registered on the e-Filing portal. 3.5. To view and submit response to Seek for Clarification Communication Step 1: Click View Notice corresponding to Seek for Clarification and you can: View and Download Notice Follow Step 2 and Step 3 Submit Response Follow Step 4 to Step 6 Step 2: Click Notice/Letter pdf. Step 3: You will be able to view the notice issued to you. If you wish to download the notice, click Download. To Submit Response Step 4: Click Submit Response. Step 5: On the Submit Response page, Select Agree or Disagree and click Continue. If you are disagreed, you have to provide the remarks. Step 6: Select the Declaration checkbox and click submit

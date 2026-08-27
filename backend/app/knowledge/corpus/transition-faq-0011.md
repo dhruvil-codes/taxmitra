@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0011"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+### 19\. Do old circulars, instructions and notifications issued by the tax department continue even after the new Act comes into force? Yes. As per the provisions of section 536(2)(j) of the Income Tax Act, 2025, circulars, notifications, instructions, approvals, etc, issued under the old Act will remain valid as long as they do not conflict with the new Act . Example: TDS provisions (Section 194C of old Act ? Section 393 of new Act) A circular clarifying the term "work" under section 194C of the old Act will continue to apply to section 393 of the ITA 2025, where the intent remain s unchanged. ### 20\. Are schemes designed to reduce direct contact between taxpayers and tax officers (such as faceless assessment/faceless appeals schemes) under the old Act still valid under the new Act? Yes. Such schemes are treated as made under the corresponding provisions of the new Act, or in case, there is no corresponding section in the new Act, such schemes are treated to have been made under section 532 of the new Act which authorizes the Central government to make schemes. In other words, the existing faceless assessment scheme will continue without interruption under the new Act. ### 21\. For how long will the old and new Acts run in parallel? What does this mean for taxpayers practically?

@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0012"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+Effective 1 April 2026, the 1961 Act will be repealed. However, its provisions will continue to govern all tax years beginning before 1st April, 2026. Accordingly: (i) The Income -tax Department's e -filing portal will facilitate compliance under both the old and the new Acts concurrently. (ii) Taxpayers filing returns for AY 2026 -27 (pertaining to the period governed by the old Act) in July 2026 will do so using the forms prescribed under the old Act. At the same time, advance tax payments for Tax Year 2026 -27, commencing from June 2026, will be made in accordance with the new Act. (iii) All assessments, appeals, and other proceedings relating to earlier years will continue to be conducted under the old Act until their final resolution. ### 22\. The Section 115BAC of the Income Tax Act, 1961 provides the new tax regime for Individuals and HUFs. Does the said new tax regime continue in the Income Tax Act, 2025? Yes. In the Income Tax Act, 2025 the new tax regime is provided under section 202 and is available for Individuals, HUF, Association of Persons (other than a cooperative society) , Body of Individuals , whether incorporated or not and Artificial Juridical Person referred to in section 2(77)(g) . In the new Act also, the new regime is the default tax regime and the option for opting out of the new tax regime has been made available to the taxpayers. ### 23\. I have opted for new tax regime under the Income Tax Act, 1961. Do I have to opt for it again in the new Income Tax Act, 2025? No. An option exercised under a provision of the old Act as was in force immediately before the commencement of new Act, is treated as if it was made under the equivalent provision of the new Act.

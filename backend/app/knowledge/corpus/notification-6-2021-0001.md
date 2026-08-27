@@ -1,0 +1,23 @@
+---
+id: "notification-6-2021-0001"
+source_id: "NOTIFICATION-6-2021"
+section: "143(2), 142(1), 142(2A), 144"
+title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_type: "CBDT notification"
+official_organization: "CBDT, Department of Revenue, Ministry of Finance"
+official_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+source_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: "faceless assessment, further evidence requests, non-compliance escalation"
+form: ""
+assessment_year: "AY 2021-22 onward as applicable"
+tax_year: ""
+effective_from: "2021-02-17"
+effective_to: ""
+status: "HISTORICAL"
+tags: "HISTORICAL, 143(2), 142(1), 142(2A), 144"
+---
+**MINISTRY OF FINANCE** **(Department of Revenue)** (CENTRAL BOARD OF DIRECT TAXES) **NOTIFICATION** New Delhi, the 17th February, 2021 **S.O. 741(E).** —In exercise of the powers conferred by sub-section (3A) of section 143 of the Income-tax Act, 1961 (43 of 1961), the Central Government hereby makes the following further amendments in the Faceless Assessment Scheme, 2019, namely: — 1\. **Short title and commencement** .––(1) The Scheme may be called the Faceless Assessment (1 st Amendment) Scheme, 2021. (2) It shall come into force on the date of its publication in the Official Gazette. 2\. In the Faceless Assessment Scheme, 2019 (hereinafter referred to as the said Scheme), in sub- paragraph (1) of paragraph 2, — (i) in clause (x) for the words ―e-mail account‖, the words ―registered e-mail account‖ shall be substituted; (ii) afterclause (xii), the following clause shall be inserted, namely:— ‗(xiia) ―Dispute Resolution Panel‖ shall have the same meaning as assigned to in clause (a) of sub-section (15) of section 144C of the Act;‘ (iii) after clause (xv), the following clause shall be inserted, namely: — ‗(xva) ―eligible assessee‖ shall have the same meaning as assigned to in clause (b) of sub- section (15) of section 144C of the Act;‘ (iv) in clause (xxiv), for the words ―video telephony‖, the words ―video conferencing or video telephony‖ shall be substituted. (2) In the said Scheme,forsub-paragraph (1) of paragraph 5, the following sub-paragraph shall be substituted, namely,— ―(1) The assessment under this Scheme shall be made as per the following procedure, namely:— (i) theNational e-Assessment Centre shall serve a notice on the assessee under sub-section (2) of section 143 of the Act;

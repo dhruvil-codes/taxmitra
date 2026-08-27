@@ -1,0 +1,23 @@
+---
+id: "ep-manual-0004"
+source_id: "EP-MANUAL"
+section: "139(9), 143(1)(a), 154, 131, 133(6)"
+title: "e-Proceedings User Manual"
+document_title: "e-Proceedings User Manual"
+document_type: "official user manual web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "viewing notices, written response, attachments, transaction ID, acknowledgement, adjournment, VC, 139(9), 143(1)(a), 154, 131, 133(6)"
+---
+3.3. To view and submit response to Suo-moto Rectification u/s 154(a) Step 1: Click View Notice corresponding to Adjustment u/s 143(1)(a) and you can: View and Download Notice Follow Step 2 and Step 3 Submit Response Follow Step 4 to Step 7 Step 2: Click Notice/Letter pdf. Step 3: You will be able to view the notice issued to you. If you wish to download the notice, click Download. To Submit Response Step 4: Click Submit Response. Step 5: Details of the mistakes proposed to be rectified will be displayed. Select the response for each mistake proposed to be rectified. You can either select Agree and proceed with rectification or Disagree and object to the rectification. Step 5a: If you agree with the proposed rectification, select Agree and proceed with rectification and click Continue. Step 5b: If you disagree with the proposed rectification, select Disagree and object to the rectification, select the reason from the dropdown and click Continue. Step 6: Select the Declaration checkbox. On successful Submission, a success message is displayed along with a Transaction ID. Please keep a note of the Transaction ID for future reference. You will also receive a confirmation message on your email ID registered on the E-Filing portal. Step 7: If you wish to view the response submitted, click View Response on the Successful Submission page. You will be able to view the details of notices, response / remarks provided. 3.4. To view/submit response or seek adjournment of response due date to notice issued by Assessing Officer or any other Income Tax Authority (including respond as part of compliance related to other PAN/TAN) Step 1: Click View Notice corresponding to the notice issued by Income Tax Official and you can:

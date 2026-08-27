@@ -1,0 +1,23 @@
+---
+id: "ep-manual-0003"
+source_id: "EP-MANUAL"
+section: "139(9), 143(1)(a), 154, 131, 133(6)"
+title: "e-Proceedings User Manual"
+document_title: "e-Proceedings User Manual"
+document_type: "official user manual web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "viewing notices, written response, attachments, transaction ID, acknowledgement, adjournment, VC, 139(9), 143(1)(a), 154, 131, 133(6)"
+---
+Step 7: If you wish to view the response submitted, click View Response on the Successful Submission page. You will be able to view the details of notices, response / remarks provided. 3.2. To view and submit response to Prima Facie Adjustment u/s 143(1)(a) Step 1: Click View Notice corresponding to Adjustment u/s 245 and you can: View and Download Notice Follow Step 2 and Step 3 Submit Response Follow Step 4 to Step 11 Step 2: Click Notice/Letter pdf. Step 3: You will be able to view the notice issued to you. If you wish to download the notice, click Download. To Submit Response Step 4: Click Submit Response. Step 5: : You will be able to view the details of the Prima Facie Adjustments found by CPC in your filed ITR. Click on each variance to provide responses. Step 6: On clicking the variance, details of the variance will be displayed. To provide response for the particular variance, click Provide Response. Step 7: Select the Agree or Disagree for the Proposed adjustment and click Save after responding to each Prima Facie Adjustment. Step 8:Once all the responses have been provided, click Back. Step 9:On clicking Back, you will be taken back to the details of Prima Facie Adjustment found by CPC in your filed ITR. After responding to each variance, Select the Declaration checkbox and click submit Step 10: On successful submission, a success message is displayed along with a Transaction ID. Please keep a note of the Transaction ID for future reference. You will also receive a confirmation message on your email ID registered on the E-Filing portal. Step 11: If you wish to view the response submitted, click View Response on the Successful Submission page. You will be able to view the details of notices, response / remarks provided.

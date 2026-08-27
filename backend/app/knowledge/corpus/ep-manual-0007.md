@@ -1,0 +1,23 @@
+---
+id: "ep-manual-0007"
+source_id: "EP-MANUAL"
+section: "139(9), 143(1)(a), 154, 131, 133(6)"
+title: "e-Proceedings User Manual"
+document_title: "e-Proceedings User Manual"
+document_type: "official user manual web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "viewing notices, written response, attachments, transaction ID, acknowledgement, adjournment, VC, 139(9), 143(1)(a), 154, 131, 133(6)"
+---
+On successful submission, a success message along with a Transaction ID will be displayed. Please keep a note of the Transaction ID for future reference. You will also receive a confirmation message on your email ID registered on the e-Filing portal. Step 7: In case you want to view the response submitted by you, click View Response on Successful Submission page and your response will be displayed.. 3.6. To Add / Withdraw Authorized Representative to respond to a notice (You can add an Authorized Representative for responding to various kinds of e-Proceedings on your behalf) Step 1: Log in to the e-Filing portal using your valid user ID and password. Step 2: On your Dashboard, click Pending Actions > e-Proceedings. Step 3: Select the notice / intimation / letter and click Add / View Authorized Representative. View and Download Notice Refer to Section 3.6.1 Submit Response Refer to Section 3.6.2 3.6.1 To add an Authorized Representative to respond to a notice: Step 1: If there are no Authorized Representatives added previously, click Add Authorized Representative. Note: In case you already have an Authorized Representative added of your choice, select Make Active and click Confirm. Step 3: A 6-digit OTP is sent on your primary mobile number and email ID registered on the e-Filing portal. Enter the 6-digit mobile or email OTP and click Submit. Note: OTPs will be valid for 15 minutes only. You have 3 attempts to enter the correct OTP. The OTP expiry countdown timer on screen tells you when the OTP will expire. On clicking Resend OTP, a new OTP will be generated and sent.

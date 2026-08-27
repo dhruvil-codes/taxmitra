@@ -1,0 +1,23 @@
+---
+id: "ep-faq-0008"
+source_id: "EP-FAQ"
+section: "139(9), 143(1)(a), 154"
+title: "e-Proceedings FAQ"
+document_title: "e-Proceedings FAQ"
+document_type: "official FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings-faq"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings-faq"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "portal workflow, deadlines, attachments, edit/withdraw limits, 139(9), 143(1)(a), 154"
+---
+**24\. Can I add two Authorized Representatives to respond to the notice issued to me?** No, you can only have one Authorized Representative active at a time for a proceeding. **25\. I have filed a revised return. Do I still need to respond to the Seek for Clarification communication issued to me?** No, it will not be allowed to submit a response in case you have already filed a revised return for the same assessment year. A message stating 'Revised Return has been filed against this notice; no further action is required' will be displayed. **26\. Is it mandatory for me to respond to the Seek for Clarification communication issued to me? If yes, then what is the time limit within which I should submit my response?** You should submit / provide your response as per the due date mentioned in the communication issued to you. In case the due date has passed and no response has been provided, CPC will process the return with the information available with them. * * * Last reviewed and updated on : current time This site is best viewed in 1024 \* 768 resolution with latest version of Chrome, Firefox, Safari and Internet Explorer. Copyright @ Income Tax Department, Ministry of Finance, Government of India. All Rights Reserved. [National Emblem Indian Goverment](https://www.india.gov.in/)

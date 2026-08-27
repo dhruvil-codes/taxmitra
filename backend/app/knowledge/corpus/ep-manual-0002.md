@@ -1,0 +1,23 @@
+---
+id: "ep-manual-0002"
+source_id: "EP-MANUAL"
+section: "139(9), 143(1)(a), 154, 131, 133(6)"
+title: "e-Proceedings User Manual"
+document_title: "e-Proceedings User Manual"
+document_type: "official user manual web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "viewing notices, written response, attachments, transaction ID, acknowledgement, adjournment, VC, 139(9), 143(1)(a), 154, 131, 133(6)"
+---
+If you log in as an Authorized Representative, click As Authorized Representative, and you will be able to view details of the notice. If you required to respond to a notice that has been issued as part of compliance under notice section 133(6) or 131 to self -PAN/TAN, click Of Other PAN/TAN. Defective Notice u/s 139(9) Refer to Section 3.1 Prima Facie Adjustment u/s 143(1)(a) Refer to Section 3.2 Suo-moto Rectification u/s 154 Refer to Section 3.3 Notices issued by Assessing Officer or any other Income Tax Authority Refer to Section 3.4 Seek for Clarification Communication Refer to Section 3.5 To add/withdraw Authorized Representative Refer to Section 3.6 3.1. To view and submit response to Defective Notice u/s 139(9): Step 1: Click View Notice corresponding to the Defective Notice u/s 139(9) and you can: View and Download Notice Follow Step 2 and Step 3 Submit Response Follow Step 4 to Step 7 To View and Download Notice Step 2: Click Notice/Letter pdf. Step 3: You will be able to view the notice issued to you. If you wish to download the notice, click Download. To Submit Response Step 4: Click Submit Response. Step 5: You can either select Agree or Disagree. Step 5a: If you select Agree, then select Mode of Response (offline) , Select ITR Type and upload the correct JSON file as applicable and click Submit. Step 5b: If you select Disagree, write the reason of disagree with the defect and click Submit. Step 6: Select the Declaration checkbox. After successful submission, a success message is displayed along with a Transaction ID. Please keep a note of the Transaction ID for future reference. You will also receive a confirmation message on your email ID registered on the e-Filing portal.

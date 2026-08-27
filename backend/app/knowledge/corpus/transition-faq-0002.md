@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0002"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+- Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads + Foreign Company - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads * Non-Company + AOP/BOI/Trust/AJP - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads + Firm/LLP - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads + Local Authority - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Downloads * Tax Professionals & Others + Chartered Accountants - Registration - Service Available + e-Return Intermediaries - API Specifications - [ERI List](https://eportal.incometax.gov.in/iec/foservices/#/eriList) + External Agency - Central & State Government Department/Approved Undertaking Agency - RBI Approved Banks + Tax Deductor & Collector - Registration - Service Available * Downloads * Help + Salaried Employees - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Business/Profession - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Senior / Super Senior Citizen - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Non Resident - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Hindu Undivided Family (HUF)

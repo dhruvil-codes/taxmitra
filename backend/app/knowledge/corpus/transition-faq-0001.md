@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0001"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+app # EFiling Logo EFiling Logo Call Us down-arrow **e-filing and Centralized Processing Center** e-Filing of Income Tax Return or Forms and other value added services & Intimation, Rectification, Refund and other Income Tax Processing Related Queries 1800 103 0025 (or) 1800 419 0025 \+91-80-46122000 \+91-80-61464700 08:00 hrs - 20:00 hrs (Monday to Friday) **Tax Information Network - NSDL** Queries related to PAN & TAN application for Issuance / Update through NSDL \+91-20-27218080 07:00 hrs - 23:00 hrs (All Days) **AIS and Reporting Portal** Queries related to AIS, TIS, SFT Preliminary response, Response to e-campaigns or e-Verification 1800 103 4215 09:30 hrs - 18:00 hrs (Monday to Friday) [View All](http://www.incometax.gov.in/iec/foportal/contact-us) Select your language English हिंदी * * * * contrast * * ‌ * Home * Individual/HUF + Salaried Employees - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Business/Profession - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Senior / Super Senior Citizen - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Non Resident - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads + Hindu Undivided Family (HUF) - Guidance to file Tax Return - Return / Forms applicable to me - Tax slabs - Deductions on which I can get tax benefit - Assisted filing - Downloads * Company + Domestic Company

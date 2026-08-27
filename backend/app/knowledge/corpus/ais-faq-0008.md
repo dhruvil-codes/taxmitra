@@ -1,0 +1,23 @@
+---
+id: "ais-faq-0008"
+source_id: "AIS-FAQ"
+section: ""
+title: "FAQs on AIS (Annual Information Statement)"
+document_title: "FAQs on AIS (Annual Information Statement)"
+document_type: "official FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/ais-faq"
+source_url: "https://www.incometax.gov.in/iec/foportal/ais-faq"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: "AIS, TIS, Form 26AS"
+assessment_year: "AY 2023-24 onward for 26AS distinction"
+tax_year: ""
+effective_from: "2021-11-01"
+effective_to: ""
+status: "CURRENT"
+tags: "AIS, TIS, 26AS, TDS/TCS, SFT, payment and mismatch evidence"
+---
+**Q-12 Would I get any confirmation on submission of AIS feedback?** Yes, after successful submission of your feedback on AIS information, the activity history tab will be updated, and you will be able to download Acknowledgement Receipt of the same. Email and SMS confirmations for submission of feedback will also be sent. **Q-13 What is AIS Consolidated Feedback file?** AIS Consolidated Feedback file (ACF) gives the taxpayers a facility to view all their AIS feedback (other than feedback, ‘Information is correct’) related information in one pdf for easy understanding. After submitting the feedback of the AIS, you can download the AIS consolidated feedback file (PDF). For more information, navigate to **AIS** under **e-File/AIS** menu after login. **Q-14 Is there any limit on the number of times I can modify given feedback?** Currently, there is no limit on the number of times you can modify previously given feedbacks. **Q-15 Can I verify the GST turnover in AIS?** Yes, AIS does display the information related to GST turnover under information code (EXC-GSTR3B). The same would be visible in the **Other Information** tab in AIS. **Q-16 Is there any video tutorial available for AIS?** Yes, there is an informational video available on YouTube for AIS. This video can be accessed here. <https://www.youtube.com/watch?v=zbGa6uvisBE> * * * Last reviewed and updated on: current time This site is best viewed in 1024 \* 768 resolution with latest version of Chrome, Firefox, Safari and Microsoft Edge. Copyright @ Income Tax Department, Ministry of Finance, Government of India. All Rights Reserved. [National Emblem Indian Goverment](https://www.india.gov.in/)

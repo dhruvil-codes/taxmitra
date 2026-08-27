@@ -20,6 +20,7 @@ from app.knowledge.corpus_loader import Chunk, load_corpus
 from app.knowledge.retriever import RetrievalResult
 
 _SECTION_RE = re.compile(r"\d+\([0-9a-zA-Z]+\)(?:\([0-9a-zA-Z]+\))*")
+_SECTION_REF_RE = re.compile(r"\b(?:section|u/s)\s*(\d+(?:\([0-9a-zA-Z]+\))*)", re.I)
 _TOKEN_RE = re.compile(r"\w{2,}")
 
 # English + Hindi function words. Section tokens are never listed here.
@@ -60,6 +61,8 @@ class LexicalRetriever:
         query: str,
         top_k: int | None = None,
         confidence_floor: float | None = None,
+        assessment_year: str | None = None,
+        tax_year: str | None = None,
     ) -> RetrievalResult:
         k = top_k or self._default_k
         floor = confidence_floor if confidence_floor is not None else self._default_floor
@@ -71,13 +74,41 @@ class LexicalRetriever:
         scored: list[tuple[float, int]] = []
         for i, bag in enumerate(self._tokens):
             matched = sum(self._idf[t] for t in query_tokens if t in bag)
-            scored.append((matched / total_weight, i))
+            score = matched / total_weight
+            if matched <= 0:
+                scored.append((0.0, i))
+                continue
+            chunk = self._chunks[i]
+            # Legal references and verified/current official sources outrank
+            # merely similar prose.
+            section_tokens = {t for t in query_tokens if _SECTION_RE.fullmatch(t)}
+            section_tokens.update(m.group(1).lower() for m in _SECTION_REF_RE.finditer(query))
+            chunk_section = chunk.section.lower()
+            if any((t in chunk_section and len(_SECTION_RE.findall(chunk_section)) == 1) if "(" in t else re.search(rf"(?<![\d(]){re.escape(t)}(?!\s*\()", chunk_section) for t in section_tokens):
+                score += 0.80
+            elif any(_SECTION_RE.fullmatch(t) and t in bag for t in section_tokens):
+                score += 0.35
+            if chunk.verification_status == "VERIFIED_OFFICIAL" or chunk.verification == "verified":
+                score += 0.08
+            if chunk.status in {"SUPERSEDED", "HISTORICAL"}:
+                score -= 0.12
+            if assessment_year:
+                if assessment_year in chunk.assessment_year:
+                    score += 0.16
+                elif chunk.assessment_year and "earlier" not in chunk.assessment_year.lower():
+                    score -= 0.20
+            if tax_year:
+                if tax_year in chunk.tax_year:
+                    score += 0.16
+                elif chunk.tax_year and "onward" not in chunk.tax_year.lower():
+                    score -= 0.20
+            scored.append((score, i))
         scored.sort(key=lambda pair: (-pair[0], pair[1]))
 
         top = scored[:k]
         picked = tuple(self._chunks[i] for _, i in top if _ > 0)
         picked_scores = tuple(score for score, _ in top if score > 0)
-        confidence = picked_scores[0] if picked_scores else 0.0
+        confidence = min(1.0, picked_scores[0]) if picked_scores else 0.0
         return RetrievalResult(
             chunks=picked,
             scores=picked_scores,

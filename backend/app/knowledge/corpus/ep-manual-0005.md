@@ -1,0 +1,23 @@
+---
+id: "ep-manual-0005"
+source_id: "EP-MANUAL"
+section: "139(9), 143(1)(a), 154, 131, 133(6)"
+title: "e-Proceedings User Manual"
+document_title: "e-Proceedings User Manual"
+document_type: "official user manual web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "viewing notices, written response, attachments, transaction ID, acknowledgement, adjournment, VC, 139(9), 143(1)(a), 154, 131, 133(6)"
+---
+View and Download Notice Follow Step 2 and Step 3 Submit Response Follow Step 4 to Step 10 Respond as part of compliance - Of other PAN / TAN Follow Step 4 to Step 10 Step 2: Click Notice/Letter pdf. Step 3: You will be able to view the notice issued to you. If you wish to download the notice, click Download. To Submit Response Step 4: Click Submit Response. Step 5: Read the instructions for attaching documents and click Continue. Note: If you are responding to a notice which requires you to submit the ITR, a message will be displayed for filing the ITR. Click Proceed and select the ITR type from the dropdown and click Continue. Step 6: You can select Partial Response (if you wish to submit response in more than one submission, or if the number of categories exceed 10) or Full Response (if you wish to submit response in single submission, or if the number of categories is less than 10). Step 7: Enter Add Written Response/Remarks (up to 4000 characters), select the categories for attaching the documents and click Add Document to upload the required attachment. Click Continue. Note: You will be required to attach the required document for each category selected. The maximum size of a single attachment should be 5 MB. On successful Submission, a success message is displayed along with a Transaction ID and Acknowledgment Number. Please keep a note of the Transaction ID and Acknowledgment Number will be displayed, and you will receive a confirmation message on the email ID registered on the e-Filing portal. Step 9: If you wish to view the response submitted, click View Response on the Successful Submission page. You will be able to view the details of notices, response / remarks provided. To View / Seek Adjournment

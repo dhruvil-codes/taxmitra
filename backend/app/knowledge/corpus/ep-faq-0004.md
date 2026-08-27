@@ -1,0 +1,23 @@
+---
+id: "ep-faq-0004"
+source_id: "EP-FAQ"
+section: "139(9), 143(1)(a), 154"
+title: "e-Proceedings FAQ"
+document_title: "e-Proceedings FAQ"
+document_type: "official FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings-faq"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings-faq"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable"
+tax_year: "Tax Year 2026-27 onward where portal supports proceeding"
+effective_from: ""
+effective_to: ""
+status: "CURRENT"
+tags: "portal workflow, deadlines, attachments, edit/withdraw limits, 139(9), 143(1)(a), 154"
+---
+**1\.What is e-Proceedings?** e-Proceedings is an electronic platform for conducting proceedings in an end to end manner using the e-Filing portal. Using this service, any registered user (or his Authorized Representative) can view and submit response to any notice / intimation / letter issued by the Income Tax Department. **2\.What are the benefits of e-Proceedings?** e-Proceedings is a simple way to respond electronically to all notices / intimation / letters issued by Income Tax Department. It reduces the compliance burden of the taxpayer as there is no need to visit the Income Tax Office. Further, it is easy to keep track of the submissions and record keeping for future reference. **3\. Can I view my response once I have submitted my response to the notice issued to me?** Yes, you can view the response submitted by you or by your Authorized Representative. **4\. Where can I see if any query has been raised against my response given on Adjustment u/s 143(1)(a) issued to me?** You can view the queries raised by the Income Tax Department under e-Proceedings. **5\. Why my submit response button is inactive?** Submit response button can be inactive due to below reasons For CPC notices - If the response due date has been lapsed. For ITBA notices - If the proceedings status has been closed/blocked by Income Tax Authority. **6\. Can I edit my response after responding to a notice on the e-Filing portal?** No, you cannot edit your response once submitted on the e-Filing portal. **7\. What are the notices can I respond to under e-Proceedings?**

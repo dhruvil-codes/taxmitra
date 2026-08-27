@@ -1,7 +1,8 @@
 """Corpus loader: parses markdown chunks with simple frontmatter.
 
-Frontmatter keys: id, section, title, source_name, official_url,
-accessed_date, verification, tags (comma-separated).
+Frontmatter keys include source_id, document_title, document_type,
+official_organization, source_url, section, rule, form, assessment_year,
+tax_year, effective_from, effective_to, status, verification_status, and tags.
 """
 
 from __future__ import annotations
@@ -10,7 +11,7 @@ import os
 from dataclasses import dataclass, field
 from functools import lru_cache
 
-_TEXT_KEYS = {"section", "title", "source_name", "official_url", "accessed_date", "verification"}
+_TEXT_KEYS = {"section", "title", "source_name", "official_url", "accessed_date", "verification", "source_id", "document_title", "document_type", "official_organization", "source_url", "rule", "form", "assessment_year", "tax_year", "effective_from", "effective_to", "status", "verification_status"}
 
 
 @dataclass(frozen=True)
@@ -24,6 +25,19 @@ class Chunk:
     accessed_date: str = ""
     verification: str = "pending"
     tags: tuple[str, ...] = field(default_factory=tuple)
+    source_id: str = ""
+    document_title: str = ""
+    document_type: str = ""
+    official_organization: str = ""
+    source_url: str = ""
+    rule: str = ""
+    form: str = ""
+    assessment_year: str = ""
+    tax_year: str = ""
+    effective_from: str = ""
+    effective_to: str = ""
+    status: str = "CURRENT"
+    verification_status: str = "NEEDS_REVIEW"
 
 
 def _parse_frontmatter_line(line: str) -> tuple[str, str] | None:
@@ -66,6 +80,16 @@ def parse_chunk(raw: str) -> Chunk:
         accessed_date=meta.get("accessed_date", ""),
         verification=meta.get("verification", "pending"),
         tags=tags,
+        source_id=meta.get("source_id", meta.get("id", "")),
+        document_title=meta.get("document_title", meta.get("title", "")),
+        document_type=meta.get("document_type", ""),
+        official_organization=meta.get("official_organization", ""),
+        source_url=meta.get("source_url", meta.get("official_url", "")),
+        rule=meta.get("rule", ""), form=meta.get("form", ""),
+        assessment_year=meta.get("assessment_year", ""), tax_year=meta.get("tax_year", ""),
+        effective_from=meta.get("effective_from", ""), effective_to=meta.get("effective_to", ""),
+        status=meta.get("status", "CURRENT"),
+        verification_status=meta.get("verification_status", meta.get("verification", "NEEDS_REVIEW")),
     )
 
 
@@ -104,6 +128,19 @@ def citations_for(chunk_ids: tuple[str, ...], corpus_dir: str) -> list[dict]:
                 "official_url": chunk.official_url,
                 "accessed_date": chunk.accessed_date,
                 "verification": chunk.verification,
+                "source_id": chunk.source_id,
+                "document_title": chunk.document_title or chunk.title,
+                "document_type": chunk.document_type,
+                "official_organization": chunk.official_organization,
+                "source_url": chunk.source_url or chunk.official_url,
+                "rule": chunk.rule,
+                "form": chunk.form,
+                "assessment_year": chunk.assessment_year,
+                "tax_year": chunk.tax_year,
+                "effective_from": chunk.effective_from,
+                "effective_to": chunk.effective_to,
+                "status": chunk.status,
+                "verification_status": chunk.verification_status,
                 "excerpt": chunk.text[:600],
             }
         )

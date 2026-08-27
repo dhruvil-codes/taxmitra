@@ -1,0 +1,23 @@
+---
+id: "notification-6-2021-0008"
+source_id: "NOTIFICATION-6-2021"
+section: "143(2), 142(1), 142(2A), 144"
+title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_title: "Notification No. 6/2021 — Faceless Assessment (1st Amendment) Scheme, 2021"
+document_type: "CBDT notification"
+official_organization: "CBDT, Department of Revenue, Ministry of Finance"
+official_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+source_url: "https://www.incometaxindia.gov.in/documents/d/guest/notification_6_2021-pdf"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: "faceless assessment, further evidence requests, non-compliance escalation"
+form: ""
+assessment_year: "AY 2021-22 onward as applicable"
+tax_year: ""
+effective_from: "2021-02-17"
+effective_to: ""
+status: "HISTORICAL"
+tags: "HISTORICAL, 143(2), 142(1), 142(2A), 144"
+---
+(b) in case the variations proposed in the revised draft assessment order are prejudicial to the interest of the assessee in comparison to the draft assessment order or the final draft assessment order, provide an opportunity to the assessee, by serving a notice calling upon him to show-cause as to why the proposed variation should not be made; (xxvi) The procedure laid down in clauses (xxiii), (xxiv) and (xxv) shall apply _mutatis mutandis_ to the notice referred to in sub-clause (b) of clause (xxv); (xxvii) where the draft assessment order or final draft assessment order or revised draft assessment order is forwarded to the eligible assessee as per item A of sub-clause (a) of clause (xxiii) or item A of sub-clause (a) of clause (xxv), such assessee shall, within the period specified in sub-section (2) of section 144C of the Act, file his acceptance of the variations to the National e-Assessment Centre; (xxviii) theNational e-Assessment Centre shall, - (a) uponreceipt of acceptance as per clause (xxvii); or (b) if no objections are received from the eligible assessee within the period specified in sub-section (2) of section 144C of the Act, finalise the assessment within the time allowed under sub-section (4) of section 144C of the Act and serve a copy of such order and notice for initiating penalty proceedings, if any, to the assessee, alongwith the demand notice, specifying the sum payable by, or refund of any amount due to, the assessee on the basis of such assessment;

@@ -28,7 +28,13 @@ def available_method(settings: Settings) -> str:
     return "embedding"
 
 
-def ground(settings: Settings, query: str, top_k: int | None = None) -> RetrievalResult:
+def ground(
+    settings: Settings,
+    query: str,
+    top_k: int | None = None,
+    assessment_year: str | None = None,
+    tax_year: str | None = None,
+) -> RetrievalResult:
     if available_method(settings) == "embedding":
         try:
             retriever = Retriever.load(settings)
@@ -37,4 +43,6 @@ def ground(settings: Settings, query: str, top_k: int | None = None) -> Retrieva
             return retriever.retrieve(vector, top_k=top_k)
         except AIUnavailableError:
             pass  # fall through to lexical — grounding degrades, never dies
-    return build_lexical_retriever(settings).retrieve(query, top_k=top_k)
+    return build_lexical_retriever(settings).retrieve(
+        query, top_k=top_k, assessment_year=assessment_year, tax_year=tax_year
+    )

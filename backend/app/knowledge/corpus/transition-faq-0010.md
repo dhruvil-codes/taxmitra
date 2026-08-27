@@ -1,0 +1,23 @@
+---
+id: "transition-faq-0010"
+source_id: "TRANSITION-FAQ"
+section: ""
+title: "Objective and scope of the New Act — FAQ"
+document_title: "Objective and scope of the New Act — FAQ"
+document_type: "official transition FAQ web text"
+official_organization: "Income Tax Department, Ministry of Finance"
+official_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+source_url: "https://www.incometax.gov.in/iec/foportal/help/all-topics/e-filing-services/objective-and-scope-new-act"
+accessed_date: "2026-08-27"
+verification: "VERIFIED_OFFICIAL"
+verification_status: "VERIFIED_OFFICIAL"
+rule: ""
+form: ""
+assessment_year: "AY 2026-27 and earlier as applicable under transition"
+tax_year: "Tax Year 2026-27 onward"
+effective_from: "2026-04-01"
+effective_to: ""
+status: "CURRENT"
+tags: "repeal, transition, tax year and assessment year distinction"
+---
+### 16\. If someone had a right or benefit under the old Act, does that right disappear when the new Act comes into force on 01.04.2026? No. Rights, benefits, obligations or liabilities that arose under the old Act continue to exist. For instance, if a taxpayer was entitled to claim a refund under the old Act for any tax year prior to the commencement of the new Act, he still remains entitled to that refund even after the new Act comes into force. ### 17\. How will pending proceedings and notices issued under the Income Tax Act, 1961 be treated after the new Act comes into force? 536(2)(c) of the new Act provides that the provisions of the repealed Income Tax Act shall continue to apply to any proceeding pending on the date of commencement of this Act and to any proceedings initiated on or after the 1st April, 2026 (including notic es, assessment, re -assessment, recomputation, rectification, penalty, reference, revision and appeals) in respect of any tax year beginning before the 1st April, 2026 and such proceedings shall be carried out as per the procedure specified in the repe aled Income Tax Act . For instance, if the assessing officer initiated assess ment of a taxpayer's income for assessment year 2024 -25 before the new Act comes into force, that entire assessment and other proceedings will be completed under the provisions of old Act. ### 18\. Are old approvals, registrations, and recognitions still valid under the new Income Tax Act? Yes, if such approvals are not inconsistent with the provisions of the new Act, they are treated as if granted under the new Act. For example, a charitable trust recognized under the old Act will be treated as recognized under the corresponding provision of the new Act, unless there is a conflict with the provisions in the new Act.
