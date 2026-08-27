@@ -93,7 +93,7 @@ export default function Landing() {
             <p className="tm-designed"><Mark /> Designed for everyday taxpayers</p>
             <p>Tax Mitra explains what your notice means, shows what to prepare, and helps you draft a response in plain language.</p>
             <div className="tm-intro-actions">
-              <ArrowLink onClick={openGuide}>GET STARTED</ArrowLink>
+              <ArrowLink onClick={openGuide}>USE TAX MITRA →</ArrowLink>
               <a href="#how" className="tm-watch">SEE HOW IT WORKS <span>↓</span></a>
             </div>
             <small>Not a government service · No automatic submissions</small>
