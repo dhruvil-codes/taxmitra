@@ -11,6 +11,7 @@ export default function Journey() {
   const { t, locale } = useI18n();
   const [phase, setPhase] = useState<Phase>("questions");
   const [questions, setQuestions] = useState<Question[] | null>(null);
+  const [notice, setNotice] = useState<Awaited<ReturnType<typeof api.notice>> | null>(null);
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>(() => (id ? store.answers(id) : {}));
   const [result, setResult] = useState<ResolveResult | null>(null);
@@ -20,6 +21,7 @@ export default function Journey() {
   useEffect(() => {
     if (!id) return;
     api.questions(id, locale).then((r) => setQuestions(r.questions)).catch(() => setQuestions([]));
+    api.notice(id).then(setNotice).catch(() => setNotice(null));
   }, [id, locale]);
 
   const answer = (optionId: string) => {
@@ -67,7 +69,7 @@ export default function Journey() {
                   <button
                     key={o.id}
                     onClick={() => answer(o.id)}
-                    className="text-left border border-stone-200 hover:border-blue-600 hover:text-blue-600 px-4 py-3 font-semibold transition-colors"
+                    className={`journey-answer${answers[q.id] === o.id ? " is-selected" : ""}`}
                   >
                     {o.label}
                   </button>
@@ -142,11 +144,11 @@ export default function Journey() {
             <dl className="text-sm divide-y divide-stone-100">
               <div className="py-2 flex justify-between gap-4">
                 <dt className="text-stone-500">{t("j.reviewIssue")}</dt>
-                <dd className="font-semibold text-right">143(1)(a) income mismatch</dd>
+                <dd className="font-semibold text-right">{notice ? `${notice.section} · ${notice.title[locale] ?? notice.title.en}` : "—"}</dd>
               </div>
               <div className="py-2 flex justify-between gap-4">
                 <dt className="text-stone-500">{t("j.reviewAmount")}</dt>
-                <dd className="font-semibold">{formatINR(45000)}</dd>
+                <dd className="font-semibold">{notice ? formatINR(notice.amount_in_question) : "—"}</dd>
               </div>
               <div className="py-2 flex justify-between gap-4">
                 <dt className="text-stone-500">{t("j.reviewPosition")}</dt>

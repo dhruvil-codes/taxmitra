@@ -33,6 +33,7 @@ export default function Dashboard() {
           <Card key={n.id}>
             <p className="app-section-label">[ NOTICE / {n.id.toUpperCase()} ]</p>
             <h2 className="text-2xl font-medium leading-tight">{n.title[locale] ?? n.title.en}</h2>
+            <p className="notice-record-meta">{n.section} · AY {n.assessment_year}{n.official_reference ? ` · ${n.official_reference}` : ""}</p>
             <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
               <div><p className="app-eyebrow">{t("dash.amount")}</p><p className="font-semibold mt-1">{formatINR(n.amount_in_question)}</p></div>
               <div><p className="app-eyebrow">{t("dash.respondBy")}</p><p className="font-semibold mt-1">{n.due_date ?? "—"}</p></div>

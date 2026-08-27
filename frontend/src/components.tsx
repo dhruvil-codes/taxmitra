@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useI18n } from "./i18n";
 import { Citation, Locale } from "./lib";
@@ -56,23 +56,26 @@ export function SavedGuidanceBadge({ show }: { show: boolean }) {
 
 export function SourcePanel({ citation, onClose }: { citation: Citation | null; onClose: () => void }) {
   const { t } = useI18n();
+  const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!citation) return;
+    const previous = document.activeElement as HTMLElement | null;
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
     document.addEventListener("keydown", closeOnEscape);
-    return () => document.removeEventListener("keydown", closeOnEscape);
+    closeRef.current?.focus();
+    return () => { document.removeEventListener("keydown", closeOnEscape); previous?.focus(); };
   }, [citation, onClose]);
   if (!citation) return null;
   return (
-    <div className="source-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={citation.title}>
+    <div className="source-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="source-dialog-title">
       <div className="source-panel" onClick={(e) => e.stopPropagation()}>
         <div className="source-head">
           <div>
             <p className="app-section-label">[ OFFICIAL SOURCE ]</p>
-            <h3>{citation.title}</h3>
+            <h3 id="source-dialog-title">{citation.title}</h3>
             <p className="source-section">{citation.source_name} · {citation.section}</p>
           </div>
-          <button onClick={onClose} className="source-close">{t("notice.close")} ×</button>
+          <button ref={closeRef} onClick={onClose} className="source-close">{t("notice.close")} ×</button>
         </div>
         <p className={`source-verification ${citation.verification === "verified" ? "is-verified" : ""}`}>
           ■ {citation.verification === "verified" ? t("notice.verification.verified") : t("notice.verification.pending")}
