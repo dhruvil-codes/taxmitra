@@ -7,10 +7,6 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: [".vercel.run", ".vercel.app", ".vusercontent.net", ".v0.build"],
-    hmr: {
-      protocol: "wss",
-      clientPort: 443,
-    },
     proxy: {
       "/api": "http://127.0.0.1:8000",
     },
