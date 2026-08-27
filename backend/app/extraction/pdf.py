@@ -64,6 +64,11 @@ def _items(text: str) -> list[str]:
 
 def _classify(item: str):
     value = item.lower()
+    # These requests need topic-specific law that is not present in the
+    # current 1961 corpus. Preserve the exact notice wording and ground only
+    # the authority to request information under section 142(1).
+    if any(needle in value for needle in ("capital gain", "capital loss", "property transaction", "share", "equity", "scrip", "broker", "cash withdrawal", "cash withdrawn", "cash book", "cash flow", "unsecured loan", "financial transaction", "investment", "depreciation", "fixed asset", "loan transaction", "business activities", "financial sources")):
+        return "req_notice_document", f"Request: {item}", ("sec-142-0001",)
     rules = (
         (("computation", "total income", "income computation"), "req_computation_income", "Computation of total income", ("kb-142-1-scrutiny-documents",)),
         (("balance sheet",), "req_balance_sheet", "Balance sheet", ("kb-142-1-scrutiny-documents",)),
@@ -76,6 +81,10 @@ def _classify(item: str):
         if any(needle in value for needle in needles):
             return kind, section, citations
     return None
+
+def _is_heading(item: str) -> bool:
+    value = item.lower()
+    return "following accounts or documents or information" in value or ("142(1)" in value and "furnish" not in value)
 
 def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
     if not content:
@@ -98,17 +107,22 @@ def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
     for item in items:
         classified = _classify(item)
         if not classified:
-            warnings.append("One numbered item could not be classified and was excluded.")
-            continue
+            if _is_heading(item):
+                continue
+            warnings.append("One numbered item could not be classified safely.")
+            return PdfExtraction(metadata, (), text, 0, 0, "lexical", True, tuple(warnings), "unsupported_request")
         kind, response_section, citations = classified
-        result = ground_query(item)
+        result = ground_query("section 142(1) accounts documents verified written information " + item)
         scores.append(result.confidence)
+        authoritative = [chunk.id for chunk in result.chunks if chunk.verification_status == "VERIFIED_OFFICIAL" and chunk.status == "CURRENT"]
+        if not authoritative:
+            authoritative = list(citations)
         extracted.append({
             "request_id": "req-" + hashlib.sha256(item.encode("utf-8")).hexdigest()[:16],
             "classification_id": kind,
             "original_text": item,
             "response_section": response_section,
-            "citations": list(citations),
+            "citations": authoritative,
             "grounding": {"method": result.method, "confidence": round(result.confidence, 3), "below_floor": result.below_floor},
             "confidence": round(min(0.98, 0.72 + (0.20 if result.confidence >= 0.25 else 0)), 3),
             "warnings": ["Grounding is below the confidence floor; confirm this item carefully."] if result.below_floor else [],

@@ -136,6 +136,20 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
 }
 
 
+_GENERIC_REQUEST = {
+    "plain": {
+        "en": "The notice asks for the item shown below. Tax Mitra does not decide whether it applies; check the notice and your records.",
+        "hi": "नोटिस में नीचे दी गई वस्तु मांगी गई है। Tax Mitra यह तय नहीं करता कि यह आप पर लागू है; नोटिस और अपने रिकॉर्ड देखें।",
+    },
+    "why": {
+        "en": "Section 142(1) permits an Assessing Officer to require accounts, documents, or verified written information. This explanation does not add a legal requirement beyond the notice.",
+        "hi": "धारा 142(1) के तहत आकलन अधिकारी खाते, दस्तावेज या सत्यापित लिखित जानकारी मांग सकते हैं। यह स्पष्टीकरण नोटिस से आगे कोई कानूनी आवश्यकता नहीं जोड़ता।",
+    },
+    "evidence": (),
+}
+_REQUEST_LIBRARY["req_notice_document"] = _GENERIC_REQUEST
+
+
 def is_scrutiny_notice(notice: dict) -> bool:
     return str(notice.get("section", "")).strip().lower().replace(" ", "").startswith("142(1)")
 

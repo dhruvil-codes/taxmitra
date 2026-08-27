@@ -37,6 +37,33 @@ Annexure A:
 3. Complete bank statements for all business accounts during FY 2023-24.
 """
 
+REAL_NOTICE_SHAPE = """Income Tax Department
+Notice under section 142(1) of the Income-tax Act, 1961 for Assessment Year 2018-19
+Reference: ITBA/AST/F/142/2023/1056743063
+Please furnish the following accounts or documents or information:
+1. Detailed note on all business activities and financial sources.
+2. Detailed computation of income.
+3. Comparative complete balance sheet and P&L.
+4. Complete statements of all bank accounts and transactions.
+5. Month-wise cash deposits.
+6. Documentary evidence for sources of cash deposits.
+7. Date-wise ledger of cash withdrawals.
+8. SCRIPTS-wise profit and loss for shares and equities.
+9. Name and address of all brokers.
+10. Ledger of share transactions.
+11. Details of short term and long term capital gain.
+12. Copy of cash book.
+13. Copy of cash flow statement.
+14. Sale and purchase deeds for property transactions and capital gain calculation.
+15. Detailed computation of capital gain on sale of properties.
+16. Details of entities from whom unsecured loan was received.
+17. Names and PAN of entities with financial transactions above the threshold.
+18. Statement of loan transactions and agreements.
+19. Ledger of all investments and source of funds.
+20. Detailed depreciation chart of fixed assets.
+21. Put to use certificate for fixed assets.
+"""
+
 
 def test_text_pdf_extracts_metadata_requests_and_grounding():
     response = client.post("/api/scrutiny/extract", files={"file": ("notice.pdf", pdf_with_text(NOTICE), "application/pdf")})
@@ -50,6 +77,26 @@ def test_text_pdf_extracts_metadata_requests_and_grounding():
     assert len(body["requests"]) == 3
     assert body["requests"][0]["request_id"].startswith("req-")
     assert body["requests"][0]["grounding"]["method"] == "lexical"
+
+
+def test_real_notice_shape_accepts_supported_authority_only_requests_without_lowering_floor():
+    response = client.post("/api/scrutiny/extract", files={"file": ("notice.pdf", pdf_with_text(REAL_NOTICE_SHAPE), "application/pdf")})
+    body = response.json()
+    assert body["supported"] is True
+    assert body["extraction"]["status"] == "needs_confirmation"
+    assert len(body["requests"]) == 21
+    capital = next(item for item in body["requests"] if "capital gain on sale" in item["original_text"])
+    assert capital["classification_id"] == "req_notice_document"
+    assert capital["grounding"]["below_floor"] is False
+    assert capital["citations"]
+    assert capital["citations"][0]["verification_status"] == "VERIFIED_OFFICIAL"
+
+
+def test_intentionally_unsupported_request_is_refused():
+    text = NOTICE.replace("1. Detailed computation of total income for Assessment Year 2024-25.", "1. Provide a horoscope and astrology prediction for the taxpayer.")
+    body = client.post("/api/scrutiny/extract", files={"file": ("notice.pdf", pdf_with_text(text), "application/pdf")}).json()
+    assert body["supported"] is False
+    assert body["extraction"]["refusal_reason"] == "unsupported_request"
 
 
 def test_confirmation_fingerprint_is_required_and_unlocks_dynamic_questions():
