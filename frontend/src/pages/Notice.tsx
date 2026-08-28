@@ -34,7 +34,7 @@ export default function Notice() {
           <SavedGuidanceBadge show={explanation?.demo_mode || explanation?.source === "static"} />
         </div>
 
-        <Card className="mb-5 app-dots">
+        <Card className="mb-5">
           <p className="app-section-label">[ IN PLAIN LANGUAGE ]</p>
           <p className="text-stone-700 leading-relaxed">
             {explanation?.content.plain_language ?? "…"}
