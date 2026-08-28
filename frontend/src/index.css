@@ -35,26 +35,6 @@ button, a { font: inherit; }
 .tm-eyebrow-dark { color: #9199aa; }
 .tm-hero-copy h1 { margin: 0; font-size: clamp(44px, 5vw, 58px); line-height: .95; letter-spacing: -.055em; }
 .tm-hero-title { position: relative; display: inline-block; }
-.tm-hero-text { 
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(20px);
-  animation: textReveal 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  animation-delay: 0.3s;
-}
-.tm-hero-text span {
-  display: inline-block;
-  opacity: 0;
-  animation: charReveal 0.05s ease forwards;
-}
-@keyframes textReveal {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-@keyframes charReveal {
-  0% { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
 .tm-hero-lede { max-width: 420px; margin: 15px 0; color: #d5d7dc; font-size: 13px; line-height: 1.55; }
 .tm-meta { margin: 0; color: #777f8e; font: 7px var(--font-mono); }
 .tm-blocks { position: relative; height: 150px; max-width: 350px; margin-left: 20px; }
@@ -66,6 +46,12 @@ button, a { font: inherit; }
 .tm-intro { display: grid; grid-template-columns: 1.35fr .65fr; gap: 88px; padding-top: 66px; padding-bottom: 58px; align-items: start; }
 .tm-intro h2, .tm-process h2, .tm-trust h2, .tm-final h2 { margin: 0; font-size: clamp(56px, 6vw, 72px); line-height: .91; letter-spacing: -.065em; font-weight: 400; }
 .tm-intro h2 em, .tm-process h2 em, .tm-questions h2 em, .tm-final h2 em { color: var(--tm-blue); font-family: var(--font-mono); font-style: normal; font-weight: 400; letter-spacing: -.09em; }
+.tm-animated-text { display: inline-block; }
+.tm-animated-text span { display: inline-block; opacity: 0; animation: textDiaChar 0.4s ease forwards; }
+@keyframes textDiaChar {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
 .tm-intro-aside { padding-top: 20px; color: var(--tm-muted); font-size: 16px; line-height: 1.55; }
 .tm-start-label { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; color: var(--tm-blue); font: 13px var(--font-mono); font-weight: 700; letter-spacing: .03em; }
 .tm-start-label .tm-mark { width: 32px; height: 32px; font-size: 14px; }

@@ -44,6 +44,8 @@ const en: Dict = {
   "landing.principles": "→ AI EXPLAINS → RULES DECIDE → HUMANS APPROVE → NO AUTOMATIC SUBMISSIONS",
   "landing.introTitle": "Understand your [ tax notice ] without the confusion.",
   "landing.introTitleHi": "अपनी [ टैक्स नोटिस ] को बिना किसी भ्रम के समझें।",
+  "landing.animatedPhrase": "tax notice",
+  "landing.animatedPhraseHi": "टैक्स नोटिस",
 
   "landing.startHere": "START HERE",
   "landing.startHereHi": "यहाँ से शुरू करें",
@@ -287,6 +289,9 @@ const hi: Dict = {
   "landing.meta": "TM / NOTICE / 2026 · स्वतंत्र प्रोटोटाइप · सिंथेटिक डेटा",
   "landing.scroll": "स्पष्टता के लिए स्क्रॉल करें ↓",
   "landing.principles": "→ AI समझाता है → नियम तय करते हैं → मनुष्य मंजूरी देते हैं → कोई स्वचालित जमा नहीं",
+  "landing.introTitle": "अपनी [ टैक्स नोटिस ] को बिना किसी भ्रम के समझें।",
+  "landing.animatedPhrase": "tax notice",
+  "landing.animatedPhraseHi": "टैक्स नोटिस",
   "landing.startHere": "यहाँ से शुरू करें",
   "landing.startHereHi": "यहाँ से शुरू करें",
   "landing.useTaxMitra": "टैक्स मित्र का प्रयोग करें",
