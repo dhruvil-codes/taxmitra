@@ -6,11 +6,6 @@ Turn confusing Indian income-tax notices into clear explanations, personalized c
 
 ---
 
-<!--
-  HERO IMAGE:
-  Replace the placeholder below with the final Tax Mitra hero screenshot.
--->
-
 [ Tax Mitra Hero Screenshot ]
 
 ---
