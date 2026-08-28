@@ -14,7 +14,40 @@ const refusalCopy: Record<string, { en: string; hi: string }> = {
   no_supported_requests: { en: "Tax Mitra found text, but not enough clearly numbered department requests to guide you without guessing. Try the included 142(1) demo notice or upload a notice with its request schedule visible.", hi: "Tax Mitra को टेक्स्ट मिला, लेकिन बिना अनुमान लगाए मार्गदर्शन करने के लिए पर्याप्त स्पष्ट क्रमांकित विभागीय अनुरोध नहीं मिले। शामिल 142(1) डेमो नोटिस आज़माएं या अनुरोध अनुसूची दिखाई देने वाला नोटिस अपलोड करें।" },
   grounding_below_floor: { en: "The extracted requests could not be grounded safely enough to continue.", hi: "निकाले गए अनुरोधों को आगे बढ़ने लायक सुरक्षित आधार नहीं मिला।" },
 };
+
+const unsupportedNoticeInfo: Record<string, {
+  title: { en: string; hi: string };
+  proceeding: { en: string; hi: string };
+  context: { en: string; hi: string };
+  boundaryReason: { en: string; hi: string };
+  nextSteps: { en: string; hi: string };
+  officialSource?: { name: { en: string; hi: string }; url: string };
+}> = {
+  "148": {
+    title: { en: "Section 148 — Reassessment notice", hi: "धारा 148 — पुनर्मूल्यांकन नोटिस" },
+    proceeding: { en: "Reassessment proceedings", hi: "पुनर्मूल्यांकन कार्यवाही" },
+    context: { en: "This notice relates to reassessment proceedings where the Department has information suggesting income may have escaped assessment. Such proceedings can involve specific statutory requirements, timelines, and taxpayer rights that vary based on the assessment year and applicable tax law framework.", hi: "यह नोटिस पुनर्मूल्यांकन कार्यवाही से संबंधित है जहां विभाग को जानकारी है कि आय मूल्यांकन से बच सकती है। ऐसी कार्यवाही में विशिष्ट वैधानिक आवश्यकताएं, समयरेखा और करदाता अधिकार शामिल हो सकते हैं जो आकलन वर्ष और लागू कर कानून ढांचे के आधार पर भिन्न होते हैं।" },
+    boundaryReason: { en: "Tax Mitra does not currently provide a guided response workflow for reassessment proceedings. These matters can involve complex statutory requirements and specific taxpayer rights. Tax Mitra will not guess or provide guidance without adequate supported official material.", hi: "Tax Mitra वर्तमान में पुनर्मूल्यांकन कार्यवाही के लिए मार्गदर्शित प्रतिक्रिया कार्यप्रवाह प्रदान नहीं करता है। ऐसे मामलों में जटिल वैधानिक आवश्यकताएं और विशिष्ट करदाता अधिकार शामिल हो सकते हैं। Tax Mitra पर्याप्त समर्थित आधिकारिक सामग्री के बिना अनुमान नहीं लगाएगा या मार्गदर्शन नहीं देगा।" },
+    nextSteps: { en: "Review the notice for the specific information, reasons, or allegations raised by the Department. Consider consulting a chartered accountant or authorised tax practitioner for guidance on your particular circumstances.", hi: "विभाग द्वारा उठाई गई विशिष्ट जानकारी, कारण या आरोपों के लिए नोटिस की समीक्षा करें। अपनी विशिष्ट परिस्थितियों के लिए मार्गदर्शन प्राप्त करने के लिए चार्टर्ड एकाउंटेंट या अधिकृत कर अभ्यासी से परामर्श करने पर विचार करें।" },
+    officialSource: { name: { en: "Income Tax Department e-Filing Help Center", hi: "आयकर विभाग e-Filing सहायता केंद्र" }, url: "https://www.incometax.gov.in/iec/helpcenter/" },
+  },
+  "default": {
+    title: { en: "Unsupported notice type", hi: "असमर्थित नोटिस प्रकार" },
+    proceeding: { en: "Other proceedings", hi: "अन्य कार्यवाही" },
+    context: { en: "This notice relates to proceedings for which Tax Mitra does not currently have a guided response workflow. Different notice types involve different statutory requirements, timelines, and taxpayer rights.", hi: "यह नोटिस उन कार्यवाहियों से संबंधित है जिनके लिए Tax Mitra के पास वर्तमान में मार्गदर्शित प्रतिक्रिया कार्यप्रवाह नहीं है। विभिन्न नोटिस प्रकारों में विभिन्न वैधानिक आवश्यकताएं, समयरेखा और करदाता अधिकार शामिल होते हैं।" },
+    boundaryReason: { en: "Tax Mitra does not currently provide guidance for this type of proceeding. This type of notice can involve specific statutory requirements that should not be generalized. Tax Mitra will not guess or provide unsafe guidance.", hi: "Tax Mitra वर्तमान में इस प्रकार की कार्यवाही के लिए मार्गदर्शन प्रदान नहीं करता है। इस प्रकार की नोटिस में विशिष्ट वैधानिक आवश्यकताएं शामिल हो सकती हैं जिन्हें सामान्यीकृत नहीं किया जाना चाहिए। Tax Mitra अनुमान नहीं लगाएगा या असुरक्षित मार्गदर्शन नहीं देगा।" },
+    nextSteps: { en: "Review the notice carefully for the specific requirements and consult a qualified tax professional for guidance on your particular circumstances.", hi: "विशिष्ट आवश्यकताओं के लिए नोटिस का सावधानीपूर्वक अध्ययन करें और अपनी विशिष्ट परिस्थितियों के लिए मार्गदर्शन के लिए योग्य कर पेशेवर से परामर्श करें।" },
+    officialSource: { name: { en: "Income Tax Department e-Filing Help Center", hi: "आयकर विभाग e-Filing सहायता केंद्र" }, url: "https://www.incometax.gov.in/iec/helpcenter/" },
+  },
+};
 const pick = (value: Record<string, string> | undefined, locale: string) => value?.[locale] ?? value?.en ?? "";
+
+const getUnsupportedNoticeInfo = (section: string | null | undefined) => {
+  if (!section) return unsupportedNoticeInfo["default"];
+  const normalizedSection = section.replace(/\s/g, "").toLowerCase();
+  if (normalizedSection.includes("148")) return unsupportedNoticeInfo["148"];
+  return unsupportedNoticeInfo["default"];
+};
 
 export default function Upload() {
   const { locale } = useI18n();
@@ -111,7 +144,32 @@ export default function Upload() {
       <div className="confirmation-actions"><PrimaryButton onClick={()=>confirm(true)} disabled={confirming}>{confirming ? (locale === "hi" ? "पुष्टि हो रही है…" : "CONFIRMING…") : (locale === "hi" ? "हाँ, सूची सही है" : "YES, THE LIST MATCHES")} →</PrimaryButton><button onClick={()=>confirm(false)} disabled={confirming}>{locale === "hi" ? "नहीं, फिर से शुरू करें" : "NO, START AGAIN"}</button></div>
     </section>}
 
-    {refused && <section className="app-empty" role="alert"><p className="app-section-label">[ SAFE STOP / {result.extraction.refusal_reason ?? "UNCLASSIFIED"} ]</p><h2 className="question-title">{locale === "hi" ? "यह नोटिस सुरक्षित रूप से संरचित नहीं किया जा सका।" : "This notice could not be safely structured."}</h2><p>{refusalCopy[result.extraction.refusal_reason ?? ""]?.[locale] ?? (locale === "hi" ? "नोटिस को पर्याप्त विश्वास से पढ़ा या वर्गीकृत नहीं किया जा सका।" : "The notice could not be read or classified with sufficient confidence.")}</p>{result.extraction.warnings.map((w,i)=><p key={i}>{w}</p>)}<div className="confirmation-actions"><button className="app-primary" onClick={() => navigate("/login")}>{locale === "hi" ? "कार्यशील डेमो नोटिस इस्तेमाल करें" : "Use the working demo notice"}</button><button onClick={reset}>{locale === "hi" ? "दूसरी PDF चुनें" : "Choose another PDF"}</button></div></section>}
+    {refused && (() => {
+      const info = getUnsupportedNoticeInfo(result.metadata.section);
+      return <section className="app-empty" role="alert">
+        <p className="app-section-label">[ SAFE STOP / {result.extraction.refusal_reason ?? "UNCLASSIFIED"} ]</p>
+        <h2 className="question-title">{pick(info.title, locale)}</h2>
+        <p className="app-lead">{pick(info.proceeding, locale)}</p>
+        <p className="app-body">{pick(info.context, locale)}</p>
+        <div className="notice-boundary">
+          <p className="app-section-label">[ WHY WE'RE STOPPING ]</p>
+          <p className="app-body">{pick(info.boundaryReason, locale)}</p>
+        </div>
+        <div className="notice-boundary">
+          <p className="app-section-label">[ WHAT YOU CAN DO NEXT ]</p>
+          <p className="app-body">{pick(info.nextSteps, locale)}</p>
+        </div>
+        {info.officialSource && <a href={info.officialSource.url} target="_blank" rel="noopener noreferrer" className="scrutiny-source">
+          {pick(info.officialSource.name, locale)} ↗
+        </a>}
+        {result.extraction.warnings.map((w,i)=><p key={i} className="text-sm text-stone-600 mt-2">{w}</p>)}
+        <div className="confirmation-actions">
+          {info.officialSource && <a href={info.officialSource.url} target="_blank" rel="noopener noreferrer" className="app-primary">{locale === "hi" ? "आधिकारिक मार्गदर्शन देखें" : "View official guidance"} ↗</a>}
+          <button onClick={() => navigate("/login")}>{locale === "hi" ? "कार्यशील 142(1) डेमो इस्तेमाल करें" : "Use the working 142(1) demo"}</button>
+          <button onClick={reset}>{locale === "hi" ? "दूसरी PDF चुनें" : "Choose another PDF"}</button>
+        </div>
+      </section>;
+    })()}
     {error && <p className="upload-error" role="alert">{error}</p>}
     <div className="notice-boundary"><p className="app-section-label">[ PROCESSING BOUNDARY ]</p><p className="app-body">{locale === "hi" ? "केवल साधारण टेक्स्ट PDF समर्थित हैं। OCR नहीं है। Tax Mitra कुछ भी जमा नहीं करता और निकाले गए तथ्य आपकी पुष्टि से पहले विश्वसनीय नहीं माने जाते।" : "Only ordinary text PDFs are supported; OCR is not. Tax Mitra submits nothing, and extracted facts are not trusted until you confirm them."}</p></div>
   </div>;
