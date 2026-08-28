@@ -125,9 +125,20 @@ export default function Landing() {
               <p className="tm-eyebrow tm-eyebrow-dark">[ 02 / HOW IT WORKS ]</p>
               <h2>A simple path from<br/><em>[ notice ]</em> to next<br/>step.</h2>
             </div>
-            <ol>
-              {steps.map((step, i) => <li key={step}><b>{String(i + 1).padStart(2, "0")}</b><span>{step}</span><i>→</i></li>)}
-            </ol>
+            <div className="tm-process-list">
+              {steps.map((step, i) => (
+                <details key={step} className="tm-process-item" open={i === 0}>
+                  <summary>
+                    <b>{String(i + 1).padStart(2, "0")}</b>
+                    <span>{step}</span>
+                    <i>→</i>
+                  </summary>
+                  <div className="tm-process-detail">
+                    <p>This step helps you understand and prepare for the next action in your tax notice response journey.</p>
+                  </div>
+                </details>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -136,11 +147,25 @@ export default function Landing() {
             <p className="tm-eyebrow">[ PRODUCT PRINCIPLE ]</p>
             <h2>NO FORMS.<br/><em>NO UNNECESSARY<br/>QUESTIONS.</em></h2>
           </div>
-          <div className="tm-questions-copy">
-            <p>Tax Mitra asks only what is necessary to safely guide the taxpayer.</p>
-            <div><b>CURRENT PROTOTYPE</b><span>Demo notices are pre-loaded.</span></div>
-              <div><b>142(1) DEMO</b><span>Synthetic PDF extraction → taxpayer confirmation → guided preparation</span></div>
-              <small>Your own PDF can be selected locally, but is not uploaded or extracted in this prototype.</small>
+          <div className="tm-questions-content">
+            <p className="tm-questions-lede">Tax Mitra asks only what is necessary to safely guide the taxpayer.</p>
+            <div className="tm-questions-list">
+              <div className="tm-questions-item">
+                <span className="tm-questions-icon">01</span>
+                <div>
+                  <b>CURRENT PROTOTYPE</b>
+                  <p>Demo notices are pre-loaded for immediate exploration.</p>
+                </div>
+              </div>
+              <div className="tm-questions-item">
+                <span className="tm-questions-icon">02</span>
+                <div>
+                  <b>142(1) DEMO</b>
+                  <p>Synthetic PDF extraction → taxpayer confirmation → guided preparation</p>
+                </div>
+              </div>
+            </div>
+            <small className="tm-questions-note">Your own PDF can be selected locally, but is not uploaded or extracted in this prototype.</small>
           </div>
         </section>
 
@@ -190,6 +215,10 @@ export default function Landing() {
         <a className="tm-brand" href="#top"><Mark /><strong>Tax Mitra</strong></a>
         <p>Independent civic prototype.</p>
         <nav><a href="#how">How it works</a><a href="#india">Built for India</a><a href="#trust">Trust</a><button onClick={openGuide}>Use Tax Mitra</button></nav>
+        <div className="tm-footer-credit">
+          <span>Built by</span>
+          <a href="https://x.com/bydhruvil" target="_blank" rel="noopener noreferrer">@bydhruvil</a>
+        </div>
       </footer>
     </div>
   );
