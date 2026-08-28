@@ -5,9 +5,7 @@
 Turn confusing Indian income-tax notices into clear explanations, personalized checklists, and response drafts — in your language.
 
 ---
-
-[ Tax Mitra Hero Screenshot ]
-
+<img width="1843" height="951" alt="image" src="https://github.com/user-attachments/assets/f5b6f8f5-3239-4f47-9c2d-1130eeecd6c3" />
 ---
 
 ## Live Demo
