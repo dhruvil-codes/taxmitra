@@ -2,8 +2,8 @@
 id: kb-142-1-scrutiny-documents
 section: "Section 142(1)(ii), Income-tax Act, 1961"
 title: "Notice to produce accounts or documents"
-source_name: "Income Tax Department - Income-tax Act, 1961"
-official_url: https://www.incometaxindia.gov.in/w/section-142-61
+source_name: "Income-tax Act, 1961 - indiacode.ecourtsindia.com"
+official_url: https://indiacode.ecourtsindia.com/income-tax-act/section/142/
 accessed_date: 2026-08-27
 verification: pending
 tags: 142(1), scrutiny, documents, accounts
