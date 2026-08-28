@@ -30,7 +30,12 @@ export default function Scrutiny() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [finalCopied, setFinalCopied] = useState(false);
+  const [checklistState, setChecklistState] = useState<Record<string, boolean>>({});
   const setStage = (next: Stage) => { setStageState(next); store.setScrutinyStage(id, next); window.scrollTo({ top: 0, behavior: "smooth" }); };
+
+  const handleChecklistToggle = (key: string) => {
+    setChecklistState(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const downloadDraft = () => {
     const blob = new Blob([draft], { type: "text/plain;charset=utf-8" });
@@ -246,11 +251,46 @@ ${draft}
         <div className="checklist-visual my-6">
           <p className="app-section-label">{t("j.beforeSubmit")}</p>
           <div className="checklist-items">
-            <span className="checklist-item">□ {t("j.check01")}</span>
-            <span className="checklist-item">□ {t("j.check02")}</span>
-            <span className="checklist-item">□ {t("j.check03")}</span>
-            <span className="checklist-item">□ {t("j.check04")}</span>
-            <span className="checklist-item">□ {t("j.check05")}</span>
+            <label className="checklist-item">
+              <input
+                type="checkbox"
+                checked={checklistState.check01 || false}
+                onChange={() => handleChecklistToggle('check01')}
+              />
+              <span>{t("j.check01")}</span>
+            </label>
+            <label className="checklist-item">
+              <input
+                type="checkbox"
+                checked={checklistState.check02 || false}
+                onChange={() => handleChecklistToggle('check02')}
+              />
+              <span>{t("j.check02")}</span>
+            </label>
+            <label className="checklist-item">
+              <input
+                type="checkbox"
+                checked={checklistState.check03 || false}
+                onChange={() => handleChecklistToggle('check03')}
+              />
+              <span>{t("j.check03")}</span>
+            </label>
+            <label className="checklist-item">
+              <input
+                type="checkbox"
+                checked={checklistState.check04 || false}
+                onChange={() => handleChecklistToggle('check04')}
+              />
+              <span>{t("j.check04")}</span>
+            </label>
+            <label className="checklist-item">
+              <input
+                type="checkbox"
+                checked={checklistState.check05 || false}
+                onChange={() => handleChecklistToggle('check05')}
+              />
+              <span>{t("j.check05")}</span>
+            </label>
           </div>
         </div>
 
