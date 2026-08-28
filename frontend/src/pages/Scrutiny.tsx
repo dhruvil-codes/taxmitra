@@ -168,7 +168,126 @@ ${draft}
 
     {stage === "review" && result && <><p className="app-eyebrow">[ {t("scrutiny.finalReview")} / {t("scrutiny.humanApproval")} ]</p><h1 className="app-title">{t("j.reviewTitle")}</h1><div className="review-grid"><Card><p className="app-section-label">[ {t("scrutiny.coverage")} ]</p>{result.checklist?.map(x=><p key={x.id} className="review-row"><span>{text(x.title,locale)}</span><b>{x.status.toUpperCase()}</b></p>)}</Card><Card className="deadline-card"><p className="app-section-label">[ {t("scrutiny.responseDeadline")} ]</p><strong>{result.deadline?.due_date ?? "—"}</strong><p>{t("scrutiny.reviewDateText")}</p></Card></div><div className="notice-boundary"><p className="app-section-label">[ {t("scrutiny.reviewLabel")} ]</p><p className="app-body">{t("scrutiny.reviewText")}</p></div><div className="flex flex-wrap items-center gap-3"><PrimaryButton onClick={()=>setStage("final")}>{t("scrutiny.continueHandoff")} →</PrimaryButton><button className="app-back !mt-0" onClick={()=>setStage("draft")}>← {t("j.back")}</button></div></>}
 
-    {stage === "final" && result?.official_step && <><p className="app-eyebrow">[ {t("scrutiny.officialHandoff")} / 04 ]</p><h1 className="app-title">{t("j.finalTitle")}</h1><p className="app-lead">{t("j.finalLead")}</p><Card className="app-dots"><p className="app-section-label">[ {t("scrutiny.whatToDo")} ]</p><h2 className="text-2xl font-medium">{text(result.official_step.label,locale)}</h2><p className="deadline-inline">{result.deadline?.due_date}</p></Card><div className="value-summary"><p className="app-section-label">[ {t("scrutiny.valueSummary")} ]</p><ul className="value-list"><li>✓ {t("scrutiny.valueRead")}</li><li>✓ {t("scrutiny.valueIdentified")}</li><li>✓ {t("scrutiny.valueBroke", {count: String(requests.length)})}</li><li>✓ {t("scrutiny.valueChecked")}</li><li>✓ {t("scrutiny.valueVerification")}</li><li>✓ {t("scrutiny.valueDraft")}</li><li>✓ {t("scrutiny.valueGuided")}</li></ul></div><Card className="my-4"><p className="app-section-label">[ {t("j.downloadDraft")} ]</p><div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3"><button onClick={downloadDraft} className="app-primary">{t("j.downloadTxt")}</button><button onClick={downloadAsMarkdown} className="app-primary">{t("j.downloadMd")}</button><button onClick={downloadAsPdf} className="app-primary">{t("j.downloadPdf")}</button></div><button onClick={async()=>{await navigator.clipboard.writeText(draft);setFinalCopied(true);setTimeout(()=>setFinalCopied(false),2000)}} className="text-sm text-stone-600 underline py-2 mt-3">{finalCopied ? t("scrutiny.copied") : t("scrutiny.copyDraft")}</button></Card><div className="notice-boundary"><p className="app-section-label">[ {t("scrutiny.readyStep")} ]</p><p className="app-body font-medium">{t("scrutiny.readyText")}</p><p className="app-body mt-2">{t("j.finalBoundary")}</p><p className="app-body mt-2">{t("j.finalInstruction")}</p></div><div className="final-actions"><a className="app-primary" href={OFFICIAL_EFILING_PORTAL_URL} target="_blank" rel="noopener noreferrer">{t("j.continuePortal")}</a></div><button className="app-back" onClick={()=>setStage("review")}>← {t("j.back")}</button></>}
+    {stage === "final" && result?.official_step && <><p className="app-eyebrow">[ TM / ACT / 04 ]</p><h1 className="app-title">{t("j.finalTitle")}</h1><p className="app-lead">{t("j.finalLead")}</p>
+      <div className="app-content-spacing">
+        <p className="app-section-label">{t("j.actionPlan")}</p>
+        
+        <div className="action-timeline">
+          <div className="action-step">
+            <span className="action-number">01</span>
+            <div>
+              <h3>{t("j.act01")}</h3>
+              <p>{t("j.act01Desc")}</p>
+            </div>
+          </div>
+          
+          <div className="action-step">
+            <span className="action-number">02</span>
+            <div>
+              <h3>{t("j.act02")}</h3>
+              <p>{t("j.act02Desc")}</p>
+              {result.checklist && result.checklist.length > 0 && (
+                <ul className="action-checklist">
+                  {result.checklist.map((c) => (
+                    <li key={c.id}>• {text(c.title, locale)}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+          
+          <div className="action-step">
+            <span className="action-number">03</span>
+            <div>
+              <h3>{t("j.act03")}</h3>
+              <p>{t("j.act03Desc")}</p>
+            </div>
+          </div>
+          
+          <div className="action-step">
+            <span className="action-number">04</span>
+            <div>
+              <h3>{t("j.act04")}</h3>
+              <p className="font-mono text-sm text-stone-600">{t("j.portalNav")}</p>
+              {notice && (
+                <div className="action-meta">
+                  <p><strong>{t("scrutiny.notice")}:</strong> {notice.section}</p>
+                  <p><strong>{t("dash.ay")}:</strong> {notice.assessment_year}</p>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="action-step">
+            <span className="action-number">05</span>
+            <div>
+              <h3>{t("j.act05")}</h3>
+              <p>{notice?.section?.replace(/\s/g, "").startsWith("142(1)") ? t("j.act05Desc142") : t("j.act05Desc143")}</p>
+            </div>
+          </div>
+          
+          <div className="action-step">
+            <span className="action-number">06</span>
+            <div>
+              <h3>{t("j.act06")}</h3>
+              <p>{t("j.act06Desc")}</p>
+            </div>
+          </div>
+          
+          <div className="action-step">
+            <span className="action-number">07</span>
+            <div>
+              <h3>{t("j.act07")}</h3>
+              <p>{t("j.act07Desc")}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="checklist-visual my-6">
+          <p className="app-section-label">{t("j.beforeSubmit")}</p>
+          <div className="checklist-items">
+            <span className="checklist-item">□ {t("j.check01")}</span>
+            <span className="checklist-item">□ {t("j.check02")}</span>
+            <span className="checklist-item">□ {t("j.check03")}</span>
+            <span className="checklist-item">□ {t("j.check04")}</span>
+            <span className="checklist-item">□ {t("j.check05")}</span>
+          </div>
+        </div>
+
+        <div className="value-summary my-6">
+          <p className="app-section-label">{t("j.whatTaxMitraDid")}</p>
+          <ul className="value-list">
+            <li>✓ {t("j.help01")}</li>
+            <li>✓ {t("j.help02")}</li>
+            <li>✓ {t("j.help03")}</li>
+            <li>✓ {t("j.help04")}</li>
+            <li>✓ {t("j.help05")}</li>
+            <li>✓ {t("j.help06")}</li>
+          </ul>
+          <p className="app-body mt-2 italic">{t("j.yourSubmission")}</p>
+        </div>
+
+        <Card className="my-4">
+          <p className="app-section-label">[ {t("j.downloadDraft")} ]</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+            <button onClick={downloadDraft} className="app-primary">{t("j.downloadTxt")}</button>
+            <button onClick={downloadAsMarkdown} className="app-primary">{t("j.downloadMd")}</button>
+            <button onClick={downloadAsPdf} className="app-primary">{t("j.downloadPdf")}</button>
+          </div>
+          <button onClick={async()=>{await navigator.clipboard.writeText(draft);setFinalCopied(true);setTimeout(()=>setFinalCopied(false),2000)}} className="text-sm text-stone-600 underline py-2 mt-3">{finalCopied ? t("scrutiny.copied") : t("scrutiny.copyDraft")}</button>
+        </Card>
+
+        <div className="notice-boundary mb-4">
+          <p className="app-section-label">[ IMPORTANT ]</p>
+          <p className="app-body font-medium">{t("j.finalBoundary")}</p>
+          <p className="app-body mt-2">{t("j.finalInstruction")}</p>
+        </div>
+
+        <div className="final-actions">
+          <a className="app-primary" href={OFFICIAL_EFILING_PORTAL_URL} target="_blank" rel="noopener noreferrer">{t("j.continuePortal")}</a>
+        </div>
+        <button className="app-back" onClick={()=>setStage("review")}>← {t("j.back")}</button>
+      </div></>}
 
     {stage === "refusal" && result && <><p className="app-eyebrow">[ {t("scrutiny.safeStop")} ]</p><h1 className="app-title">{text(result.headline,locale)}</h1><div className="refusal-layout"><Card><p className="app-section-label">[ {t("scrutiny.refusalWhy")} ]</p><p className="app-body">{text(result.why,locale)}</p></Card><Card><p className="app-section-label">[ {t("scrutiny.refusalSuggestion")} ]</p><p className="app-body">{text(result.suggestion,locale)}</p></Card><Card>{result.official_links?.map(link=><a key={link.url} className="app-text-action block mb-3" href={verifiedIncomeTaxUrl(link.url)} target="_blank" rel="noopener noreferrer">{text(link.label,locale)} ↗</a>)}</Card></div><button className="app-back" onClick={()=>setStage("requests")}>← {t("scrutiny.reviewAgain")}</button></>}
   </div>;
