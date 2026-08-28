@@ -246,81 +246,154 @@ ${draft}
 
       {phase === "final" && result?.official_step && (
         <div>
-          <p className="app-eyebrow">[ TM / OFFICIAL HANDOFF / 04 ]</p>
+          <p className="app-eyebrow">[ TM / ACT / 04 ]</p>
           <h1 className="app-title">{t("j.finalTitle")}</h1>
           <p className="app-lead">{t("j.finalLead")}</p>
           
-          <Card className="my-4 space-y-4">
-            <div>
-              <p className="text-xs font-bold uppercase text-stone-500">{t("j.finalWhat")}</p>
-              <p className="font-semibold">
-                {result.official_step.label[locale] ?? result.official_step.label.en}
-              </p>
+          <div className="app-content-spacing">
+            <p className="app-section-label">{t("j.actionPlan")}</p>
+            
+            <div className="action-timeline">
+              <div className="action-step">
+                <span className="action-number">01</span>
+                <div>
+                  <h3>{t("j.act01")}</h3>
+                  <p>{t("j.act01Desc")}</p>
+                </div>
+              </div>
+              
+              <div className="action-step">
+                <span className="action-number">02</span>
+                <div>
+                  <h3>{t("j.act02")}</h3>
+                  <p>{t("j.act02Desc")}</p>
+                  {result.checklist && result.checklist.length > 0 && (
+                    <ul className="action-checklist">
+                      {result.checklist.map((c) => (
+                        <li key={c.id}>• {c.title[locale] ?? c.title.en}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+              
+              <div className="action-step">
+                <span className="action-number">03</span>
+                <div>
+                  <h3>{t("j.act03")}</h3>
+                  <p>{t("j.act03Desc")}</p>
+                </div>
+              </div>
+              
+              <div className="action-step">
+                <span className="action-number">04</span>
+                <div>
+                  <h3>{t("j.act04")}</h3>
+                  <p className="font-mono text-sm text-stone-600">{t("j.portalNav")}</p>
+                  {notice && (
+                    <div className="action-meta">
+                      <p><strong>{t("scrutiny.notice")}:</strong> {notice.section}</p>
+                      <p><strong>{t("dash.ay")}:</strong> {notice.assessment_year}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="action-step">
+                <span className="action-number">05</span>
+                <div>
+                  <h3>{t("j.act05")}</h3>
+                  <p>{notice?.section?.replace(/\s/g, "").startsWith("142(1)") ? t("j.act05Desc142") : t("j.act05Desc143")}</p>
+                </div>
+              </div>
+              
+              <div className="action-step">
+                <span className="action-number">06</span>
+                <div>
+                  <h3>{t("j.act06")}</h3>
+                  <p>{t("j.act06Desc")}</p>
+                </div>
+              </div>
+              
+              <div className="action-step">
+                <span className="action-number">07</span>
+                <div>
+                  <h3>{t("j.act07")}</h3>
+                  <p>{t("j.act07Desc")}</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-bold uppercase text-stone-500">{t("j.finalWhen")}</p>
-              <p className="font-semibold">
-                {result.deadline?.due_date}{" "}
-                {result.deadline?.days_remaining != null && result.deadline.days_remaining >= 0
-                  ? `(${t("dash.daysLeft", { n: String(result.deadline.days_remaining) })})`
-                  : ""}
-              </p>
+
+            <div className="checklist-visual my-6">
+              <p className="app-section-label">{t("j.beforeSubmit")}</p>
+              <div className="checklist-items">
+                <span className="checklist-item">□ {t("j.check01")}</span>
+                <span className="checklist-item">□ {t("j.check02")}</span>
+                <span className="checklist-item">□ {t("j.check03")}</span>
+                <span className="checklist-item">□ {t("j.check04")}</span>
+                <span className="checklist-item">□ {t("j.check05")}</span>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-bold uppercase text-stone-500">{t("j.finalNeed")}</p>
-              <ul className="text-sm mt-1 space-y-1">
-                {result.checklist?.map((c) => (
-                  <li key={c.id} className="text-stone-700">• {c.title[locale] ?? c.title.en}</li>
-                ))}
+
+            <div className="value-summary my-6">
+              <p className="app-section-label">{t("j.whatTaxMitraDid")}</p>
+              <ul className="value-list">
+                <li>✓ {t("j.help01")}</li>
+                <li>✓ {t("j.help02")}</li>
+                <li>✓ {t("j.help03")}</li>
+                <li>✓ {t("j.help04")}</li>
+                <li>✓ {t("j.help05")}</li>
+                <li>✓ {t("j.help06")}</li>
               </ul>
+              <p className="app-body mt-2 italic">{t("j.yourSubmission")}</p>
             </div>
-          </Card>
 
-          <Card className="my-4">
-            <p className="app-section-label">[ {t("j.downloadDraft")} ]</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
-              <button onClick={downloadAsTxt} className="app-primary">
-                {t("j.downloadTxt")}
+            <Card className="my-4">
+              <p className="app-section-label">[ {t("j.downloadDraft")} ]</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+                <button onClick={downloadAsTxt} className="app-primary">
+                  {t("j.downloadTxt")}
+                </button>
+                <button onClick={downloadAsMarkdown} className="app-primary">
+                  {t("j.downloadMd")}
+                </button>
+                <button onClick={downloadAsPdf} className="app-primary">
+                  {t("j.downloadPdf")}
+                </button>
+              </div>
+              <button
+                onClick={() => {
+                  navigator.clipboard?.writeText(draft);
+                  setCopied(true);
+                }}
+                className="text-sm text-stone-600 underline py-2 mt-3"
+              >
+                {copied ? t("j.finalCopied") : t("j.finalCopy")}
               </button>
-              <button onClick={downloadAsMarkdown} className="app-primary">
-                {t("j.downloadMd")}
-              </button>
-              <button onClick={downloadAsPdf} className="app-primary">
-                {t("j.downloadPdf")}
-              </button>
+            </Card>
+
+            <div className="notice-boundary mb-4">
+              <p className="app-section-label">[ IMPORTANT ]</p>
+              <p className="app-body font-medium">{t("j.finalBoundary")}</p>
+              <p className="app-body mt-2">{t("j.finalInstruction")}</p>
             </div>
-            <button
-              onClick={() => {
-                navigator.clipboard?.writeText(draft);
-                setCopied(true);
-              }}
-              className="text-sm text-stone-600 underline py-2 mt-3"
-            >
-              {copied ? t("j.finalCopied") : t("j.finalCopy")}
-            </button>
-          </Card>
 
-          <div className="notice-boundary mb-4">
-            <p className="app-section-label">[ IMPORTANT ]</p>
-            <p className="app-body font-medium">{t("j.finalBoundary")}</p>
-            <p className="app-body mt-2">{t("j.finalInstruction")}</p>
-          </div>
-
-          <div className="grid gap-2">
-            <a
-              href={OFFICIAL_EFILING_PORTAL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="app-primary text-center"
-            >
-              {t("j.continuePortal")}
-            </a>
-          </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-5">
-            <button className="app-back !mt-0" onClick={() => setPhase("review")}>← {t("j.back")}</button>
-            <Link to="/notices" className="text-sm text-stone-500 underline">
-              {t("j.restart")}
-            </Link>
+            <div className="grid gap-2">
+              <a
+                href={OFFICIAL_EFILING_PORTAL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="app-primary text-center"
+              >
+                {t("j.continuePortal")}
+              </a>
+            </div>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-5">
+              <button className="app-back !mt-0" onClick={() => setPhase("review")}>← {t("j.back")}</button>
+              <Link to="/notices" className="text-sm text-stone-500 underline">
+                {t("j.restart")}
+              </Link>
+            </div>
           </div>
         </div>
       )}
