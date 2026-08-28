@@ -49,7 +49,6 @@ function ArrowLink({ children, onClick, light = false }: { children: React.React
 export default function Landing() {
   const navigate = useNavigate();
   const { locale, setLocale, t } = useI18n();
-  const openGuide = () => navigate("/guide");
 
   return (
     <div className="tm-site">
@@ -68,7 +67,7 @@ export default function Landing() {
           <button className={locale === "en" ? "is-active" : ""} onClick={() => setLocale("en")} aria-pressed={locale === "en"}>EN</button>
           <button className={locale === "hi" ? "is-active" : ""} onClick={() => setLocale("hi")} aria-pressed={locale === "hi"} lang="hi">हिन्दी</button>
         </div>
-        <button className="tm-open" onClick={openGuide}>USE TAX MITRA <span>→</span></button>
+        <button className="tm-open" onClick={() => navigate("/login")}>{t("landing.startDemo")} <span>→</span></button>
       </header>
 
       <section className="tm-dark-hero" id="top">
@@ -113,7 +112,7 @@ export default function Landing() {
           <aside className="tm-intro-aside" aria-label="Start using Tax Mitra">
             <p className="tm-start-label"><Mark /> {locale === "hi" ? <span lang="hi">{t("landing.startHereHi")}</span> : t("landing.startHere")}</p>
             <div className="tm-intro-actions">
-              <ArrowLink onClick={openGuide}>{t("landing.useTaxMitra")}</ArrowLink>
+              <ArrowLink onClick={() => navigate("/login")}>{t("landing.startDemo")}</ArrowLink>
               <a href="/upload" className="tm-upload-action">
                 <span>{t("landing.usePdf")}</span>
                 <small lang={locale === "hi" ? "hi" : "en"}>{locale === "hi" ? t("landing.choosePdfHi") : t("landing.choosePdf")}</small>
@@ -150,7 +149,7 @@ export default function Landing() {
                     <i>→</i>
                   </summary>
                   <div className="tm-process-detail">
-                    <p>{t("landing.stepDetail")}</p>
+                    <p>{t(`landing.step${i + 1}Detail`)}</p>
                   </div>
                 </details>
               ))}
@@ -222,7 +221,7 @@ export default function Landing() {
         <section className="tm-final tm-wrap">
           <p className="tm-eyebrow">{t("landing.ready")}</p>
           <h2>{t("landing.finalTitle")}</h2>
-          <ArrowLink onClick={openGuide}>{t("landing.useTaxMitraArrow")}</ArrowLink>
+          <ArrowLink onClick={() => navigate("/login")}>{t("landing.startDemo")}</ArrowLink>
           <p>{t("landing.finalSub")}</p>
         </section>
       </main>
@@ -230,7 +229,7 @@ export default function Landing() {
       <footer className="tm-footer tm-wrap">
         <a className="tm-brand" href="#top"><Mark /><strong>Tax Mitra</strong></a>
         <p>{t("landing.footer")}</p>
-        <nav><a href="#how">{t("landing.footerLink1")}</a><a href="#india">{t("landing.footerLink2")}</a><a href="#trust">{t("landing.footerLink3")}</a><button onClick={openGuide}>{t("landing.footerButton")}</button></nav>
+        <nav><a href="#how">{t("landing.footerLink1")}</a><a href="#india">{t("landing.footerLink2")}</a><a href="#trust">{t("landing.footerLink3")}</a><button onClick={() => navigate("/login")}>{t("landing.startDemo")}</button></nav>
         <div className="tm-footer-credit">
           <span>{t("landing.builtBy")}</span>
           <a href="https://x.com/bydhruvil" target="_blank" rel="noopener noreferrer">@bydhruvil</a>
