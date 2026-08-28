@@ -55,12 +55,42 @@ def _metadata(text: str) -> dict:
 
 def _items(text: str) -> list[str]:
     lines = [_clean(line) for line in text.splitlines()]
-    starts = [i for i, line in enumerate(lines) if re.match(r"^(?:\(?\d{1,2}\)?[.)]|Q(?:uestion)?\s*\d{1,2}[.:)])\s+", line, re.I)]
+    
+    # Detect both formats: "1. Text" and "1" followed by "Text"
+    # Format 1: Number and text on same line
+    same_line_starts = [i for i, line in enumerate(lines) if re.match(r"^(?:\(?\d{1,2}\)?[.)]|Q(?:uestion)?\s*\d{1,2}[.:)])\s+", line, re.I)]
+    
+    # Format 2: Number on separate line (e.g., "1" then "Text")
+    multi_line_starts = []
+    for i, line in enumerate(lines):
+        if re.match(r"^\d{1,2}\s*$", line.strip()) and i + 1 < len(lines):
+            # Check if next line looks like item text (not another number)
+            next_line = lines[i + 1] if i + 1 < len(lines) else ""
+            if len(next_line) >= 10 and not re.match(r"^\d{1,2}\s*$", next_line.strip()):
+                multi_line_starts.append(i)
+    
+    # Combine both detection methods
+    all_starts = sorted(set(same_line_starts + multi_line_starts))
+    
     out = []
-    for pos, start in enumerate(starts):
-        end = starts[pos + 1] if pos + 1 < len(starts) else len(lines)
+    for pos, start in enumerate(all_starts):
+        end = all_starts[pos + 1] if pos + 1 < len(all_starts) else len(lines)
         value = _clean(" ".join(lines[start:end]))
+        # Remove numbering from same-line format
         value = re.sub(r"^(?:\(?\d{1,2}\)?[.)]|Q(?:uestion)?\s*\d{1,2}[.:)])\s+", "", value, flags=re.I)
+        # Remove standalone number from multi-line format
+        value = re.sub(r"^\d{1,2}\s+", "", value, flags=re.I)
+        # Remove "Pending" and similar status words that might be captured
+        value = re.sub(r"\s+(?:Pending|Status|Response\s+status)\s*$", "", value, flags=re.I)
+        # Remove trailing status words anywhere in the string
+        value = re.sub(r"\s+pending\s*", "", value, flags=re.I)
+        # Stop at footer-like content - more aggressive cleanup
+        for stop_phrase in ["submit the response", "assessing officer", "prescribed income-tax", "signature and office", "income tax department"]:
+            if stop_phrase in value.lower():
+                value = value.lower().split(stop_phrase)[0].strip()
+                break
+        # Final cleanup of any remaining trailing junk
+        value = re.sub(r"\s+", " ", value).strip()
         if len(value) >= 15:
             out.append(value)
     return out
@@ -79,6 +109,11 @@ def _classify(item: str):
         (("bank statement", "bank account"), "req_bank_statements", "Bank statements", ("kb-142-1-scrutiny-documents",)),
         (("cash deposit",), "req_cash_deposits", "Sources of cash deposits", ("kb-142-1-written-information",)),
         (("significant credit", "significant debit", "credits and debits"), "req_significant_transactions", "Significant credits and debits", ("kb-142-1-written-information",)),
+        # Additional rules for demo PDF items
+        (("ledger extract", "supporting invoices", "professional receipts"), "req_ledger_extract", "Ledger extract and supporting invoices", ("kb-142-1-scrutiny-documents",)),
+        (("high-value transactions", "ais", "sft"), "req_high_value_transactions", "Explanation of high-value transactions", ("kb-142-1-written-information",)),
+        (("tax payments", "tds", "tcs", "challan"), "req_tax_payments", "Details of tax payments and challans", ("kb-142-1-scrutiny-documents",)),
+        (("evidence", "support of the return"), "req_evidence", "Supporting evidence for the return", ("kb-142-1-scrutiny-documents",)),
     )
     for needles, kind, section, citations in rules:
         if any(needle in value for needle in needles):
