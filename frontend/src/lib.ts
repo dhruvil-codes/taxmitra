@@ -2,6 +2,20 @@
 
 export type Locale = "en" | "hi";
 
+export const OFFICIAL_EFILING_PORTAL_URL = "https://www.incometax.gov.in/iec/foportal/";
+
+export function verifiedIncomeTaxUrl(url: string): string {
+  try {
+    const candidate = new URL(url);
+    if (candidate.hostname === "www.incometax.gov.in" && candidate.pathname.startsWith("/iec/forservices")) {
+      return OFFICIAL_EFILING_PORTAL_URL;
+    }
+  } catch {
+    return url;
+  }
+  return url;
+}
+
 export interface Citizen {
   id: string;
   name: string;
@@ -27,10 +41,6 @@ export interface NoticeCard {
   income_source?: string;
   official_reference?: string;
   citizen_id?: string;
-}
-
-export function isScrutinyNotice(notice: Pick<NoticeCard, "category">): boolean {
-  return notice.category === "scrutiny_142_1";
 }
 
 export interface Citation {
@@ -64,23 +74,6 @@ export interface Question {
   options: { id: string; label: string }[];
 }
 
-export interface ScrutinyRequest {
-  request_id: string;
-  original_text: string;
-  what_department_is_asking: string;
-  expected_evidence: string[];
-  confidence: number;
-  warnings: string[];
-}
-
-export interface ScrutinyRequestsResult {
-  supported: boolean;
-  notice_id: string;
-  requests: ScrutinyRequest[];
-  extraction: { source_type: string; requires_human_confirmation: boolean; confirmed: boolean };
-  grounding?: { method: string; confidence: number; below_floor: boolean };
-}
-
 export interface ResolveResult {
   supported: boolean;
   path?: {
@@ -102,41 +95,6 @@ export interface ResolveResult {
   why?: Record<string, string>;
   suggestion?: Record<string, string>;
   official_links?: { label: Record<string, string>; url: string }[];
-}
-
-export interface ExtractionRequest {
-  request_id: string;
-  original_text: string;
-  normalized_explanation: string;
-  department_asks: string;
-  expected_evidence: string[];
-  classification_id: string;
-  response_section: string;
-  citations: Citation[];
-  confidence: number;
-  warnings: string[];
-  grounding?: { method: string; confidence: number; below_floor: boolean };
-}
-
-export interface ExtractionResult {
-  supported: boolean;
-  extraction_id?: string;
-  fingerprint?: string;
-  requires_human_confirmation?: boolean;
-  metadata?: {
-    notice_reference?: string | null;
-    section?: string | null;
-    assessment_year?: string | null;
-    response_deadline?: string | null;
-  };
-  requests?: ExtractionRequest[];
-  extraction: {
-    status: "needs_confirmation" | "refused";
-    confidence: number;
-    warnings: string[];
-    refusal_reason?: string | null;
-  };
-  grounding: { method: string; confidence: number; below_floor: boolean };
 }
 
 export class ApiError extends Error {
@@ -167,8 +125,85 @@ export class ApiError extends Error {
   }
 }
 
-export function isIntegrationError(error: unknown): boolean {
-  return error instanceof TypeError || (error instanceof ApiError && [405, 502, 503, 504].includes(error.status));
+export interface Grounding {
+  method: string;
+  confidence: number;
+  below_floor: boolean;
+}
+
+export interface ScrutinyRequest {
+  id: string;
+  request_id: string;
+  classification_id: string;
+  original_text: string;
+  plain_language_explanation: Record<string, string>;
+  why_required: Record<string, string>;
+  required_evidence: Record<string, string>[];
+  what_department_is_asking?: string;
+  expected_evidence?: Record<string, string>[];
+  response_section: string;
+  citations: Citation[];
+  confidence: number;
+  warnings: string[];
+  grounding: Grounding;
+}
+
+export interface ExtractionResult {
+  supported: boolean;
+  metadata: {
+    notice_reference: string | null;
+    section: string | null;
+    assessment_year: string | null;
+    response_deadline: string | null;
+    issue_date: string | null;
+  };
+  requests: ScrutinyRequest[];
+  extraction: {
+    status: "needs_confirmation" | "refused";
+    confidence: number;
+    warnings: string[];
+    refusal_reason: string | null;
+  };
+  grounding: Grounding;
+  extraction_id?: string;
+  fingerprint?: string;
+  requires_human_confirmation?: boolean;
+}
+
+export interface ExtractionConfirmationResult {
+  supported: boolean;
+  status: "confirmed" | "refused";
+  extraction_id?: string;
+  notice_id?: string;
+  requests?: ScrutinyRequest[];
+  reason?: string;
+}
+
+export interface ScrutinyRequestsResult {
+  supported: boolean;
+  notice_id?: string;
+  extraction?: { source_type: string; requires_human_confirmation: boolean; confirmed: boolean };
+  requests?: ScrutinyRequest[];
+  grounding?: { method: string; confidence: number; below_floor: boolean };
+  headline?: Record<string, string>;
+  why?: Record<string, string>;
+  suggestion?: Record<string, string>;
+  official_links?: { label: Record<string, string>; url: string }[];
+}
+
+export interface ScrutinyQuestion extends Question { request_id: string }
+export interface ScrutinyChecklistItem {
+  id: string;
+  request_id: string;
+  status: "yes" | "no" | "unsure";
+  title: Record<string, string>;
+  required_evidence: Record<string, string>[];
+  why_needed: Record<string, string>;
+}
+export interface ScrutinyResolveResult extends Omit<ResolveResult, "checklist" | "path"> {
+  category: string;
+  path?: { path_id: "ready_to_respond" | "needs_evidence" | "needs_review"; headline: Record<string, string>; professional_help_recommended: boolean };
+  checklist?: ScrutinyChecklistItem[];
 }
 
 function configuredApiBase(value: string | undefined): string {
@@ -200,66 +235,36 @@ function apiUrl(url: string): string {
   return `${apiBase}${url}`;
 }
 
-async function get<T>(url: string): Promise<T> {
-  const res = await fetch(apiUrl(url));
-  if (!res.ok) throw new ApiError(url, res.status, await readError(res));
+async function request<T>(url: string, init?: RequestInit): Promise<T> {
+  const fullUrl = apiUrl(url);
+  const res = await fetch(fullUrl, init);
+  if (!res.ok) {
+    let detail = `Request failed (${res.status})`;
+    try { detail = (await res.json()).detail ?? detail; } catch { /* non-JSON response */ }
+    if (import.meta.env.DEV) {
+      console.error("API request failed:", { url: fullUrl, status: res.status, detail });
+    }
+    throw new ApiError(url, res.status, detail);
+  }
   return res.json();
 }
 
-async function post<T>(url: string, body: unknown): Promise<T> {
-  const res = await fetch(apiUrl(url), {
+async function get<T>(url: string, signal?: AbortSignal): Promise<T> {
+  return request<T>(url, { signal });
+}
+
+async function post<T>(url: string, body: unknown, signal?: AbortSignal): Promise<T> {
+  return request<T>(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    signal,
   });
-  if (!res.ok) throw new ApiError(url, res.status, await readError(res));
-  return res.json();
-}
-
-async function readError(res: Response): Promise<unknown> {
-  try {
-    return await res.json();
-  } catch {
-    return await res.text();
-  }
-}
-
-async function extractPdf(file: File): Promise<ExtractionResult> {
-  const form = new FormData();
-  form.append("file", file, file.name);
-  // Do not set Content-Type here: the browser adds multipart/form-data and its boundary.
-  const url = apiUrl("/api/scrutiny/extract");
-  if (import.meta.env.DEV) {
-    console.log("Extraction request:", {
-      url,
-      method: "POST",
-      file: file.name,
-      size: file.size,
-      type: file.type,
-      apiBase,
-    });
-  }
-  const res = await fetch(url, {
-    method: "POST",
-    body: form,
-  });
-  if (!res.ok) {
-    const errorDetail = await readError(res);
-    if (import.meta.env.DEV) {
-      console.error("Extraction failed:", {
-        url,
-        status: res.status,
-        detail: errorDetail,
-      });
-    }
-    throw new ApiError("/api/scrutiny/extract", res.status, errorDetail);
-  }
-  return res.json();
 }
 
 export const api = {
   citizens: () => get<Citizen[]>("/api/citizens"),
-  notices: (citizenId?: string) => get<NoticeCard[]>(citizenId ? `/api/notices?citizen_id=${citizenId}` : "/api/notices"),
+  notices: (citizenId: string) => get<NoticeCard[]>(`/api/notices?citizen_id=${citizenId}`),
   notice: (id: string) => get<NoticeCard>(`/api/notices/${id}`),
   explanation: (id: string, locale: Locale) =>
     get<Explanation>(`/api/ai/explanation/${id}?locale=${locale}`),
@@ -267,12 +272,30 @@ export const api = {
     get<{ questions: Question[] }>(`/api/workflow/questions/${id}?locale=${locale}`),
   resolve: (noticeId: string, answers: Record<string, string>) =>
     post<ResolveResult>("/api/workflow/resolve", { notice_id: noticeId, answers }),
-  scrutinyRequests: (id: string, locale: Locale) => get<ScrutinyRequestsResult>(`/api/scrutiny/${id}/requests?locale=${locale}`),
-  scrutinyQuestions: (id: string, locale: Locale) => get<{ questions: Question[] }>(`/api/scrutiny/${id}/questions?locale=${locale}`),
-  scrutinyResolve: (noticeId: string, answers: Record<string, string>) => post<ResolveResult>("/api/scrutiny/resolve", { notice_id: noticeId, answers }),
-  confirmExtraction: (extractionId: string, fingerprint: string) => post<{ supported: boolean; notice_id: string }>("/api/scrutiny/confirm", { extraction_id: extractionId, fingerprint, confirmed: true }),
   refusal: (id: string) => get<ResolveResult>(`/api/notices/${id}/refusal`),
-  extractPdf,
+  extractScrutiny: (file: File, signal?: AbortSignal) => {
+    const body = new FormData();
+    body.append("file", file);
+    const url = "/api/scrutiny/extract";
+    if (import.meta.env.DEV) {
+      console.log("Extraction request:", {
+        url,
+        method: "POST",
+        file: file.name,
+        size: file.size,
+        type: file.type,
+      });
+    }
+    return request<ExtractionResult>(url, { method: "POST", body, signal });
+  },
+  confirmExtraction: (extractionId: string, fingerprint: string, confirmed: boolean, signal?: AbortSignal) =>
+    post<ExtractionConfirmationResult>("/api/scrutiny/confirm", { extraction_id: extractionId, fingerprint, confirmed }, signal),
+  scrutinyRequests: (id: string, locale: Locale, extractionConfirmed = true, signal?: AbortSignal) =>
+    get<ScrutinyRequestsResult>(`/api/scrutiny/${id}/requests?locale=${locale}&extraction_confirmed=${extractionConfirmed}`, signal),
+  scrutinyQuestions: (id: string, locale: Locale, extractionConfirmed = true, signal?: AbortSignal) =>
+    get<{ supported: boolean; questions: ScrutinyQuestion[] }>(`/api/scrutiny/${id}/questions?locale=${locale}&extraction_confirmed=${extractionConfirmed}`, signal),
+  resolveScrutiny: (noticeId: string, answers: Record<string, string>, extractionConfirmed = true, signal?: AbortSignal) =>
+    post<ScrutinyResolveResult>("/api/scrutiny/resolve", { notice_id: noticeId, answers, extraction_confirmed: extractionConfirmed }, signal),
 };
 
 // --- journey state ---
@@ -310,6 +333,24 @@ export const store = {
   },
   setDraft(noticeId: string, draft: string) {
     localStorage.setItem(`taxmitra.draft.${noticeId}`, draft);
+  },
+  scrutinyStage(noticeId: string): string {
+    return read(`taxmitra.scrutiny.stage.${noticeId}`) || "requests";
+  },
+  setScrutinyStage(noticeId: string, stage: string) {
+    localStorage.setItem(`taxmitra.scrutiny.stage.${noticeId}`, stage);
+  },
+  extractionConfirmed(noticeId: string): boolean {
+    return read(`taxmitra.scrutiny.confirmed.${noticeId}`) === "true";
+  },
+  setExtractionConfirmed(noticeId: string, confirmed: boolean) {
+    localStorage.setItem(`taxmitra.scrutiny.confirmed.${noticeId}`, String(confirmed));
+  },
+  uploadedNoticeId(): string | null {
+    return read("taxmitra.scrutiny.uploadedNoticeId");
+  },
+  setUploadedNoticeId(noticeId: string) {
+    localStorage.setItem("taxmitra.scrutiny.uploadedNoticeId", noticeId);
   },
   reset() {
     Object.keys(localStorage)
