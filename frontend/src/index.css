@@ -145,6 +145,7 @@ button, a { font: inherit; }
 /* Application detail system */
 .app-page { min-height: calc(100vh - 130px); }
 .app-page > .app-stepper:first-child { margin-bottom: 52px; }
+.app-content-spacing { margin-top: 32px; }
 .app-body { margin: 0; color: #434955; font-size: 14px; line-height: 1.65; }
 .app-text-action, .official-links a, .source-footer a { color: var(--tm-blue); text-decoration: none; font: 600 10px var(--font-mono); }
 .app-text-action:hover, .official-links a:hover, .source-footer a:hover { text-decoration: underline; text-underline-offset: 4px; }

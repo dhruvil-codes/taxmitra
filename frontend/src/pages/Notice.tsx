@@ -26,66 +26,65 @@ export default function Notice() {
     <div className="app-page">
       <p className="app-eyebrow">[ TM / NOTICE / 01 ]</p>
       <h1 className="app-title">{notice.title[locale] ?? notice.title.en}</h1>
+      <p className="app-lead">{notice.section} · AY {notice.assessment_year}</p>
       <Stepper current={0} />
-      <h2 className="text-2xl font-medium leading-snug mb-1">{t("notice.plain")}</h2>
-      <p className="text-sm text-stone-500 mb-4">
-        {notice.section} · AY {notice.assessment_year}
-      </p>
 
-      <div className="mb-3">
-        <SavedGuidanceBadge show={explanation?.demo_mode || explanation?.source === "static"} />
-      </div>
-
-      <Card className="mb-4 app-dots">
-        <p className="app-section-label">[ IN PLAIN LANGUAGE ]</p>
-        <p className="text-stone-700 leading-relaxed">
-          {explanation?.content.plain_language ?? "…"}
-        </p>
-        <div className="notice-boundary">
-          <p className="app-section-label">[ {t("notice.notMean")} ]</p>
-          <p className="app-body">{explanation?.content.what_this_does_not_mean ?? "…"}</p>
+      <div className="app-content-spacing">
+        <div className="mb-3">
+          <SavedGuidanceBadge show={explanation?.demo_mode || explanation?.source === "static"} />
         </div>
-      </Card>
 
-      {explanation && explanation.content.possible_reasons.length > 0 && (
-        <Card className="mb-4">
-          <h2 className="app-section-label">[ {t("notice.reasons")} ]</h2>
-          <ol className="reason-list">
-            {explanation.content.possible_reasons.map((r, i) => <li key={i}><span>{String(i + 1).padStart(2, "0")}</span>{r}</li>)}
-          </ol>
-        </Card>
-      )}
-
-      <Card className="mb-4">
-        <button
-          onClick={() => setShowOfficial(!showOfficial)}
-          className="app-text-action"
-          aria-expanded={showOfficial}
-        >
-          {showOfficial ? t("notice.officialHide") : t("notice.officialShow")}
-        </button>
-        {showOfficial && (
-          <div className="mt-3 text-xs text-stone-600 bg-stone-50 border border-stone-200  p-3 whitespace-pre-line max-h-72 overflow-y-auto">
-            {notice.official_text}
-          </div>
-        )}
-      </Card>
-
-      {explanation && (
-        <Card className="mb-4">
-          <CitationChips citations={explanation.citations} />
-          <p className="mt-3 text-[11px] text-stone-500 leading-relaxed">
-            {explanation.scope_statement[locale] ?? explanation.scope_statement.en}
+        <Card className="mb-5 app-dots">
+          <p className="app-section-label">[ IN PLAIN LANGUAGE ]</p>
+          <p className="text-stone-700 leading-relaxed">
+            {explanation?.content.plain_language ?? "…"}
           </p>
+          <div className="notice-boundary">
+            <p className="app-section-label">[ {t("notice.notMean")} ]</p>
+            <p className="app-body">{explanation?.content.what_this_does_not_mean ?? "…"}</p>
+          </div>
         </Card>
-      )}
 
-      <Link
-        to={`/notices/${id}/journey`}
-        className="app-primary"
-      >
-        {t("notice.continue")} →
-      </Link>
+        <Link
+          to={`/notices/${id}/journey`}
+          className="app-primary mb-5"
+        >
+          {t("notice.continue")} →
+        </Link>
+
+        {explanation && explanation.content.possible_reasons.length > 0 && (
+          <Card className="mb-4">
+            <h2 className="app-section-label">[ {t("notice.reasons")} ]</h2>
+            <ol className="reason-list">
+              {explanation.content.possible_reasons.map((r, i) => <li key={i}><span>{String(i + 1).padStart(2, "0")}</span>{r}</li>)}
+            </ol>
+          </Card>
+        )}
+
+        <Card className="mb-4">
+          <button
+            onClick={() => setShowOfficial(!showOfficial)}
+            className="app-text-action"
+            aria-expanded={showOfficial}
+          >
+            {showOfficial ? t("notice.officialHide") : t("notice.officialShow")}
+          </button>
+          {showOfficial && (
+            <div className="mt-3 text-xs text-stone-600 bg-stone-50 border border-stone-200  p-3 whitespace-pre-line max-h-72 overflow-y-auto">
+              {notice.official_text}
+            </div>
+          )}
+        </Card>
+
+        {explanation && (
+          <Card className="mb-4">
+            <CitationChips citations={explanation.citations} />
+            <p className="mt-3 text-[11px] text-stone-500 leading-relaxed">
+              {explanation.scope_statement[locale] ?? explanation.scope_statement.en}
+            </p>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
