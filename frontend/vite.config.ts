@@ -40,5 +40,8 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    build: {
+      copyPublicDir: true,
+    },
   };
 });
