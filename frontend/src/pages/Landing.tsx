@@ -139,7 +139,7 @@ export default function Landing() {
           <div className="tm-wrap tm-process-grid">
             <div>
               <p className="tm-eyebrow tm-eyebrow-dark">[ 02 / HOW IT WORKS ]</p>
-              <h2>{t("landing.howTitle")}</h2>
+              <h2 dangerouslySetInnerHTML={{ __html: t("landing.howTitle") }} />
             </div>
             <div className="tm-process-list">
               {steps.map((step, i) => (
