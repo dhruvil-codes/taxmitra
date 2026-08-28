@@ -34,8 +34,6 @@ tax-mitra/
 │   └── tests/               # pytest suite
 ├── frontend/                # React + TypeScript + Vite mobile-first UI
 │   └── src/{pages,components,locales,lib}
-├── docs/                    # Legal verification checklist, architecture notes
-├── BUILD_LOG.md             # AI-assisted build journal (generated/reviewed/rejected)
 └── README.md
 ```
 

@@ -16,6 +16,10 @@ venv/
 node_modules/
 *.log
 
+# Build outputs
+frontend/dist/
+frontend/.vite/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -23,3 +27,8 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# AI agent generated
+.agents/
+.tmp/
+skills-lock.json
