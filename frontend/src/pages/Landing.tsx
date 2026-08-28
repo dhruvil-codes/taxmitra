@@ -74,7 +74,7 @@ export default function Landing() {
       <section className="tm-dark-hero" id="top">
         <div className="tm-hero-copy">
           <p className="tm-eyebrow tm-eyebrow-dark">◆ BUILT FOR INDIAN TAXPAYERS</p>
-          <h1>Tax Mitra</h1>
+          <h1 className="tm-hero-title"><span className="tm-hero-text">Tax Mitra</span></h1>
           <p className="tm-hero-lede">Your tax notice, made understandable. Simple guidance for what happened, what you need, and what to do next.</p>
           <p className="tm-meta">TM / NOTICE / 2026 · INDEPENDENT PROTOTYPE · SYNTHETIC DATA</p>
         </div>
