@@ -3,11 +3,14 @@ from __future__ import annotations
 
 import hashlib
 import io
+import logging
 import re
 from dataclasses import dataclass
 from datetime import date
 
 from pypdf import PdfReader
+
+logger = logging.getLogger(__name__)
 
 MAX_PDF_BYTES = 10 * 1024 * 1024
 
@@ -93,7 +96,12 @@ def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
         return PdfExtraction({}, (), "", 0, 0, "lexical", True, ("The PDF exceeds the 10 MB limit.",), "file_too_large")
     try:
         reader = PdfReader(io.BytesIO(content), strict=False)
+        page_count = len(reader.pages)
         text = "\n".join("\n".join(_clean(line) for line in (page.extract_text() or "").splitlines()) for page in reader.pages)
+        logger.info(f"PyPDF EXTRACTION: pages={page_count}, text_length={len(text)}, is_empty={len(text.strip()) == 0}")
+        if len(text) > 0:
+            preview = text[:200].replace('\n', ' ') if len(text) > 200 else text.replace('\n', ' ')
+            logger.info(f"TEXT PREVIEW: {preview}")
     except Exception:
         return PdfExtraction({}, (), "", 0, 0, "lexical", True, ("The PDF could not be read safely.",), "malformed_pdf")
     text = text.strip()
@@ -103,16 +111,27 @@ def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
     if metadata["section"] != "142(1)":
         return PdfExtraction(metadata, (), text, 0, 0, "lexical", True, ("Only Section 142(1) scrutiny notices are supported in V1.",), "unsupported_notice")
     items = _items(text)
+    logger.info(f"DETECTED NUMBERED ITEMS: count={len(items)}")
+    # Log retrieval method before processing items
+    import os
+    vectors_path = os.path.join(os.path.dirname(__file__), "..", "knowledge", "vectors.json")
+    vectors_exists = os.path.exists(vectors_path)
+    logger.info(f"RETRIEVAL SETUP: vectors.json_exists={vectors_exists}, path={vectors_path}")
     extracted, scores, warnings = [], [], []
-    for item in items:
+    for idx, item in enumerate(items):
+        truncated = item[:100] if len(item) > 100 else item
+        logger.info(f"ITEM[{idx}]: {truncated}")
         classified = _classify(item)
         if not classified:
+            logger.info(f"CLASSIFICATION[{idx}]: UNCLASSIFIED - item_truncated={item[:50]}")
             if _is_heading(item):
                 continue
             warnings.append("One numbered item could not be classified safely.")
             return PdfExtraction(metadata, (), text, 0, 0, "lexical", True, tuple(warnings), "unsupported_request")
         kind, response_section, citations = classified
+        logger.info(f"CLASSIFICATION[{idx}]: SUCCESS - kind={kind}, response_section={response_section}")
         result = ground_query("section 142(1) accounts documents verified written information " + item)
+        logger.info(f"GROUNDING[{idx}]: method={result.method}, confidence={result.confidence:.3f}, below_floor={result.below_floor}")
         scores.append(result.confidence)
         authoritative = [chunk.id for chunk in result.chunks if chunk.verification_status == "VERIFIED_OFFICIAL" and chunk.status == "CURRENT"]
         if not authoritative:
@@ -127,7 +146,16 @@ def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
             "confidence": round(min(0.98, 0.72 + (0.20 if result.confidence >= 0.25 else 0)), 3),
             "warnings": ["Grounding is below the confidence floor; confirm this item carefully."] if result.below_floor else [],
         })
+    logger.info(f"CLASSIFICATION COMPLETE: classified_items={len(extracted)}, total_items={len(items)}")
     if not extracted:
+        reason = "no_supported_requests"
+        if len(items) == 0:
+            reason = "no_supported_requests_no_items_detected"
+        elif len(warnings) > 0:
+            reason = f"no_supported_requests_classification_failed: {warnings[0]}"
+        else:
+            reason = "no_supported_requests_empty_extraction"
+        logger.error(f"NO_SUPPORTED_REQUESTS: detected_items={len(items)}, classified_items={len(extracted)}, reason={reason}")
         return PdfExtraction(metadata, (), text, 0, 0, "lexical", True, tuple(warnings) or ("No supported numbered scrutiny requests were found.",), "no_supported_requests")
     grounding = min(scores)
     warnings = list(dict.fromkeys(warnings))

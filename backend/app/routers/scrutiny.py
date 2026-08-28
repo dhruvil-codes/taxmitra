@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 import os
 
 from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 from app.config import get_settings
 from app.data_store import get_notice
@@ -70,9 +73,11 @@ def _scrutiny_notice(notice_id: str) -> dict:
 
 @router.post("/extract")
 async def extract(file: UploadFile = File(...)):
+    logger.info(f"PDF EXTRACTION START: filename={file.filename}, content_type={file.content_type}")
     if file.content_type != "application/pdf":
         raise HTTPException(status_code=415, detail="Only application/pdf is accepted")
     content = await file.read(MAX_PDF_BYTES + 1)
+    logger.info(f"PDF BYTES RECEIVED: size={len(content)} bytes, file_successfully_read={len(content) > 0}")
     settings = get_settings()
     result = extract_pdf(content, lambda query: ground(settings, query))
     preview_notice = {
