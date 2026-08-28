@@ -297,12 +297,12 @@ ${draft}
         <div className="value-summary my-6">
           <p className="app-section-label">{t("j.whatTaxMitraDid")}</p>
           <ul className="value-list">
-            <li>✓ {t("j.help01")}</li>
-            <li>✓ {t("j.help02")}</li>
-            <li>✓ {t("j.help03")}</li>
-            <li>✓ {t("j.help04")}</li>
-            <li>✓ {t("j.help05")}</li>
-            <li>✓ {t("j.help06")}</li>
+            <li>{t("j.help01")}</li>
+            <li>{t("j.help02")}</li>
+            <li>{t("j.help03")}</li>
+            <li>{t("j.help04")}</li>
+            <li>{t("j.help05")}</li>
+            <li>{t("j.help06")}</li>
           </ul>
           <p className="app-body mt-2 italic">{t("j.yourSubmission")}</p>
         </div>
