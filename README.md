@@ -6,7 +6,7 @@ Turn confusing Indian income-tax notices into clear explanations, personalized c
 
 ---
 
-![Tax Mitra Hero Banner](hero-banner.svg)
+<img width="1843" height="951" alt="Tax Mitra Hero Screenshot" src="https://github.com/user-attachments/assets/f5b6f8f5-3239-4f47-9c2d-1130eeecd6c3" />
 
 ---
 
