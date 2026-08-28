@@ -133,6 +133,63 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
             {"en": "Invoices, agreements, confirmations, receipts, or ledger extracts", "hi": "इनवॉइस, अनुबंध, पुष्टि, रसीदें या लेजर अंश"},
         ),
     },
+    # Additional request types for demo PDF items
+    "req_ledger_extract": {
+        "plain": {
+            "en": "The officer wants a ledger extract showing professional receipts and supporting invoices.",
+            "hi": "अधिकारी पेशेवरियल रसीदें और सहायक इनवॉइस दिखाने वाला लेजर अंश चाहते हैं।",
+        },
+        "why": {
+            "en": "Ledger extracts help verify the accuracy of reported professional income and reconcile it with invoices.",
+            "hi": "लेजर अंश रिपोर्ट किए गए पेशेवरियल आय की सटीकता की पुष्टि करने और इनवॉइस से मिलाने में मदद करते हैं।",
+        },
+        "evidence": (
+            {"en": "Ledger extract for professional receipts", "hi": "पेशेवरियल रसीदें का लेजर अंश"},
+            {"en": "Supporting invoices for professional receipts", "hi": "पेशेवरियल रसीदें की सहायक इनवॉइस"},
+        ),
+    },
+    "req_high_value_transactions": {
+        "plain": {
+            "en": "The officer wants an explanation for high-value transactions appearing in AIS / SFT.",
+            "hi": "अधिकारी AIS / SFT में दिखाई देने वाले उच्च-मूल्य लेनदेन का स्पष्टीकरण चाहते हैं।",
+        },
+        "why": {
+            "en": "High-value transactions in AIS/SFT may indicate income that needs explanation to match reported figures.",
+            "hi": "AIS/SFT में उच्च-मूल्य लेनदेन रिपोर्ट किए गए आंकड़ों से मेल खाते हो सकते हैं, इसलिए स्पष्टीकरण चाहिए।",
+        },
+        "evidence": (
+            {"en": "Explanation for each high-value transaction", "hi": "हर उच्च-मूल्य लेनदेन का स्पष्टीकरण"},
+            {"en": "Supporting documents for the transactions", "hi": "लेनदेन के लिए सहायक दस्तावेज़"},
+        ),
+    },
+    "req_tax_payments": {
+        "plain": {
+            "en": "The officer wants details of tax payments, TDS, TCS, and challan numbers.",
+            "hi": "अधिकारी कर भुगतान, TDS, TCS और चल्लन नंबर का विवरण चाहते हैं।",
+        },
+        "why": {
+            "en": "Tax payment details help verify that advance tax and withheld taxes match the return figures.",
+            "hi": "कर भुगतान का विवरण यह सत्यापित करने में मदद करता है कि अग्रिम कर और काटे गए कर रिटर्न आंकड़ों से मेल खाते हैं।",
+        },
+        "evidence": (
+            {"en": "Challan copies for tax payments", "hi": "कर भुगतान के लिए चल्लन की प्रतियां"},
+            {"en": "Form 26AS / AIS showing TDS/TCS", "hi": "TDS/TCS दिखाने वाला Form 26AS / AIS"},
+        ),
+    },
+    "req_evidence": {
+        "plain": {
+            "en": "The officer wants any other evidence relied upon in support of the return.",
+            "hi": "अधिकारी रिटर्न के समर्थन में भरोसे किए गए किसी भी अन्य प्रमाण चाहते हैं।",
+        },
+        "why": {
+            "en": "Additional evidence supports the accuracy and completeness of the filed return.",
+            "hi": "अतिरिक्त प्रमाण दाखिल किए गए रिटर्न की सटीकता और पूर्णता का समर्थन करते हैं।",
+        },
+        "evidence": (
+            {"en": "Any supporting documents referenced in the return", "hi": "रिटर्न में संदर्भित किसी भी सहायक दस्तावेज़"},
+            {"en": "Records that support claimed deductions or exemptions", "hi": "दावा किए गए कटौट या छूट का समर्थन करने वाले रिकॉर्ड"},
+        ),
+    },
 }
 
 
