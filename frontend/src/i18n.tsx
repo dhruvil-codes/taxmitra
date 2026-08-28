@@ -42,6 +42,9 @@ const en: Dict = {
   "landing.meta": "TM / NOTICE / 2026 · INDEPENDENT PROTOTYPE · SYNTHETIC DATA",
   "landing.scroll": "SCROLL FOR CLARITY ↓",
   "landing.principles": "→ AI EXPLAINS → RULES DECIDE → HUMANS APPROVE → NO AUTOMATIC SUBMISSIONS",
+  "landing.introTitle": "Understand your [ tax notice ] without the confusion.",
+  "landing.introTitleHi": "अपनी [ टैक्स नोटिस ] को बिना किसी भ्रम के समझें।",
+
   "landing.startHere": "START HERE",
   "landing.startHereHi": "यहाँ से शुरू करें",
   "landing.useTaxMitra": "USE TAX MITRA",

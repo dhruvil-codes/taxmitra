@@ -38,6 +38,18 @@ function Mark() {
   return <span className="tm-mark" aria-hidden="true">त</span>;
 }
 
+function AnimatedText({ text }: { text: string }) {
+  return (
+    <span className="tm-hero-text">
+      {text.split('').map((char, i) => (
+        <span key={i} style={{ animationDelay: `${0.3 + i * 0.03}s` }}>
+          {char === ' ' ? '\u00A0' : char}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 function ArrowLink({ children, onClick, light = false }: { children: React.ReactNode; onClick?: () => void; light?: boolean }) {
   return (
     <button className={`tm-button${light ? " tm-button-light" : ""}`} onClick={onClick}>
@@ -74,7 +86,7 @@ export default function Landing() {
       <section className="tm-dark-hero" id="top">
         <div className="tm-hero-copy">
           <p className="tm-eyebrow tm-eyebrow-dark">{t("landing.eyebrow")}</p>
-          <h1 className="tm-hero-title"><span className="tm-hero-text">{t("landing.heroTitle")}</span></h1>
+          <h1 className="tm-hero-title"><AnimatedText text={t("landing.heroTitle")} /></h1>
           <p className="tm-hero-lede">{t("landing.heroLede")}</p>
           <p className="tm-meta">{t("landing.meta")}</p>
         </div>
@@ -85,14 +97,20 @@ export default function Landing() {
       </section>
 
       <div className="tm-principles" aria-label="Product principles">
-        <span>{t("landing.principles")}</span>
+        {t("landing.principles").split(" → ").map((item: string, i: number, arr: string[]) => (
+          <span key={i}>{item}{i < arr.length - 1 ? " → " : ""}</span>
+        ))}
       </div>
 
       <main>
         <section className="tm-intro tm-wrap" id="india">
           <div>
             <p className="tm-eyebrow">[ TM / GUIDE / 01 ]</p>
-            <h2>Understand your<br/><em>[ tax notice ]</em><br/>without the<br/>confusion.</h2>
+            {locale === "hi" ? (
+              <h2>अपनी<br/><em>[ टैक्स नोटिस ]</em><br/>को बिना किसी<br/>भ्रम के समझें।</h2>
+            ) : (
+              <h2>Understand your<br/><em>[ tax notice ]</em><br/>without the<br/>confusion.</h2>
+            )}
           </div>
           <aside className="tm-intro-aside" aria-label="Start using Tax Mitra">
             <p className="tm-start-label"><Mark /> {locale === "hi" ? <span lang="hi">{t("landing.startHereHi")}</span> : t("landing.startHere")}</p>
