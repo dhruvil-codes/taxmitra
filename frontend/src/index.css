@@ -37,17 +37,14 @@ button, a { font: inherit; }
 .tm-hero-title { position: relative; display: inline-block; }
 .tm-hero-text { 
   display: inline-block;
-  background: linear-gradient(90deg, #fff 0%, #fff 50%, #fff 50%, #fff 100%);
-  background-size: 200% 100%;
-  background-position: 100% 0;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  opacity: 0;
+  transform: translateY(20px);
   animation: textReveal 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.3s;
 }
 @keyframes textReveal {
-  0% { background-position: 100% 0; }
-  100% { background-position: 0 0; }
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 .tm-hero-lede { max-width: 420px; margin: 15px 0; color: #d5d7dc; font-size: 13px; line-height: 1.55; }
 .tm-meta { margin: 0; color: #777f8e; font: 7px var(--font-mono); }
