@@ -38,12 +38,12 @@ _Q_INCOME_MISMATCH: tuple[Question, ...] = (
     Question(
         id="q1_received",
         text={
-            "en": "Did you receive this {amount}?",
-            "hi": "क्या आपको यह {amount} प्राप्त हुआ था?",
+            "en": "Does the Department's reported {amount} match your records?",
+            "hi": "क्या विभाग की रिपोर्ट की गई {amount} आपके रिकॉर्ड से मेल खाती है?",
         },
         help={
-            "en": "Check the income source mentioned in the notice against your bank records.",
-            "hi": "नोटिस में बताई गई आय स्रोत को अपने बैंक रिकॉर्ड से मिलाइए।",
+            "en": "Check the Department's stated amount and income source against your bank records and actual receipts.",
+            "hi": "विभाग की बताई राशि और आय स्रोत को अपने बैंक रिकॉर्ड और वास्तविक प्राप्तियों से मिलाइए।",
         },
     ),
     Question(
@@ -60,8 +60,8 @@ _Q_INCOME_MISMATCH: tuple[Question, ...] = (
     Question(
         id="q3_documents",
         text={
-            "en": "Do you have a document that supports your answer?",
-            "hi": "क्या आपके पास अपने उत्तर के समर्थन में कोई दस्तावेज़ है?",
+            "en": "Do you have a document that supports your stated position?",
+            "hi": "क्या आपके पास अपनी बताई स्थिति के समर्थन में कोई दस्तावेज़ है?",
         },
         help={
             "en": "For example: a bank statement, interest certificate, or your return's computation.",

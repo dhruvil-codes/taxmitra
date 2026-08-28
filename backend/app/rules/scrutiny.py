@@ -244,12 +244,12 @@ def scrutiny_questions(requests: tuple[ScrutinyRequest, ...]) -> tuple[ScrutinyQ
             id=f"evidence_{request.id}",
             request_id=request.id,
             text={
-                "en": f"Do you have the documents or explanation for: {request.response_section}?",
-                "hi": f"क्या आपके पास इसके लिए दस्तावेज़ या स्पष्टीकरण है: {request.response_section}?",
+                "en": f"Does the Department's request match your records for: {request.response_section}?",
+                "hi": f"क्या विभाग का अनुरोध आपके रिकॉर्ड से मेल खाता है: {request.response_section}?",
             },
             help={
-                "en": "Answer only from records you actually have. Choose 'I'm not sure' if you need to verify.",
-                "hi": "केवल अपने वास्तविक रिकॉर्ड के आधार पर उत्तर दें। जांच करनी हो तो 'मुझे पक्का नहीं है' चुनें।",
+                "en": "Check the Department's stated requirement against your actual records. 'Yes' means it matches, 'No' means it does not match, 'I'm not sure' means you need to verify.",
+                "hi": "विभाग की बताई आवश्यकता को अपने वास्तविक रिकॉर्ड से मिलाइए। 'हाँ' का मतलब है यह मेल खाता है, 'नहीं' का मतलब है यह मेल नहीं खाता, 'मुझे पक्का नहीं है' का मतलब है आपको सत्यापित करने की जरूरत है।",
             },
             options=_OPTIONS,
         )
@@ -380,17 +380,17 @@ def insufficient_information_refusal(reason: str) -> dict:
 def _headline(path: str) -> Text:
     if path == "ready_to_respond":
         return {
-            "en": "You appear ready to prepare a response package",
-            "hi": "आप उत्तर पैकेज तैयार करने के लिए तैयार लगते हैं",
+            "en": "You confirmed the Department's requests match your records",
+            "hi": "आपने पुष्टि की कि विभाग के अनुरोध आपके रिकॉर्ड से मेल खाते हैं",
         }
     if path == "needs_evidence":
         return {
-            "en": "Collect the missing evidence before submitting",
-            "hi": "जमा करने से पहले छूटे हुए प्रमाण इकट्ठा करें",
+            "en": "You identified discrepancies that need clarification",
+            "hi": "आपने विसंगतियां पहचानी हैं जिनकी स्पष्टीकरण चाहिए",
         }
     return {
-        "en": "Some items need verification or professional review",
-        "hi": "कुछ मदों की जांच या विशेषज्ञ समीक्षा चाहिए",
+        "en": "You indicated some items need verification from your records",
+        "hi": "आपने बताया कि कुछ मदों की आपके रिकॉर्ड से जांच चाहिए",
     }
 
 
@@ -399,9 +399,9 @@ def _checklist(requests: tuple[ScrutinyRequest, ...], statuses: dict[str, str]) 
     for request in requests:
         answer = statuses[request.id]
         prefix = {
-            ANSWER_YES: {"en": "Attach", "hi": "संलग्न करें"},
-            ANSWER_NO: {"en": "Obtain", "hi": "प्राप्त करें"},
-            ANSWER_UNSURE: {"en": "Verify", "hi": "जांच करें"},
+            ANSWER_YES: {"en": "Attach matching records", "hi": "मेल खाते रिकॉर्ड संलग्न करें"},
+            ANSWER_NO: {"en": "Clarify discrepancy", "hi": "विसंगति स्पष्ट करें"},
+            ANSWER_UNSURE: {"en": "Verify from records", "hi": "रिकॉर्ड से सत्यापित करें"},
         }[answer]
         items.append(
             {
@@ -426,7 +426,7 @@ def _draft(notice: dict, requests: tuple[ScrutinyRequest, ...], statuses: dict[s
         "Respected Sir/Madam,",
         "",
         f"I refer to the notice dated {notice.get('issue_date', '')} requiring information and documents for Assessment Year {notice.get('assessment_year', '')}.",
-        "This draft is structured request-wise and should be reviewed against the taxpayer's actual records before upload.",
+        "This draft is structured request-wise and reflects the taxpayer's stated position based on their records.",
         "",
     ]
     for index, request in enumerate(requests, start=1):
@@ -434,11 +434,11 @@ def _draft(notice: dict, requests: tuple[ScrutinyRequest, ...], statuses: dict[s
         lines.extend([f"{index}. {request.response_section}", f"Original request: {request.original_text}"])
         if answer == ANSWER_YES:
             evidence = "; ".join(item["en"] for item in request.required_evidence)
-            lines.append(f"Response: The relevant records are available and should be enclosed: {evidence}.")
+            lines.append(f"Response: The Department's request matches my records. The relevant documents are enclosed: {evidence}.")
         elif answer == ANSWER_NO:
-            lines.append("Response: The relevant records are being obtained. Do not submit this section as complete until the evidence is available.")
+            lines.append("Response: The Department's request does not match my records. The discrepancy is being clarified and supporting evidence will be provided once verified.")
         else:
-            lines.append("Response: The item needs verification from records. Consider professional review before taking a final position.")
+            lines.append("Response: The information requires verification from my records. I am currently reviewing the relevant documents before taking a final position. Consider professional review before finalizing.")
         lines.append("")
     if due:
         lines.append(f"Response deadline shown on the synthetic notice: {due}.")

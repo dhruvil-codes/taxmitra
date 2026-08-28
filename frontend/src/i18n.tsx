@@ -256,7 +256,7 @@ const en: Dict = {
   "scrutiny.confirmSub": "Compare all {count} requests with the original wording. Do not confirm if anything is missing or incorrect.",
   "scrutiny.yesCorrect": "YES, IT LOOKS CORRECT",
   "scrutiny.somethingWrong": "SOMETHING LOOKS WRONG",
-  "scrutiny.questionTitle": "Check your records",
+  "scrutiny.questionTitle": "Check the Department's request against your records",
   "scrutiny.questionProgress": "QUESTION",
   "scrutiny.evidenceCheck": "EVIDENCE CHECK",
   "scrutiny.resultTitle": "REVIEW RESPONSE DRAFT",

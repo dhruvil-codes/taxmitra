@@ -85,8 +85,8 @@ def test_resolve_no_marks_missing_evidence_without_inventing_facts():
     assert body["path"]["path_id"] == "needs_evidence"
     cash = next(item for item in body["checklist"] if item["request_id"] == "req_cash_deposits")
     assert cash["status"] == "no"
-    assert cash["title"]["en"].startswith("Obtain:")
-    assert "being obtained" in body["draft"]
+    assert cash["title"]["en"].startswith("Clarify discrepancy:")
+    assert "does not match my records" in body["draft"]
 
 
 def test_resolve_unsure_takes_safe_review_path():
@@ -95,6 +95,7 @@ def test_resolve_unsure_takes_safe_review_path():
     body = client.post("/api/scrutiny/resolve", json={"notice_id": "N-2026-003", "answers": answers}).json()
     assert body["path"]["path_id"] == "needs_review"
     assert body["path"]["professional_help_recommended"] is True
+    assert "requires verification from my records" in body["draft"]
     assert "professional review" in body["draft"]
 
 
