@@ -7,6 +7,7 @@ const en: Dict = {
   "app.name": "Tax Mitra",
   "app.tagline": "Your tax notice, made understandable.",
   "banner": "Independent prototype · All data is fictional and synthetic · Not an official Income Tax Department service",
+  "appDisclaimer": "Not affiliated with or endorsed by the Income Tax Department or Government of India",
   "lang.label": "Language",
 
   "landing.hero": "Got a confusing income tax notice?",
@@ -103,6 +104,7 @@ const en: Dict = {
   "landing.footerLink2": "Built for India",
   "landing.footerLink3": "Trust",
   "landing.footerButton": "Use Tax Mitra",
+  "landing.disclaimer": "Tax Mitra is an independent prototype and is not affiliated with or endorsed by the Income Tax Department or Government of India.",
   "landing.builtBy": "Built by",
   "landing.ready": "[ READY WHEN YOU ARE ]",
 
@@ -291,6 +293,7 @@ const hi: Dict = {
   "app.name": "टैक्स मित्र",
   "app.tagline": "आपका टैक्स नोटिस, अब आसान भाषा में।",
   "banner": "स्वतंत्र प्रोटोटाइप · सारा डेटा काल्पनिक है · यह आयकर विभाग की आधिकारिक सेवा नहीं है",
+  "appDisclaimer": "आयकर विभाग या भारत सरकार से संबद्ध या समर्थित नहीं",
   "lang.label": "भाषा",
 
   "landing.hero": "आपको कोई उलझन भरा टैक्स नोटिस आया है?",
@@ -385,6 +388,7 @@ const hi: Dict = {
   "landing.footerLink2": "भारत के लिए बनाया गया",
   "landing.footerLink3": "विश्वास",
   "landing.footerButton": "टैक्स मित्र का प्रयोग करें",
+  "landing.disclaimer": "टैक्स मित्र एक स्वतंत्र प्रोटोटाइप है और आयकर विभाग या भारत सरकार से संबद्ध या समर्थित नहीं है।",
   "landing.builtBy": "द्वारा बनाया गया",
   "landing.ready": "[ जब आप तैयार हों ]",
 

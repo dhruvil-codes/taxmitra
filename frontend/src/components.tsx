@@ -5,7 +5,7 @@ import { Citation, Locale } from "./lib";
 
 export function DisclaimerBanner() {
   const { t } = useI18n();
-  return <div className="app-disclaimer">[ PUBLIC BETA ] &nbsp; {t("banner")}</div>;
+  return <div className="app-disclaimer">[ PUBLIC BETA ] &nbsp; {t("banner")} · {t("appDisclaimer")}</div>;
 }
 
 export function LanguageSelector() {

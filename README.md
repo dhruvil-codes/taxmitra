@@ -12,7 +12,8 @@ Turn confusing Indian income-tax notices into clear explanations, personalized c
 
 ## Live Demo
 
-**[taxmitra-eight.vercel.app](https://taxmitra-eight.vercel.app/)**
+**[taxmitra.bydhruvil.in](https://taxmitra.bydhruvil.in)** (Custom Domain)  
+**[taxmitra-eight.vercel.app](https://taxmitra-eight.vercel.app/)** (Vercel Domain)
 
 ---
 
@@ -117,4 +118,4 @@ Provided as-is for educational purposes.
 
 ## Disclaimer
 
-Tax Mitra is an independent prototype. All data is fictional. Not affiliated with the Income Tax Department. For complex situations, consult a qualified professional.
+Tax Mitra is an independent citizen-assistance prototype and is not affiliated with or endorsed by the Income Tax Department or Government of India. All data is fictional and synthetic. Tax Mitra does not submit tax responses to government systems; official filing remains with the taxpayer through the official Income Tax e-Filing portal. For complex situations, consult a qualified professional.

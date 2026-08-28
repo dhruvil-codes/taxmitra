@@ -235,6 +235,7 @@ export default function Landing() {
           <span>{t("landing.builtBy")}</span>
           <a href="https://x.com/bydhruvil" target="_blank" rel="noopener noreferrer">@bydhruvil</a>
         </div>
+        <p className="tm-footer-disclaimer">{t("landing.disclaimer")}</p>
       </footer>
     </div>
   );
