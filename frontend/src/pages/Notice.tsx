@@ -30,11 +30,11 @@ export default function Notice() {
       <Stepper current={0} />
 
       <div className="app-content-spacing">
-        <div className="mb-3">
+        <div className="mb-2">
           <SavedGuidanceBadge show={explanation?.demo_mode || explanation?.source === "static"} />
         </div>
 
-        <Card className="mb-5">
+        <Card className="mb-4">
           <p className="app-section-label">[ IN PLAIN LANGUAGE ]</p>
           <p className="text-stone-700 leading-relaxed">
             {explanation?.content.plain_language ?? "…"}
@@ -47,7 +47,7 @@ export default function Notice() {
 
         <Link
           to={`/notices/${id}/journey`}
-          className="app-primary mb-5"
+          className="app-primary mb-4"
         >
           {t("notice.continue")} →
         </Link>
