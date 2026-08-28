@@ -38,18 +38,6 @@ function Mark() {
   return <span className="tm-mark" aria-hidden="true">त</span>;
 }
 
-function AnimatedText({ text }: { text: string }) {
-  return (
-    <span className="tm-animated-text">
-      {text.split('').map((char, i) => (
-        <span key={i} style={{ animationDelay: `${i * 0.05}s` }}>
-          {char === ' ' ? '\u00A0' : char}
-        </span>
-      ))}
-    </span>
-  );
-}
-
 function ArrowLink({ children, onClick, light = false }: { children: React.ReactNode; onClick?: () => void; light?: boolean }) {
   return (
     <button className={`tm-button${light ? " tm-button-light" : ""}`} onClick={onClick}>
@@ -109,14 +97,14 @@ export default function Landing() {
             {locale === "hi" ? (
               <h2>
                 अपनी<br/>
-                <em>[ <AnimatedText text={t("landing.animatedPhraseHi")} /> ]</em><br/>
+                <em>[ {t("landing.animatedPhraseHi")} ]</em><br/>
                 को बिना किसी<br/>
                 भ्रम के समझें।
               </h2>
             ) : (
               <h2>
                 Understand your<br/>
-                <em>[ <AnimatedText text={t("landing.animatedPhrase")} /> ]</em><br/>
+                <em>[ {t("landing.animatedPhrase")} ]</em><br/>
                 without the<br/>
                 confusion.
               </h2>
