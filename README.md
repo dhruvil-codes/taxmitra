@@ -62,9 +62,6 @@ Set `VITE_API_BASE_URL=http://localhost:8000` in `frontend/.env`
 
 ## Architecture
 
-<!-- EXCALIDRAW DIAGRAM: System Architecture -->
-[ Excalidraw diagram showing: User → Vercel (React) → Railway (FastAPI) → Knowledge Base ]
-
 **Frontend:** React + TypeScript + Vite (Vercel)
 **Backend:** FastAPI + Python (Railway)
 **Knowledge:** Authoritative Income Tax Department corpus
@@ -73,8 +70,8 @@ Set `VITE_API_BASE_URL=http://localhost:8000` in `frontend/.env`
 
 ## User Flow
 
-<!-- EXCALIDRAW DIAGRAM: User Flow -->
-[ Excalidraw diagram showing: Landing → Demo Citizen → Dashboard → Notice → Understand → Questions → Draft → Portal ]
+<!-- EXCALIDRAW DIAGRAM -->
+[ Landing → Demo Citizen → Dashboard → Notice → Understand → Questions → Draft → Portal ]
 
 ---
 
