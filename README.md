@@ -6,12 +6,7 @@ Turn confusing Indian income-tax notices into clear explanations, personalized c
 
 ---
 
-<!--
-  HERO IMAGE:
-  Replace the placeholder below with the final Tax Mitra hero screenshot.
--->
-
-[ Tax Mitra Hero Screenshot ]
+![Tax Mitra Hero Banner](hero-banner.svg)
 
 ---
 
@@ -70,8 +65,7 @@ Set `VITE_API_BASE_URL=http://localhost:8000` in `frontend/.env`
 
 ## User Flow
 
-<!-- EXCALIDRAW DIAGRAM -->
-[ Landing → Demo Citizen → Dashboard → Notice → Understand → Questions → Draft → Portal ]
+![User Flow](user-flow.svg)
 
 ---
 

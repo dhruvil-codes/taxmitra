@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 200">
+  <defs>
+    <style>
+      .node { fill: #a5d8ff; stroke: #1e1e1e; stroke-width: 2; }
+      .node-final { fill: #ffd43b; stroke: #1e1e1e; stroke-width: 2; }
+      .text { font-family: Arial, sans-serif; font-size: 16px; text-anchor: middle; dominant-baseline: middle; fill: #1e1e1e; }
+      .arrow { stroke: #1e1e1e; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" />
+    </marker>
+  </defs>
+  
+  <!-- Landing -->
+  <ellipse cx="175" cy="100" rx="75" ry="30" class="node"/>
+  <text x="175" y="100" class="text">Landing</text>
+  
+  <!-- Arrow -->
+  <line x1="250" y1="100" x2="325" y2="100" class="arrow"/>
+  
+  <!-- Demo Citizen -->
+  <ellipse cx="425" cy="100" rx="75" ry="30" class="node"/>
+  <text x="425" y="100" class="text">Demo Citizen</text>
+  
+  <!-- Arrow -->
+  <line x1="500" y1="100" x2="575" y2="100" class="arrow"/>
+  
+  <!-- Dashboard -->
+  <ellipse cx="675" cy="100" rx="75" ry="30" class="node"/>
+  <text x="675" y="100" class="text">Dashboard</text>
+  
+  <!-- Arrow -->
+  <line x1="750" y1="100" x2="825" y2="100" class="arrow"/>
+  
+  <!-- Notice -->
+  <ellipse cx="925" cy="100" rx="75" ry="30" class="node"/>
+  <text x="925" y="100" class="text">Notice</text>
+  
+  <!-- Arrow -->
+  <line x1="1000" y1="100" x2="1075" y2="100" class="arrow"/>
+  
+  <!-- Understand -->
+  <ellipse cx="1175" cy="100" rx="75" ry="30" class="node"/>
+  <text x="1175" y="100" class="text">Understand</text>
+  
+  <!-- Arrow -->
+  <line x1="1250" y1="100" x2="1325" y2="100" class="arrow"/>
+  
+  <!-- Questions -->
+  <ellipse cx="1425" cy="100" rx="75" ry="30" class="node"/>
+  <text x="1425" y="100" class="text">Questions</text>
+  
+  <!-- Arrow -->
+  <line x1="1500" y1="100" x2="1575" y2="100" class="arrow"/>
+  
+  <!-- Draft -->
+  <ellipse cx="1675" cy="100" rx="75" ry="30" class="node"/>
+  <text x="1675" y="100" class="text">Draft</text>
+  
+  <!-- Arrow -->
+  <line x1="1750" y1="100" x2="1825" y2="100" class="arrow"/>
+  
+  <!-- e-Filing Portal -->
+  <ellipse cx="1925" cy="100" rx="75" ry="30" class="node-final"/>
+  <text x="1925" y="100" class="text">e-Filing Portal</text>
+</svg>
