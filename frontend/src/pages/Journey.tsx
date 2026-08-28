@@ -168,11 +168,12 @@ ${draft}
         <div>
           <h1 className="app-title">{t("j.checklistTitle")}</h1>
           <p className="text-sm text-stone-600 mt-1 mb-4">{t("j.checklistSub")}</p>
-          <Card className="mb-4 workflow-guidance app-dots">
+          <Card className="mb-4 workflow-guidance">
             <p className="app-section-label">[ YOUR GUIDED PATH ]</p>
-            <h2>{result.path?.headline[locale] ?? result.path?.headline.en}</h2>
-            <p className="app-body">{result.path?.guidance[locale] ?? result.path?.guidance.en}</p>
+            <h2 className="text-xl font-medium leading-snug mb-2">{result.path?.headline[locale] ?? result.path?.headline.en}</h2>
+            <p className="app-body text-sm leading-relaxed">{result.path?.guidance[locale] ?? result.path?.guidance.en}</p>
           </Card>
+          <p className="app-section-label mb-3">[ EVIDENCE YOU MAY NEED ]</p>
           <div className="checklist-list">
             {result.checklist.map((item, index) => (
               <Card key={item.id}>
@@ -181,7 +182,7 @@ ${draft}
               </Card>
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center gap-3">
             <PrimaryButton onClick={() => setPhase("draft")}>{t("j.next")} →</PrimaryButton>
             <button className="app-back !mt-0" onClick={() => setPhase("questions")}>← {t("j.back")}</button>
           </div>
