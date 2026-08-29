@@ -84,9 +84,6 @@ export default function Upload() {
     try { setResult(await api.extractScrutiny(file, controller.current.signal)); }
     catch (e) {
       if ((e as Error).name !== "AbortError") {
-        if (import.meta.env.DEV) {
-          console.error("Extraction error:", e);
-        }
         setError(e instanceof ApiError ? e.message : (locale === "hi" ? "सेवा उपलब्ध नहीं है। फिर प्रयास करें।" : "The extraction service is unavailable. Try again."));
       }
     }
@@ -101,9 +98,6 @@ export default function Upload() {
       store.setUploadedNoticeId(response.notice_id); store.setExtractionConfirmed(response.notice_id, true); store.setScrutinyStage(response.notice_id, "requests");
       navigate(`/notices/${response.notice_id}/scrutiny`, { state: { uploaded: true } });
     } catch (e) {
-      if (import.meta.env.DEV) {
-        console.error("Confirmation error:", e);
-      }
       setError(e instanceof ApiError && e.status === 409 ? (locale === "hi" ? "निष्कर्षण सत्र अमान्य या समाप्त हो गया। PDF फिर से अपलोड करें।" : "The extraction session is invalid or expired. Upload the PDF again.") : e instanceof ApiError ? e.message : (locale === "hi" ? "पुष्टि नहीं हो सकी।" : "Confirmation failed."));
     }
     finally { setConfirming(false); }

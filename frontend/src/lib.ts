@@ -241,9 +241,6 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   if (!res.ok) {
     let detail = `Request failed (${res.status})`;
     try { detail = (await res.json()).detail ?? detail; } catch { /* non-JSON response */ }
-    if (import.meta.env.DEV) {
-      console.error("API request failed:", { url: fullUrl, status: res.status, detail });
-    }
     throw new ApiError(url, res.status, detail);
   }
   return res.json();
@@ -277,15 +274,6 @@ export const api = {
     const body = new FormData();
     body.append("file", file);
     const url = "/api/scrutiny/extract";
-    if (import.meta.env.DEV) {
-      console.log("Extraction request:", {
-        url,
-        method: "POST",
-        file: file.name,
-        size: file.size,
-        type: file.type,
-      });
-    }
     return request<ExtractionResult>(url, { method: "POST", body, signal });
   },
   confirmExtraction: (extractionId: string, fingerprint: string, confirmed: boolean, signal?: AbortSignal) =>
