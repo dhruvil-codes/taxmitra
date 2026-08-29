@@ -199,7 +199,7 @@ ${draft}
             onBlur={() => store.setDraft(id, draft)}
             placeholder={t("j.draftPlaceholder")}
             rows={14}
-            className="w-full border border-stone-300 focus:border-blue-600 p-4 text-sm leading-relaxed font-mono outline-none"
+            className="w-full border border-stone-300 focus:border-blue-600 p-4 text-sm leading-relaxed outline-none"
           />
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <PrimaryButton

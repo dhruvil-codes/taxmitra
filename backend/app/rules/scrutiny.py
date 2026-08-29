@@ -454,23 +454,18 @@ def _draft(notice: dict, requests: tuple[ScrutinyRequest, ...], statuses: dict[s
     for index, request in enumerate(requests, start=1):
         answer = statuses[request.id]
         
-        lines.append(f"{index}.")
-        lines.append(f"   {request.response_section}")
-        lines.append("")
+        lines.append(f"{index}. {request.response_section}")
         
         if answer == ANSWER_YES:
             evidence = "; ".join(item["en"] for item in request.required_evidence)
-            lines.append(f"   With reference to the Department's request regarding {request.response_section}, I state that the information matches my records. The relevant documents are enclosed as follows:")
-            lines.append("")
-            lines.append(f"   Supporting documents: {evidence}")
+            lines.append(f"With reference to the Department's request regarding {request.response_section}, I state that the information matches my records. The relevant documents are enclosed as follows:")
+            lines.append(f"Supporting documents: {evidence}")
         elif answer == ANSWER_NO:
-            lines.append(f"   With reference to the Department's request regarding {request.response_section}, I state that the information does not match my records. The discrepancy is being clarified and supporting evidence will be provided once verified.")
-            lines.append("")
-            lines.append(f"   Required clarification: The specific points of discrepancy are being reviewed and supporting documents will be submitted after verification.")
+            lines.append(f"With reference to the Department's request regarding {request.response_section}, I state that the information does not match my records. The discrepancy is being clarified and supporting evidence will be provided once verified.")
+            lines.append(f"Required clarification: The specific points of discrepancy are being reviewed and supporting documents will be submitted after verification.")
         else:
-            lines.append(f"   With reference to the Department's request regarding {request.response_section}, I state that the information requires verification from my records. I am currently reviewing the relevant documents before taking a final position.")
-            lines.append("")
-            lines.append(f"   Action required: Verification of records is in progress. Consider professional review before finalizing the response.")
+            lines.append(f"With reference to the Department's request regarding {request.response_section}, I state that the information requires verification from my records. I am currently reviewing the relevant documents before taking a final position.")
+            lines.append(f"Action required: Verification of records is in progress. Consider professional review before finalizing the response.")
         
         lines.append("")
     
