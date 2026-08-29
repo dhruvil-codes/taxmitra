@@ -420,35 +420,71 @@ def _checklist(requests: tuple[ScrutinyRequest, ...], statuses: dict[str, str]) 
 
 
 def _draft(notice: dict, requests: tuple[ScrutinyRequest, ...], statuses: dict[str, str], due: str | None) -> str:
+    # Extract notice details
+    section = notice.get('section', '142(1)')
+    official_reference = notice.get('official_reference', '')
+    assessment_year = notice.get('assessment_year', '')
+    issue_date = notice.get('issue_date', '')
+    
+    # Determine appropriate recipient based on notice section
+    if section.startswith('143'):
+        recipient = "The Assessing Officer,\nCentralized Processing Centre - Demo,\nIncome Tax Department"
+    elif section.startswith('142'):
+        recipient = "The Assessing Officer,\nIncome Tax Department"
+    else:
+        recipient = "The Assessing Officer,\nIncome Tax Department"
+    
     lines = [
-        f"Subject: Response to notice under section {notice.get('section', '142(1)')} - {notice.get('official_reference', '')} (Assessment Year {notice.get('assessment_year', '')})",
+        f"Date: {date.today().strftime('%d/%m/%Y')}",
+        "",
+        "To:",
+        recipient,
+        "",
+        f"Subject: Response to notice under section {section} - {official_reference} (Assessment Year {assessment_year})",
+        "",
+        f"Reference: Notice under section {section} - {official_reference} dated {issue_date} - Assessment Year {assessment_year}",
         "",
         "Respected Sir/Madam,",
         "",
-        f"I refer to the notice dated {notice.get('issue_date', '')} requiring information and documents for Assessment Year {notice.get('assessment_year', '')}.",
-        "This draft is structured request-wise and reflects the taxpayer's stated position based on their records.",
+        "With reference to the above notice, I wish to state as under:",
         "",
     ]
+    
+    # Generate numbered response sections based on actual requests
     for index, request in enumerate(requests, start=1):
         answer = statuses[request.id]
-        lines.extend([f"{index}. {request.response_section}", f"Original request: {request.original_text}"])
+        
+        lines.append(f"{index}.")
+        lines.append(f"   {request.response_section}")
+        lines.append("")
+        
         if answer == ANSWER_YES:
             evidence = "; ".join(item["en"] for item in request.required_evidence)
-            lines.append(f"Response: The Department's request matches my records. The relevant documents are enclosed: {evidence}.")
+            lines.append(f"   With reference to the Department's request regarding {request.response_section}, I state that the information matches my records. The relevant documents are enclosed as follows:")
+            lines.append("")
+            lines.append(f"   Supporting documents: {evidence}")
         elif answer == ANSWER_NO:
-            lines.append("Response: The Department's request does not match my records. The discrepancy is being clarified and supporting evidence will be provided once verified.")
+            lines.append(f"   With reference to the Department's request regarding {request.response_section}, I state that the information does not match my records. The discrepancy is being clarified and supporting evidence will be provided once verified.")
+            lines.append("")
+            lines.append(f"   Required clarification: The specific points of discrepancy are being reviewed and supporting documents will be submitted after verification.")
         else:
-            lines.append("Response: The information requires verification from my records. I am currently reviewing the relevant documents before taking a final position. Consider professional review before finalizing.")
+            lines.append(f"   With reference to the Department's request regarding {request.response_section}, I state that the information requires verification from my records. I am currently reviewing the relevant documents before taking a final position.")
+            lines.append("")
+            lines.append(f"   Action required: Verification of records is in progress. Consider professional review before finalizing the response.")
+        
         lines.append("")
+    
+    # Add closing
+    lines.extend([
+        "Thanking you,",
+        "",
+        "Yours faithfully,",
+        "[Taxpayer Name]",
+        "",
+        "Note: This response draft is structured based on the taxpayer's stated position and records. Tax Mitra has not verified taxpayer facts and has not submitted anything to the Income Tax Department. The taxpayer should review and verify all information before submitting through the official e-Filing portal.",
+    ])
+    
     if due:
         lines.append(f"Response deadline shown on the synthetic notice: {due}.")
-    lines.extend(
-        [
-            "Tax Mitra has not verified taxpayer facts and has not submitted anything to the Income Tax Department.",
-            "",
-            "Sincerely,",
-            "Taxpayer",
-            f"Date: {date.today().isoformat()}",
-        ]
-    )
+    
     return "\n".join(lines)

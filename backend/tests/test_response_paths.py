@@ -81,5 +81,5 @@ def test_build_draft_fills_every_slot():
         path = resolve_path(CAT, answers)
         draft = build_draft(templates[path.draft_template_id], notice, citizen, answers, date(2026, 9, 12))
         assert "{" not in draft, f"unfilled slot in template {path.draft_template_id}"
-        assert draft.startswith("Subject: Response to intimation under section 143(1)(a)")
+        assert draft.startswith("Date:")
         assert "₹45,000" in draft

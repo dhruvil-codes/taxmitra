@@ -189,9 +189,9 @@ def build_draft(
         "amount": f"₹{notice.get('amount_in_question', 0):,}",
         "income_source": localized_income_source(notice, "en"),  # drafts are English official letters
         "issue_date": notice.get("issue_date", ""),
-        "deadline_date": due_date.isoformat() if due_date else "",
+        "deadline_date": due_date.strftime('%d/%m/%Y') if due_date else "",
         "documents_sentence": _DOCUMENT_SENTENCES[evidence_from_answers(answers)],
-        "today_date": today.isoformat(),
+        "today_date": today.strftime('%d/%m/%Y'),
     }
     text = template
     for key, value in slots.items():
