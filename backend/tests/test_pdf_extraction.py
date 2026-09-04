@@ -136,7 +136,7 @@ def test_scanned_empty_malformed_and_unsupported_files_refuse():
     empty = client.post("/api/scrutiny/extract", files={"file": ("notice.pdf", b"", "application/pdf")}).json()
     assert empty["supported"] is False and empty["extraction"]["refusal_reason"] == "empty_pdf"
     scanned = client.post("/api/scrutiny/extract", files={"file": ("scan.pdf", pdf_with_text("image"), "application/pdf")}).json()
-    assert scanned["supported"] is False and scanned["extraction"]["refusal_reason"] == "ocr_not_supported"
+    assert scanned["supported"] is False and scanned["extraction"]["refusal_reason"] == "low_extraction_confidence"
     malformed = client.post("/api/scrutiny/extract", files={"file": ("bad.pdf", b"not a pdf", "application/pdf")}).json()
     assert malformed["supported"] is False and malformed["extraction"]["refusal_reason"] == "malformed_pdf"
     unsupported = client.post("/api/scrutiny/extract", files={"file": ("other.pdf", pdf_with_text(NOTICE.replace("142(1)", "148")), "application/pdf")}).json()
