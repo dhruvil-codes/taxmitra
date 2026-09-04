@@ -1,16 +1,61 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useI18n } from "../i18n";
-import { api, ApiError, NoticeCard, OFFICIAL_EFILING_PORTAL_URL, ScrutinyQuestion, ScrutinyRequestsResult, ScrutinyResolveResult, store, verifiedIncomeTaxUrl } from "../lib";
-import { Card, PrimaryButton, Stepper } from "../components";
+import {
+  api,
+  ApiError,
+  EvidenceRecommendation,
+  EvidenceStatus,
+  NoticeCard,
+  OFFICIAL_EFILING_PORTAL_URL,
+  ScrutinyQuestion,
+  ScrutinyRequestsResult,
+  ScrutinyResolveResult,
+  store,
+  verifiedIncomeTaxUrl,
+} from "../lib";
+import {
+  CitationChips,
+  NoticeFactsCard,
+  PrimaryButton,
+  ScreenFrame,
+  SecondaryButton,
+  WhyDrawer,
+  WorkflowLayout,
+} from "../components";
 
 type Stage = "requests" | "confirm" | "questions" | "result" | "draft" | "review" | "final" | "refusal";
-const text = (value: Record<string, string> | undefined, locale: string) => value?.[locale] ?? value?.en ?? "";
+
+const text = (value: Record<string, string> | undefined, locale: string) =>
+  value?.[locale] ?? value?.en ?? "";
+
+const statusLabel = (status: string | undefined, locale: string) => ({
+  not_started: locale === "hi" ? "शुरू नहीं हुआ" : "Not started",
+  need_information: locale === "hi" ? "जानकारी चाहिए" : "Need info",
+  documents_needed: locale === "hi" ? "दस्तावेज़ चाहिए" : "Docs needed",
+  ready_for_response: locale === "hi" ? "उत्तर तैयार" : "Ready",
+  reviewed: locale === "hi" ? "समीक्षा पूर्ण" : "Reviewed",
+}[status || "not_started"]);
 
 function ErrorState({ error, retry }: { error: ApiError | Error; retry: () => void }) {
-  const { locale, t } = useI18n();
-  const message = error instanceof ApiError && error.status === 404 ? t("scrutiny.error404") : error instanceof ApiError && error.status === 429 ? t("scrutiny.error429") : error instanceof ApiError && error.status === 503 ? t("scrutiny.error503") : t("scrutiny.errorGeneric");
-  return <div className="app-empty"><p className="app-section-label">[ {t("scrutiny.errorLabel")} ]</p><p>{message}</p><button className="app-primary mt-5" onClick={retry}>{t("scrutiny.retry")}</button></div>;
+  const { t } = useI18n();
+  const message =
+    error instanceof ApiError && error.status === 404
+      ? t("scrutiny.error404")
+      : error instanceof ApiError && error.status === 429
+      ? t("scrutiny.error429")
+      : error instanceof ApiError && error.status === 503
+      ? t("scrutiny.error503")
+      : t("scrutiny.errorGeneric");
+  return (
+    <div className="app-empty">
+      <p className="app-section-label">ERROR</p>
+      <p>{message}</p>
+      <button className="app-primary mt-5" onClick={retry}>
+        {t("scrutiny.retry")}
+      </button>
+    </div>
+  );
 }
 
 export default function Scrutiny() {
@@ -18,7 +63,9 @@ export default function Scrutiny() {
   const { locale, t } = useI18n();
   const restored = store.scrutinyStage(id) as Stage;
   const isUploaded = store.uploadedNoticeId() === id;
-  const [stage, setStageState] = useState<Stage>(restored === "questions" && !store.extractionConfirmed(id) ? "requests" : restored);
+  const [stage, setStageState] = useState<Stage>(
+    restored === "questions" && !store.extractionConfirmed(id) ? "requests" : restored || "requests"
+  );
   const [notice, setNotice] = useState<NoticeCard | null>(null);
   const [data, setData] = useState<ScrutinyRequestsResult | null>(null);
   const [questions, setQuestions] = useState<ScrutinyQuestion[]>([]);
@@ -31,10 +78,17 @@ export default function Scrutiny() {
   const [copied, setCopied] = useState(false);
   const [finalCopied, setFinalCopied] = useState(false);
   const [checklistState, setChecklistState] = useState<Record<string, boolean>>({});
-  const setStage = (next: Stage) => { setStageState(next); store.setScrutinyStage(id, next); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const [evidence, setEvidence] = useState<EvidenceRecommendation[]>([]);
+  const [approval, setApproval] = useState(false);
+
+  const setStage = (next: Stage) => {
+    setStageState(next);
+    store.setScrutinyStage(id, next);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handleChecklistToggle = (key: string) => {
-    setChecklistState(prev => ({ ...prev, [key]: !prev[key] }));
+    setChecklistState((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const downloadDraft = () => {
@@ -50,11 +104,12 @@ export default function Scrutiny() {
   };
 
   const downloadAsMarkdown = () => {
-    if (!draft || !id || !notice) return;
+    if (!draft || !id) return;
     const md = `# Tax Mitra Response Draft
 
-**Notice:** ${notice.section} · ${notice.title[locale] ?? notice.title.en}
-**Assessment Year:** ${notice.assessment_year}
+**Notice:** Section 142(1) · Inquiry before assessment
+**Assessment Year:** ${notice?.assessment_year || "2024-25"}
+**Reference DIN:** ${notice?.official_reference || "DEMO"}
 
 ---
 
@@ -72,7 +127,7 @@ ${draft}
   };
 
   const downloadAsPdf = () => {
-    if (!draft || !id || !notice) return;
+    if (!draft || !id) return;
     const printContent = `
 <!DOCTYPE html>
 <html>
@@ -80,23 +135,23 @@ ${draft}
   <meta charset="UTF-8">
   <title>Tax Mitra Response Draft</title>
   <style>
-    body { font-family: 'Noto Sans Devanagari', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
-    h1 { border-bottom: 2px solid #333; padding-bottom: 10px; }
-    .meta { color: #666; margin-bottom: 30px; }
-    .draft { white-space: pre-wrap; }
-    .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 12px; color: #999; }
+    body { font-family: 'Inter', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; color: #101115; }
+    h1 { border-bottom: 2px solid #101115; padding-bottom: 10px; font-size: 24px; }
+    .meta { color: #555; margin-bottom: 30px; font-size: 14px; }
+    .draft { white-space: pre-wrap; font-size: 15px; }
+    .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 12px; color: #777; }
   </style>
 </head>
 <body>
   <h1>Tax Mitra Response Draft</h1>
   <div class="meta">
-    <p><strong>Notice:</strong> ${notice.section} · ${notice.title[locale] ?? notice.title.en}</p>
-    <p><strong>Assessment Year:</strong> ${notice.assessment_year}</p>
+    <p><strong>Notice:</strong> Section 142(1) · ${notice?.title[locale] ?? notice?.title.en ?? "Inquiry before assessment"}</p>
+    <p><strong>Assessment Year:</strong> ${notice?.assessment_year || "2024-25"}</p>
   </div>
   <div class="draft">${draft}</div>
   <div class="footer">
-    <p>This draft was generated by Tax Mitra, an independent prototype and is not affiliated with or endorsed by the Income Tax Department or Government of India.</p>
-    <p>Tax Mitra does not submit anything on your behalf. You must submit this response yourself through the official Income Tax e-Filing portal.</p>
+    <p>Generated by Tax Mitra for official submission on the Income Tax Department e-Filing portal.</p>
+    <p>Tax Mitra does not submit on your behalf. Submit via e-Proceedings on incometax.gov.in.</p>
   </div>
 </body>
 </html>`;
@@ -109,226 +164,1075 @@ ${draft}
   };
 
   const load = () => {
-    const controller = new AbortController(); setLoading(true); setError(null);
+    const controller = new AbortController();
+    setLoading(true);
+    setError(null);
     Promise.all([
       isUploaded ? Promise.resolve(null) : api.notice(id),
       api.scrutinyRequests(id, locale, true, controller.signal),
     ])
-      .then(([n, r]) => { setNotice(n); setData(r); setLoading(false); })
-      .catch((e) => { if (e.name !== "AbortError") { setError(e); setLoading(false); } });
+      .then(([n, r]) => {
+        setNotice(n);
+        setData(r);
+        setLoading(false);
+      })
+      .catch((e) => {
+        if (e.name !== "AbortError") {
+          setError(e);
+          setLoading(false);
+        }
+      });
     return () => controller.abort();
   };
+
   useEffect(load, [id, locale]);
 
   const confirm = async () => {
-    setLoading(true); setError(null);
-    try { const response = await api.scrutinyQuestions(id, locale, true); store.setExtractionConfirmed(id, true); setQuestions(response.questions); setIndex(Math.max(0, response.questions.findIndex(q => !answers[q.id]))); setStage("questions"); }
-    catch (e) { setError(e as Error); }
-    finally { setLoading(false); }
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.scrutinyQuestions(id, locale, true);
+      store.setExtractionConfirmed(id, true);
+      setQuestions(response.questions);
+      setIndex(Math.max(0, response.questions.findIndex((q) => !answers[q.id])));
+      setStage("questions");
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setLoading(false);
+    }
   };
+
   const reject = async () => {
     setLoading(true);
-    try { setResult(await api.resolveScrutiny(id, {}, false)); setStage("refusal"); }
-    catch (e) { setError(e as Error); }
-    finally { setLoading(false); }
+    try {
+      setResult(await api.resolveScrutiny(id, {}, false));
+      setStage("refusal");
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setLoading(false);
+    }
   };
-  const answer = async (value: string) => {
-    const q = questions[index]; const next = { ...answers, [q.id]: value }; setAnswers(next); store.setAnswers(id, next);
-    if (index < questions.length - 1) { setIndex(index + 1); return; }
-    setLoading(true); setError(null);
-    try { const resolved = await api.resolveScrutiny(id, next, true); setResult(resolved); setDraft(store.draft(id) ?? resolved.draft ?? ""); setStage("result"); }
-    catch (e) { setError(e as Error); }
-    finally { setLoading(false); }
-  };
-  const ensureQuestions = async () => { if (!questions.length) { const r = await api.scrutinyQuestions(id, locale, true); setQuestions(r.questions); } setStage("questions"); };
 
-  if (loading && !data) return <div className="app-page"><div className="app-loading">{t("scrutiny.loading")}</div></div>;
-  if (error && !data) return <div className="app-page"><ErrorState error={error} retry={load} />{isUploaded ? <Link to="/upload" className="app-primary mt-5">{t("scrutiny.newPdf")}</Link> : <Link to="/notices" className="app-back">← {t("j.back")}</Link>}</div>;
-  if (!data || (!notice && !isUploaded)) return null;
+  const answer = async (value: string) => {
+    const q = questions[index];
+    const next = { ...answers, [q.id]: value };
+    setAnswers(next);
+    store.setAnswers(id, next);
+    if (index < questions.length - 1) {
+      setIndex(index + 1);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const resolved = await api.resolveScrutiny(
+        id,
+        next,
+        true,
+        undefined,
+        Object.fromEntries(evidence.map((item) => [item.document_id, item.status]))
+      );
+      setResult(resolved);
+      setEvidence(resolved.evidence ?? []);
+      setDraft(store.draft(id) ?? resolved.draft ?? "");
+      setStage("result");
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const ensureQuestions = async () => {
+    if (!questions.length) {
+      const r = await api.scrutinyQuestions(id, locale, true);
+      setQuestions(r.questions);
+    }
+    setStage("questions");
+  };
+
+  const approveReview = async () => {
+    if (!result) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const outcome = await api.approveScrutiny(
+        id,
+        answers,
+        draft,
+        approval,
+        Object.fromEntries(evidence.map((item) => [item.document_id, item.status]))
+      );
+      if (outcome.handoff_allowed) {
+        setStage("final");
+      } else {
+        setError(new Error([outcome.message, ...(outcome.missing ?? [])].filter(Boolean).join(" ")));
+      }
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEvidenceStatusChange = async (documentId: string, status: EvidenceStatus) => {
+    const next = evidence.map((item) =>
+      item.document_id === documentId ? { ...item, status } : item
+    );
+    setEvidence(next);
+    try {
+      const projected = await api.evidence(
+        id,
+        Object.fromEntries(next.map((item) => [item.document_id, item.status]))
+      );
+      if (projected?.evidence) {
+        setEvidence(projected.evidence);
+      }
+    } catch {
+      // Keep optimistic state
+    }
+  };
+
+  if (loading && !data) {
+    return (
+      <div className="workflow-shell">
+        <div className="workflow-main">
+          <div className="app-loading">{t("scrutiny.loading")}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <div className="workflow-shell">
+        <div className="workflow-main">
+          <ErrorState error={error} retry={load} />
+          {isUploaded ? (
+            <Link to="/upload" className="app-primary mt-5">
+              {t("scrutiny.newPdf")}
+            </Link>
+          ) : (
+            <Link to="/notices" className="app-back-link mt-5">
+              ← {t("j.back")}
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
   const requests = data.requests ?? [];
   const q = questions[index];
-  const step = stage === "requests" || stage === "confirm" ? 0 : stage === "questions" ? 1 : stage === "result" ? 2 : stage === "draft" ? 3 : stage === "review" ? 4 : 5;
 
-  return <div className="app-page scrutiny-page">
-    <Stepper current={step} />
-    {error && <div className="mb-5"><ErrorState error={error} retry={() => setError(null)} /></div>}
+  // Map stage to step index 0..5 for WorkflowLayout
+  const stepIndex: 0 | 1 | 2 | 3 | 4 | 5 =
+    stage === "requests" || stage === "confirm" || stage === "refusal"
+      ? 0
+      : stage === "questions"
+      ? 1
+      : stage === "result"
+      ? 2
+      : stage === "draft"
+      ? 3
+      : stage === "review"
+      ? 4
+      : 5;
 
-    {stage === "requests" && <>
-      <p className="app-eyebrow">[ TM / SCRUTINY / REQUESTS ]</p><h1 className="app-title">{t("scrutiny.title")}</h1>
-      <div className="scrutiny-meta"><span>{notice?.section ?? "142(1)"}</span>{notice?.assessment_year && <span>AY {notice.assessment_year}</span>}{notice?.official_reference && <span>{notice.official_reference}</span>}{notice?.due_date && <span>{notice.due_date}</span>}</div>
-      <p className="app-lead">{t("scrutiny.lead", {count: String(requests.length)})}</p>
-      <p className="request-count">{String(requests.length).padStart(2,"0")} {t("scrutiny.count")}</p>
-      <div className="document-requests">{requests.map((r, i) => <details className="document-request" key={r.id} open={i===0}><summary><span>{String(i+1).padStart(2,"0")}</span><strong>{text(r.plain_language_explanation,locale) || r.response_section}</strong><i>{t("j.next")}</i></summary><div className="document-request-body"><p className="request-label">{t("scrutiny.labelAsking")}</p><p className="request-explanation">{text(r.plain_language_explanation,locale)}</p>{r.required_evidence.length>0&&<><p className="request-label">{t("scrutiny.labelNeed")}</p><ul className="evidence-list-simple">{r.required_evidence.map((e,j)=><li key={j}>{text(e,locale)}</li>)}</ul></>}<details className="original-source"><summary>{t("scrutiny.viewOriginal")}</summary><div className="official-wording"><b>{t("scrutiny.officialWording")}</b><blockquote>{r.original_text}</blockquote></div></details><details className="verification-details"><summary>{t("scrutiny.howUnderstood")}</summary><div className="verification-content"><div className="verification-row"><span>{t("scrutiny.responseSection")}</span><b>{r.response_section}</b></div><div className="verification-row"><span>{t("scrutiny.extractionConfidence")}</span><b>{Math.round(r.confidence*100)}%</b></div><div className="verification-row"><span>{t("scrutiny.groundingConfidence")}</span><b>{r.grounding.method} {Math.round(r.grounding.confidence*100)}%</b></div>{r.why_required&&<div className="verification-row"><span>{t("scrutiny.whyRequired")}</span><p>{text(r.why_required,locale)}</p></div>}{r.warnings.length>0&&<div className="verification-warnings">{r.warnings.map((warning,j)=><p key={j}>{warning}</p>)}</div>}{r.citations.length>0&&<div className="verification-citations"><p className="verification-label">{t("scrutiny.sources")}</p>{r.citations.map(c=><a key={c.id} href={c.official_url} target="_blank" rel="noreferrer">{c.section} ↗</a>)}</div>}</div></details></div></details>)}</div>
-      <div className="notice-boundary"><p className="app-section-label">[ {isUploaded ? t("scrutiny.confirmedExtraction") : t("scrutiny.humanConfirmation")} ]</p><p className="app-body">{isUploaded ? t("scrutiny.confirmedText") : t("scrutiny.syntheticText")}</p></div>
-      <div className="flex flex-wrap items-center gap-3"><PrimaryButton onClick={isUploaded ? ensureQuestions : () => setStage("confirm")}>{isUploaded ? t("scrutiny.checkRecords") : t("scrutiny.confirmList")} →</PrimaryButton><Link className="app-back !mt-0" to={isUploaded ? "/upload" : `/notices/${id}`}>← {t("j.back")}</Link></div>
-    </>}
+  const activeNotice: NoticeCard = notice || {
+    id,
+    section: "142(1)",
+    category: "scrutiny",
+    supported: true,
+    title: {
+      en: "Inquiry before assessment under Section 142(1)",
+      hi: "धारा 142(1) के तहत निर्धारण पूर्व जांच",
+    },
+    amount_in_question: 0,
+    issue_date: "Not available in this notice",
+    assessment_year: "2024-25",
+    due_date: "Not available in this notice",
+    days_remaining: null,
+    status: "action_required",
+    official_reference: "142(1) Scrutiny",
+  };
 
-    {stage === "confirm" && <Card className="confirmation-card app-dots"><p className="app-section-label">[ {t("scrutiny.checkpoint")} ]</p><h1>{t("scrutiny.confirmTitle")}</h1><p className="app-body">{t("scrutiny.confirmSub", {count: String(requests.length)})}</p><div className="confirmation-actions"><PrimaryButton onClick={confirm}>{t("scrutiny.yesCorrect")} →</PrimaryButton><button onClick={reject}>{t("scrutiny.somethingWrong")}</button></div><button className="app-back" onClick={() => setStage("requests")}>← {t("j.back")}</button></Card>}
+  return (
+    <WorkflowLayout currentStep={stepIndex} notice={activeNotice} noticeId={id}>
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-800 text-sm">
+          {error.message}
+        </div>
+      )}
 
-    {stage === "questions" && q && <><p className="app-eyebrow">[ {t("scrutiny.evidenceCheck")} / {String(index + 1).padStart(2, "0")} ]</p><h1 className="app-title">{t("scrutiny.questionTitle")}</h1><Card><div className="question-progress"><span>{t("scrutiny.questionProgress")} {index + 1}</span><span>{index + 1} / {questions.length}</span></div><div className="question-meter"><i style={{width:`${((index + 1) / questions.length) * 100}%`}} /></div><h2 className="question-title">{q.text}</h2><p className="app-body mt-3">{q.help}</p><div className="answer-grid">{q.options.map(o => <button className={answers[q.id] === o.id ? "is-selected" : ""} key={o.id} onClick={() => answer(o.id)}>{o.label}<span>→</span></button>)}</div></Card><button className="app-back" onClick={() => index > 0 ? setIndex(index - 1) : setStage("requests")}>← {t("j.back")}</button></>}
+      {/* =========================================================================
+          STEP 01: UNDERSTAND (Requests & Confirm)
+         ========================================================================= */}
+      {stage === "requests" && (
+        <ScreenFrame
+          whereAmI={
+            locale === "hi"
+              ? "चरण 01 / 06 · स्क्रूटनी नोटिस समझें"
+              : "Step 01 of 06 · Understand Scrutiny Notice"
+          }
+          whatDoesThisMean={
+            locale === "hi"
+              ? `आपके नोटिस में ${requests.length} मदों की जानकारी मांगी गई है।`
+              : `Your notice asks for ${requests.length} item${requests.length === 1 ? "" : "s"}.`
+          }
+          whatDoINeedToDo={
+            locale === "hi"
+              ? "विभाग द्वारा मांगी गई प्रत्येक मद की समीक्षा करें। विभाग की मूल शब्दावली नीचे सुरक्षित रखी गई है।"
+              : "Review each item requested by the Department. The Department's original wording is preserved below."
+          }
+          primaryAction={
+            <PrimaryButton onClick={isUploaded ? ensureQuestions : () => setStage("confirm")}>
+              {isUploaded ? t("scrutiny.checkRecords") : t("scrutiny.confirmList")} →
+            </PrimaryButton>
+          }
+          secondaryAction={
+            <Link to={isUploaded ? "/upload" : `/notices/${id}`} className="app-back-link">
+              ← {t("j.back")}
+            </Link>
+          }
+          whatHappensNext={
+            locale === "hi"
+              ? "अगला कदम: विभाग के हर अनुरोध के लिए सीधे स्पष्टीकरण प्रश्न।"
+              : "Next step: Specific questions to identify the required facts and evidence for your response."
+          }
+        >
+          <div className="space-y-6">
+            {notice && <NoticeFactsCard notice={notice} />}
 
-    {stage === "result" && result?.path && <><p className="app-eyebrow">[ {t("scrutiny.deterministicResult")} / {result.path.path_id.toUpperCase()} ]</p><h1 className="app-title">{text(result.path.headline, locale)}</h1>{result.path.professional_help_recommended && <div className="notice-boundary"><p className="app-section-label">[ {t("scrutiny.professionalReview")} ]</p><p className="app-body">{t("scrutiny.professionalText")}</p></div>}<div className="checklist-list">{result.checklist?.map(item => <Card key={item.id}><p className="checklist-title"><span>{item.status.toUpperCase()}</span>{text(item.title, locale)}</p><ul className="evidence-list">{item.required_evidence.map((e,i)=><li key={i}>{text(e,locale)}</li>)}</ul></Card>)}</div><div className="flex flex-wrap gap-3"><PrimaryButton onClick={() => setStage("draft")}>{t("scrutiny.resultTitle")} →</PrimaryButton><button className="app-back !mt-0" onClick={ensureQuestions}>← {t("scrutiny.changeAnswers")}</button></div></>}
-
-    {stage === "draft" && <><p className="app-eyebrow">[ {t("scrutiny.responsePackage")} / {t("scrutiny.draft")} ]</p><h1 className="app-title">{t("j.draftTitle")}</h1><p className="app-lead mb-5">{t("j.draftSub")}</p><textarea className="scrutiny-draft" rows={20} value={draft} onChange={e=>setDraft(e.target.value)} onBlur={()=>store.setDraft(id,draft)} /><div className="flex flex-wrap items-center gap-3"><PrimaryButton onClick={()=>{store.setDraft(id,draft);setStage("review")}}>{t("j.acceptDraft")} →</PrimaryButton><button onClick={downloadDraft}>{t("scrutiny.downloadDraft")}</button><button onClick={async()=>{await navigator.clipboard.writeText(draft);setCopied(true);setTimeout(()=>setCopied(false),2000)}}>{copied ? t("scrutiny.copied") : t("scrutiny.copyDraft")}</button><button className="app-back !mt-0" onClick={()=>setStage("result")}>← {t("j.back")}</button></div></>}
-
-    {stage === "review" && result && <><p className="app-eyebrow">[ {t("scrutiny.finalReview")} / {t("scrutiny.humanApproval")} ]</p><h1 className="app-title">{t("j.reviewTitle")}</h1><div className="review-grid"><Card><p className="app-section-label">[ {t("scrutiny.coverage")} ]</p>{result.checklist?.map(x=><p key={x.id} className="review-row"><span>{text(x.title,locale)}</span><b>{x.status.toUpperCase()}</b></p>)}</Card><Card className="deadline-card"><p className="app-section-label">[ {t("scrutiny.responseDeadline")} ]</p><strong>{result.deadline?.due_date ?? "—"}</strong><p>{t("scrutiny.reviewDateText")}</p></Card></div><div className="notice-boundary"><p className="app-section-label">[ {t("scrutiny.reviewLabel")} ]</p><p className="app-body">{t("scrutiny.reviewText")}</p></div><div className="flex flex-wrap items-center gap-3"><PrimaryButton onClick={()=>setStage("final")}>{t("scrutiny.continueHandoff")} →</PrimaryButton><button className="app-back !mt-0" onClick={()=>setStage("draft")}>← {t("j.back")}</button></div></>}
-
-    {stage === "final" && result?.official_step && <><p className="app-eyebrow">[ TM / ACT / 04 ]</p><h1 className="app-title">{t("j.finalTitle")}</h1><p className="app-lead">{t("j.finalLead")}</p>
-      <div className="app-content-spacing">
-        <p className="app-section-label">{t("j.actionPlan")}</p>
-        
-        <div className="action-timeline">
-          <div className="action-step">
-            <span className="action-number">01</span>
-            <div>
-              <h3>{t("j.act01")}</h3>
-              <p>{t("j.act01Desc")}</p>
+            <div className="p-4 bg-blue-50/60 border border-blue-200">
+              <p className="text-sm font-bold text-slate-900">
+                {locale === "hi" ? "स्क्रूटनी जांच (धारा 142(1))" : "Section 142(1) Scrutiny Inquiry"}
+              </p>
+              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                {locale === "hi"
+                  ? "आयकर विभाग ने निर्धारण से पूर्व विशिष्ट जानकारी एवं खाते प्रस्तुत करने को कहा है। टैक्स मित्र ने आपके नोटिस से निम्नलिखित अनुरोध निकाले हैं:"
+                  : "The Income Tax Department has called for production of accounts and specific explanations. Tax Mitra has extracted each departmental request below:"}
+              </p>
             </div>
+
+            {/* Scrutiny Request Cards */}
+            <div className="space-y-4">
+              {requests.map((r, i) => (
+                <div key={r.id} className="scrutiny-request-card">
+                  <div className="scrutiny-request-header">
+                    <span className="request-num-badge">{String(i + 1).padStart(2, "0")}</span>
+                    <div className="request-header-content">
+                      <p className="text-xs font-bold uppercase tracking-wider text-blue-600 mb-1">
+                        {locale === "hi" ? "विभाग क्या मांग रहा है" : "What the Department is Asking"}
+                      </p>
+                      <blockquote className="request-original-quote">
+                        "{r.original_text}"
+                      </blockquote>
+                      <p className="request-meaning-text">
+                        <strong>{locale === "hi" ? "इसका अर्थ:" : "What this means:"}</strong>{" "}
+                        {text(r.plain_language_explanation, locale) || r.response_section}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="scrutiny-request-details">
+                    <div className="request-detail-row">
+                      <span className="detail-label">
+                        {locale === "hi" ? "आवश्यक जानकारी" : "Information You Need to Provide"}
+                      </span>
+                      <p className="detail-text">
+                        {r.why_required
+                          ? text(r.why_required, locale)
+                          : locale === "hi"
+                          ? "लेन-देन का ब्योरा एवं संबंधित खाता बही में प्रविष्टियां।"
+                          : "Clarification of transaction dates, amounts, and ledger reconciliation."}
+                      </p>
+                    </div>
+
+                    {r.required_evidence.length > 0 && (
+                      <div className="request-detail-row">
+                        <span className="detail-label">
+                          {locale === "hi" ? "मददगार दस्तावेज़" : "Documents That May Help"}
+                        </span>
+                        <ul className="list-disc pl-5 text-xs text-slate-700 space-y-1">
+                          {r.required_evidence.map((e, j) => (
+                            <li key={j}>{text(e, locale)}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-xs">
+                      <span className="font-semibold text-slate-500">
+                        {locale === "hi" ? "स्थिति:" : "Status:"}{" "}
+                        <span className="text-slate-900 font-bold">
+                          {statusLabel(r.workflow_status, locale)}
+                        </span>
+                      </span>
+
+                      {r.citations.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-400">
+                            {locale === "hi" ? "स्रोत:" : "Sources:"}
+                          </span>
+                          <CitationChips citations={r.citations} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {isUploaded && (
+              <div className="p-4 bg-slate-50 border border-slate-200 text-xs text-slate-600">
+                <strong>{t("scrutiny.confirmedExtraction")}:</strong> {t("scrutiny.confirmedText")}
+              </div>
+            )}
           </div>
-          
-          <div className="action-step">
-            <span className="action-number">02</span>
+        </ScreenFrame>
+      )}
+
+      {/* Confirmation Checkpoint */}
+      {stage === "confirm" && (
+        <ScreenFrame
+          whereAmI={
+            locale === "hi" ? "सत्यापन · अनुरोध पुष्टि" : "Checkpoint · Confirm Extraction"
+          }
+          whatDoesThisMean={t("scrutiny.confirmTitle")}
+          whatDoINeedToDo={t("scrutiny.confirmSub", { count: String(requests.length) })}
+          primaryAction={
+            <PrimaryButton onClick={confirm}>{t("scrutiny.yesCorrect")} →</PrimaryButton>
+          }
+          secondaryAction={
+            <SecondaryButton onClick={reject} className="!border-red-300 !text-red-700 hover:!bg-red-50">
+              {t("scrutiny.somethingWrong")}
+            </SecondaryButton>
+          }
+          whatHappensNext={
+            locale === "hi"
+              ? "अगला कदम: विभाग के प्रश्नों का उत्तर देकर आवश्यक दस्तावेज़ और प्रारूप तय करें।"
+              : "Next step: Answer dynamic questions for each departmental request."
+          }
+        >
+          <div className="p-4 bg-slate-50 border border-slate-200">
+            <p className="text-xs text-slate-500 uppercase tracking-wider font-bold mb-2">
+              {locale === "hi" ? "पहचाने गए अनुरोध" : "Extracted Request Summary"}
+            </p>
+            <ol className="list-decimal pl-5 text-sm text-slate-800 space-y-2">
+              {requests.map((r, i) => (
+                <li key={i}>
+                  <strong>{text(r.plain_language_explanation, locale) || r.response_section}</strong>
+                  <p className="text-xs text-slate-500 italic mt-0.5">"{r.original_text}"</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </ScreenFrame>
+      )}
+
+      {/* =========================================================================
+          STEP 02: QUESTIONS
+         ========================================================================= */}
+      {stage === "questions" && q && (
+        <ScreenFrame
+          whereAmI={
+            locale === "hi"
+              ? `चरण 02 / 06 · प्रश्न ${index + 1} / ${questions.length}`
+              : `Step 02 of 06 · Question ${index + 1} of ${questions.length}`
+          }
+          whatDoesThisMean={q.text}
+          whatDoINeedToDo={
+            q.help ||
+            (locale === "hi"
+              ? "अपने बैंक विवरण या बहीखातों के आधार पर उपयुक्त विकल्प चुनें।"
+              : "Select the option that matches your actual financial records and books of account.")
+          }
+          primaryAction={null}
+          secondaryAction={
+            <SecondaryButton onClick={() => (index > 0 ? setIndex(index - 1) : setStage("requests"))}>
+              ← {locale === "hi" ? "पिछला प्रश्न" : "Previous Question"}
+            </SecondaryButton>
+          }
+          whatHappensNext={
+            index < questions.length - 1
+              ? locale === "hi"
+                ? `अगला कदम: प्रश्न ${index + 2} / ${questions.length}`
+                : `Next step: Question ${index + 2} of ${questions.length}`
+              : locale === "hi"
+              ? "अगला कदम: आपके उत्तरों के आधार पर आवश्यक दस्तावेज़ों की सूची।"
+              : "Next step: Evidence & document checklist tailored to your responses."
+          }
+        >
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {q.options.map((o) => {
+                const isSelected = answers[q.id] === o.id;
+                return (
+                  <button
+                    key={o.id}
+                    onClick={() => answer(o.id)}
+                    className={`p-4 text-center border font-semibold text-base transition-all min-h-[56px] flex items-center justify-center ${
+                      isSelected
+                        ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                        : "bg-white text-slate-900 border-slate-300 hover:border-slate-900"
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {q.help && (
+              <WhyDrawer
+                title={locale === "hi" ? "यह प्रश्न क्यों पूछा जा रहा है?" : "Why is this question asked?"}
+              >
+                <p className="text-sm text-slate-700 leading-relaxed">{q.help}</p>
+              </WhyDrawer>
+            )}
+          </div>
+        </ScreenFrame>
+      )}
+
+      {/* =========================================================================
+          STEP 03: DOCUMENTS
+         ========================================================================= */}
+      {stage === "result" && result && (
+        <ScreenFrame
+          whereAmI={
+            locale === "hi"
+              ? "चरण 03 / 06 · दस्तावेज़ तैयारी"
+              : "Step 03 of 06 · Documents & Evidence"
+          }
+          whatDoesThisMean={
+            text(result.path?.headline, locale) ||
+            (locale === "hi"
+              ? "हर अनुरोध के लिए संभावित प्रमाण"
+              : "Supporting Evidence for Section 142(1)")
+          }
+          whatDoINeedToDo={
+            locale === "hi"
+              ? "प्रत्येक दस्तावेज़ की उपलब्धता स्थिति चुनें। 'पक्का नहीं' रहने पर अंतिम समीक्षा में ध्यान दिलाया जाएगा।"
+              : "Mark whether you have each document or need to find it. Items marked 'Not sure' will remain flagged for review."
+          }
+          primaryAction={
+            <PrimaryButton onClick={() => setStage("draft")}>
+              {locale === "hi" ? "उत्तर का प्रारूप देखें" : "Prepare Response Draft"} →
+            </PrimaryButton>
+          }
+          secondaryAction={
+            <SecondaryButton onClick={ensureQuestions}>
+              ← {locale === "hi" ? "उत्तर बदलें" : "Change Answers"}
+            </SecondaryButton>
+          }
+          whatHappensNext={
+            locale === "hi"
+              ? "अगला कदम: आपके उत्तरों एवं उपलब्ध प्रमाणों के आधार पर औपचारिक उत्तर का प्रारूप।"
+              : "Next step: Formal clause-by-clause response draft grounded in tax provisions."
+          }
+        >
+          <div className="space-y-6">
+            {result.path?.professional_help_recommended && (
+              <div className="p-4 bg-amber-50 border border-amber-200">
+                <p className="text-xs font-bold uppercase tracking-wider text-amber-900 mb-1">
+                  {locale === "hi" ? "पेशेवर समीक्षा अनुशंसित" : "Professional Review Recommended"}
+                </p>
+                <p className="text-sm text-amber-950">
+                  {t("scrutiny.professionalText")}
+                </p>
+              </div>
+            )}
+
+            {/* Evidence items list */}
             <div>
-              <h3>{t("j.act02")}</h3>
-              <p>{t("j.act02Desc")}</p>
-              {result.checklist && result.checklist.length > 0 && (
-                <ul className="action-checklist">
-                  {result.checklist.map((c) => (
-                    <li key={c.id}>• {text(c.title, locale)}</li>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+                {locale === "hi" ? "दस्तावेज़ उपलब्धता चेकलिस्ट" : "Evidence Availability Checklist"}
+              </p>
+
+              {evidence.length > 0 ? (
+                <div className="space-y-3">
+                  {evidence.map((item) => (
+                    <div key={item.document_id} className="evidence-item-card">
+                      <div className="evidence-header">
+                        <div>
+                          <p className="evidence-name">{text(item.document_name, locale)}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {item.requirement_level === "required"
+                              ? locale === "hi"
+                                ? "नोटिस में सीधे मांगा गया"
+                                : "Directly requested in notice"
+                              : locale === "hi"
+                              ? "संभावित रूप से उपयोगी प्रमाण"
+                              : "Supporting evidence"}
+                          </p>
+                        </div>
+                        <span
+                          className={`evidence-status-pill ${
+                            item.status === "have"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : item.status === "need_to_find"
+                              ? "bg-amber-100 text-amber-800"
+                              : item.status === "dont_have"
+                              ? "bg-rose-100 text-rose-800"
+                              : "bg-slate-100 text-slate-700"
+                          }`}
+                        >
+                          {item.status === "have"
+                            ? locale === "hi"
+                              ? "उपलब्ध"
+                              : "Have it"
+                            : item.status === "need_to_find"
+                            ? locale === "hi"
+                              ? "ढूंढना है"
+                              : "Need to find"
+                            : item.status === "dont_have"
+                            ? locale === "hi"
+                              ? "नहीं है"
+                              : "Don't have"
+                            : locale === "hi"
+                            ? "पक्का नहीं"
+                            : "Not sure"}
+                        </span>
+                      </div>
+
+                      <p className="evidence-reason">{text(item.reason, locale)}</p>
+
+                      <div className="evidence-status-actions-row">
+                        <button
+                          type="button"
+                          onClick={() => handleEvidenceStatusChange(item.document_id, "have")}
+                          className={`status-choice-btn ${item.status === "have" ? "is-have" : ""}`}
+                        >
+                          ✓ {locale === "hi" ? "मेरे पास है" : "Have it"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleEvidenceStatusChange(item.document_id, "need_to_find")}
+                          className={`status-choice-btn ${item.status === "need_to_find" ? "is-need-find" : ""}`}
+                        >
+                          ⚲ {locale === "hi" ? "ढूंढना है" : "Need to find it"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleEvidenceStatusChange(item.document_id, "dont_have")}
+                          className={`status-choice-btn ${item.status === "dont_have" ? "is-dont-have" : ""}`}
+                        >
+                          ✕ {locale === "hi" ? "नहीं है" : "Don't have it"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleEvidenceStatusChange(item.document_id, "not_sure")}
+                          className={`status-choice-btn ${item.status === "not_sure" ? "is-not-sure" : ""}`}
+                        >
+                          ? {locale === "hi" ? "पक्का नहीं" : "Not sure"}
+                        </button>
+                      </div>
+                    </div>
                   ))}
-                </ul>
-              )}
-            </div>
-          </div>
-          
-          <div className="action-step">
-            <span className="action-number">03</span>
-            <div>
-              <h3>{t("j.act03")}</h3>
-              <p>{t("j.act03Desc")}</p>
-            </div>
-          </div>
-          
-          <div className="action-step">
-            <span className="action-number">04</span>
-            <div>
-              <h3>{t("j.act04")}</h3>
-              <p className="font-mono text-sm text-stone-600">{t("j.portalNav")}</p>
-              {notice && (
-                <div className="action-meta">
-                  <p><strong>{t("scrutiny.notice")}:</strong> {notice.section}</p>
-                  <p><strong>{t("dash.ay")}:</strong> {notice.assessment_year}</p>
+                </div>
+              ) : (
+                <div className="p-4 bg-slate-50 border border-slate-200 text-sm text-slate-600">
+                  {locale === "hi"
+                    ? "इस निर्धारण वर्ष के लिए कोई अतिरिक्त दस्तावेज़ आवश्यक नहीं हैं।"
+                    : "Standard ledger extracts and return acknowledgment are sufficient for this notice."}
                 </div>
               )}
             </div>
+
+            <WhyDrawer
+              title={
+                locale === "hi"
+                  ? "दस्तावेज़ स्थिति क्यों महत्वपूर्ण है?"
+                  : "Why is document availability tracking important?"
+              }
+            >
+              <p className="text-sm text-slate-700 leading-relaxed">
+                {locale === "hi"
+                  ? "धारा 142(1) के तहत विभाग को मांगे गए दस्तावेज समय पर न देने पर धारा 144 (बेस्ट जजमेंट असेसमेंट) की कार्रवाई हो सकती है। टैक्स मित्र कोई भी फाइल अपलोड या स्टोर नहीं करता, लेकिन आपकी तत्परता सुनिश्चित करता है।"
+                  : "Under Section 142(1), failure to produce accounts or documents can lead to best judgment assessment under Section 144. Tax Mitra does not store or upload your files, but helps ensure you submit a complete evidence package on the official portal."}
+              </p>
+            </WhyDrawer>
           </div>
-          
-          <div className="action-step">
-            <span className="action-number">05</span>
+        </ScreenFrame>
+      )}
+
+      {/* =========================================================================
+          STEP 04: RESPONSE (Guided Draft Editor)
+         ========================================================================= */}
+      {stage === "draft" && (
+        <ScreenFrame
+          whereAmI={
+            locale === "hi"
+              ? "चरण 04 / 06 · उत्तर का प्रारूप"
+              : "Step 04 of 06 · Official Response Draft"
+          }
+          whatDoesThisMean={
+            locale === "hi"
+              ? "धारा 142(1) के लिए औपचारिक उत्तर प्रारूप"
+              : "Clause-by-Clause Response Draft"
+          }
+          whatDoINeedToDo={
+            locale === "hi"
+              ? "प्रारूप की समीक्षा करें। आप सीधे नीचे संपादक में कोई भी सुधार या विवरण जोड़ सकते हैं।"
+              : "Review the drafted response below. You can edit directly to adjust specific dates or ledger figures."
+          }
+          primaryAction={
+            <PrimaryButton
+              onClick={() => {
+                store.setDraft(id, draft);
+                setStage("review");
+              }}
+            >
+              {t("j.acceptDraft")} →
+            </PrimaryButton>
+          }
+          secondaryAction={
+            <SecondaryButton onClick={() => setStage("result")}>
+              ← {locale === "hi" ? "दस्तावेज़ों पर वापस जाएं" : "Back to Documents"}
+            </SecondaryButton>
+          }
+          whatHappensNext={
+            locale === "hi"
+              ? "अगला कदम: अंतिम समीक्षा, सांविधिक जांच और स्पष्ट अनुमोदन।"
+              : "Next step: Executive review, statutory checks, and explicit taxpayer approval."
+          }
+        >
+          <div className="space-y-6">
+            {/* Guided Context Box */}
+            <div className="p-4 bg-slate-50 border border-slate-200">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                {locale === "hi" ? "आपके उत्तरों के आधार पर" : "Based On Your Answers"}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(answers).map(([qid, val]) => (
+                  <span
+                    key={qid}
+                    className="inline-block px-2.5 py-1 bg-white border border-slate-300 text-xs font-medium text-slate-800"
+                  >
+                    Q: {qid} → <strong>{val}</strong>
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                {locale === "hi"
+                  ? "तथ्य आपके उत्तरों से लिए गए हैं; कानूनी भाषा सीबीडीटी धारा 142(1) नियमों पर आधारित है।"
+                  : "Facts are drawn directly from your answers; statutory format adheres strictly to Section 142(1) standards."}
+              </p>
+            </div>
+
+            {/* Editable Draft Textarea */}
             <div>
-              <h3>{t("j.act05")}</h3>
-              <p>{notice?.section?.replace(/\s/g, "").startsWith("142(1)") ? t("j.act05Desc142") : t("j.act05Desc143")}</p>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                  {locale === "hi" ? "संपादन योग्य उत्तर प्रारूप" : "Editable Response Text"}
+                </span>
+                <span className="text-xs text-slate-500">
+                  {draft.length} {locale === "hi" ? "अक्षर" : "characters"}
+                </span>
+              </div>
+              <textarea
+                className="w-full font-mono text-sm leading-relaxed p-4 border border-slate-300 focus:border-blue-600 focus:outline-none min-h-[360px] bg-white text-slate-900"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onBlur={() => store.setDraft(id, draft)}
+                rows={16}
+              />
+            </div>
+
+            {/* Draft Actions */}
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(draft);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="px-4 py-2 text-xs font-bold border border-slate-300 bg-white hover:border-slate-900 text-slate-800 transition-colors"
+              >
+                {copied ? t("scrutiny.copied") : t("scrutiny.copyDraft")}
+              </button>
+              <button
+                type="button"
+                onClick={downloadDraft}
+                className="px-4 py-2 text-xs font-bold border border-slate-300 bg-white hover:border-slate-900 text-slate-800 transition-colors"
+              >
+                {t("scrutiny.downloadDraft")}
+              </button>
             </div>
           </div>
-          
-          <div className="action-step">
-            <span className="action-number">06</span>
-            <div>
-              <h3>{t("j.act06")}</h3>
-              <p>{t("j.act06Desc")}</p>
+        </ScreenFrame>
+      )}
+
+      {/* =========================================================================
+          STEP 05: REVIEW (Executive Review & Approval Gate)
+         ========================================================================= */}
+      {stage === "review" && result && (
+        <ScreenFrame
+          whereAmI={
+            locale === "hi"
+              ? "चरण 05 / 06 · अंतिम समीक्षा एवं अनुमोदन"
+              : "Step 05 of 06 · Executive Review & Approval"
+          }
+          whatDoesThisMean={t("j.reviewTitle")}
+          whatDoINeedToDo={
+            locale === "hi"
+              ? "अपने उत्तर की सभी मदों की पुष्टि करें और आधिकारिक पोर्टल पर जाने के लिए अपनी स्पष्ट सहमति दें।"
+              : "Verify the 5 readiness items below and give your explicit approval before accessing the e-Filing portal instructions."
+          }
+          primaryAction={
+            <PrimaryButton disabled={!approval} onClick={approveReview}>
+              {t("scrutiny.continueHandoff")} →
+            </PrimaryButton>
+          }
+          secondaryAction={
+            <SecondaryButton onClick={() => setStage("draft")}>
+              ← {locale === "hi" ? "प्रारूप संपादित करें" : "Edit Response Draft"}
+            </SecondaryButton>
+          }
+          whatHappensNext={
+            locale === "hi"
+              ? "अगला कदम: ई-फाइलिंग पोर्टल पर उत्तर दाखिल करने की चरणबद्ध गाइड।"
+              : "Next step: Step-by-step submission instructions on the official Income Tax portal."
+          }
+        >
+          <div className="space-y-6">
+            {/* Executive Review Card */}
+            <div className="executive-review-card">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">
+                {locale === "hi" ? "कार्यकारी समीक्षा चेकलिस्ट" : "Executive Readiness Checklist"}
+              </p>
+
+              <div className="review-items-list">
+                <div className="review-checklist-item">
+                  <span className="review-item-name">
+                    {locale === "hi" ? "नोटिस एवं धारा" : "Notice & Section"}
+                  </span>
+                  <span className="review-item-status">
+                    Section 142(1) · AY {notice?.assessment_year || "2024-25"} ✓
+                  </span>
+                </div>
+
+                <div className="review-checklist-item">
+                  <span className="review-item-name">
+                    {locale === "hi" ? "स्पष्टीकरण प्रश्न" : "Clarification Questions"}
+                  </span>
+                  <span className="review-item-status">
+                    {Object.keys(answers).length} {locale === "hi" ? "उत्तर दिए गए" : "completed"} ✓
+                  </span>
+                </div>
+
+                <div className="review-checklist-item">
+                  <span className="review-item-name">
+                    {locale === "hi" ? "दस्तावेज़ उपलब्धता" : "Document Readiness"}
+                  </span>
+                  <span className="review-item-status">
+                    {evidence.filter((e) => e.status === "have").length} / {evidence.length || requests.length}{" "}
+                    {locale === "hi" ? "उपलब्ध" : "marked ready"}
+                  </span>
+                </div>
+
+                <div className="review-checklist-item">
+                  <span className="review-item-name">
+                    {locale === "hi" ? "उत्तर का प्रारूप" : "Draft Response"}
+                  </span>
+                  <span className="review-item-status">
+                    {draft.length > 0 ? (locale === "hi" ? "तैयार ✓" : "Ready ✓") : "Incomplete"}
+                  </span>
+                </div>
+
+                <div className="review-checklist-item">
+                  <span className="review-item-name">
+                    {locale === "hi" ? "सांविधिक आधार" : "Statutory Grounding"}
+                  </span>
+                  <span className="review-item-status">
+                    {locale === "hi" ? "आयकर अधिनियम, 1961 सत्यापित ✓" : "Verified against Act ✓"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Deadline reminder */}
+              <div className="p-3 bg-slate-50 border border-slate-200 text-xs text-slate-700 flex items-center justify-between">
+                <span>{locale === "hi" ? "प्रतिक्रिया की अंतिम तिथि:" : "Response Deadline:"}</span>
+                <strong className="text-slate-900 font-bold">
+                  {result.deadline?.due_date ?? notice?.due_date ?? "Not available in this notice"}
+                </strong>
+              </div>
+            </div>
+
+            {/* Safety checks */}
+            {result.safety_review && (
+              <div className="p-4 bg-slate-50 border border-slate-200">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+                  {locale === "hi" ? "सुरक्षा जांच" : "Safety System Checks"}
+                </p>
+                <div className="space-y-2">
+                  {result.safety_review.checks.map((check) => (
+                    <div key={check.key} className="flex items-start gap-2 text-xs">
+                      <span className={check.status === "passed" ? "text-emerald-700 font-bold" : "text-amber-700 font-bold"}>
+                        {check.status === "passed" ? "✓" : "!"}
+                      </span>
+                      <span className="text-slate-800 font-medium">
+                        {check.label}
+                        {check.missing && <span className="text-slate-500 block">{check.missing}</span>}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Explicit Human Approval Gate */}
+            <div className="approval-gate-box">
+              <label className="approval-gate-label">
+                <input
+                  type="checkbox"
+                  checked={approval}
+                  onChange={(e) => setApproval(e.target.checked)}
+                />
+                <span>
+                  {locale === "hi"
+                    ? "मैंने response draft, documents और sources की समीक्षा की है और official portal पर स्वयं review करने की मंजूरी देता/देती हूं।"
+                    : "I have reviewed the response draft, documents, and sources, and approve moving to the official portal for my own review."}
+                </span>
+              </label>
             </div>
           </div>
-          
-          <div className="action-step">
-            <span className="action-number">07</span>
-            <div>
-              <h3>{t("j.act07")}</h3>
-              <p>{t("j.act07Desc")}</p>
+        </ScreenFrame>
+      )}
+
+      {/* =========================================================================
+          STEP 06: ACT (Official Portal Guide)
+         ========================================================================= */}
+      {stage === "final" && (
+        <ScreenFrame
+          whereAmI={
+            locale === "hi"
+              ? "चरण 06 / 06 · ई-फाइलिंग पोर्टल पर कार्रवाई"
+              : "Step 06 of 06 · Submit on Official Portal"
+          }
+          whatDoesThisMean={t("j.finalTitle")}
+          whatDoINeedToDo={
+            locale === "hi"
+              ? "नीचे दिए गए 7 चरणों का पालन करें। ड्राफ्ट डाउनलोड करें और आधिकारिक आयकर ई-फाइलिंग पोर्टल पर ई-प्रोसीडिंग्स में जमा करें।"
+              : "Follow the 7 official submission steps below to submit your response under e-Proceedings on incometax.gov.in."
+          }
+          primaryAction={
+            <a
+              className="app-primary-btn"
+              href={OFFICIAL_EFILING_PORTAL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("j.continuePortal")} ↗
+            </a>
+          }
+          secondaryAction={
+            <SecondaryButton onClick={() => setStage("review")}>
+              ← {t("j.back")}
+            </SecondaryButton>
+          }
+          whatHappensNext={
+            locale === "hi"
+              ? "जमा करने के बाद पावती (Acknowledgment Receipt) और DIN सुरक्षित रखें।"
+              : "Keep the submission acknowledgment receipt and DIN safe for your records."
+          }
+        >
+          <div className="space-y-6">
+            {/* Download and Copy Box */}
+            <div className="p-4 bg-slate-50 border border-slate-200">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+                {t("j.downloadDraft")}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={downloadDraft}
+                  className="px-4 py-2.5 text-xs font-bold border border-slate-300 bg-white hover:border-slate-900 text-slate-800 transition-colors text-center"
+                >
+                  {t("j.downloadTxt")}
+                </button>
+                <button
+                  type="button"
+                  onClick={downloadAsMarkdown}
+                  className="px-4 py-2.5 text-xs font-bold border border-slate-300 bg-white hover:border-slate-900 text-slate-800 transition-colors text-center"
+                >
+                  {t("j.downloadMd")}
+                </button>
+                <button
+                  type="button"
+                  onClick={downloadAsPdf}
+                  className="px-4 py-2.5 text-xs font-bold border border-slate-300 bg-white hover:border-slate-900 text-slate-800 transition-colors text-center"
+                >
+                  {t("j.downloadPdf")}
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(draft);
+                  setFinalCopied(true);
+                  setTimeout(() => setFinalCopied(false), 2000);
+                }}
+                className="text-xs text-blue-600 hover:underline mt-3 block font-semibold"
+              >
+                {finalCopied ? t("scrutiny.copied") : t("scrutiny.copyDraft")}
+              </button>
+            </div>
+
+            {/* Official Submission Timeline */}
+            <div className="space-y-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                {t("j.actionPlan")}
+              </p>
+
+              <div className="action-timeline">
+                <div className="action-step">
+                  <span className="action-number">01</span>
+                  <div>
+                    <h3>{t("j.act01")}</h3>
+                    <p>{t("j.act01Desc")}</p>
+                  </div>
+                </div>
+
+                <div className="action-step">
+                  <span className="action-number">02</span>
+                  <div>
+                    <h3>{t("j.act02")}</h3>
+                    <p>{t("j.act02Desc")}</p>
+                  </div>
+                </div>
+
+                <div className="action-step">
+                  <span className="action-number">03</span>
+                  <div>
+                    <h3>{t("j.act03")}</h3>
+                    <p>{t("j.act03Desc")}</p>
+                  </div>
+                </div>
+
+                <div className="action-step">
+                  <span className="action-number">04</span>
+                  <div>
+                    <h3>{t("j.act04")}</h3>
+                    <p className="font-mono text-xs text-slate-600">{t("j.portalNav")}</p>
+                  </div>
+                </div>
+
+                <div className="action-step">
+                  <span className="action-number">05</span>
+                  <div>
+                    <h3>{t("j.act05")}</h3>
+                    <p>{t("j.act05Desc142")}</p>
+                  </div>
+                </div>
+
+                <div className="action-step">
+                  <span className="action-number">06</span>
+                  <div>
+                    <h3>{t("j.act06")}</h3>
+                    <p>{t("j.act06Desc")}</p>
+                  </div>
+                </div>
+
+                <div className="action-step">
+                  <span className="action-number">07</span>
+                  <div>
+                    <h3>{t("j.act07")}</h3>
+                    <p>{t("j.act07Desc")}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pre-submission Checklist */}
+            <div className="p-4 bg-slate-50 border border-slate-200">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+                {t("j.beforeSubmit")}
+              </p>
+              <div className="space-y-2">
+                {[
+                  { key: "c1", label: t("j.check01") },
+                  { key: "c2", label: t("j.check02") },
+                  { key: "c3", label: t("j.check03") },
+                  { key: "c4", label: t("j.check04") },
+                  { key: "c5", label: t("j.check05") },
+                ].map((item) => (
+                  <label key={item.key} className="flex items-center gap-2.5 text-xs text-slate-800 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={checklistState[item.key] || false}
+                      onChange={() => handleChecklistToggle(item.key)}
+                      className="w-4 h-4 accent-blue-600"
+                    />
+                    <span>{item.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Safety Boundary */}
+            <div className="p-4 bg-blue-50 border border-blue-200 text-xs text-slate-700 space-y-1">
+              <p className="font-bold text-slate-900">{t("j.finalBoundary")}</p>
+              <p>{t("j.finalInstruction")}</p>
             </div>
           </div>
-        </div>
+        </ScreenFrame>
+      )}
 
-        <div className="checklist-visual my-6">
-          <p className="app-section-label">{t("j.beforeSubmit")}</p>
-          <div className="checklist-items">
-            <label className="checklist-item">
-              <input
-                type="checkbox"
-                checked={checklistState.check01 || false}
-                onChange={() => handleChecklistToggle('check01')}
-              />
-              <span>{t("j.check01")}</span>
-            </label>
-            <label className="checklist-item">
-              <input
-                type="checkbox"
-                checked={checklistState.check02 || false}
-                onChange={() => handleChecklistToggle('check02')}
-              />
-              <span>{t("j.check02")}</span>
-            </label>
-            <label className="checklist-item">
-              <input
-                type="checkbox"
-                checked={checklistState.check03 || false}
-                onChange={() => handleChecklistToggle('check03')}
-              />
-              <span>{t("j.check03")}</span>
-            </label>
-            <label className="checklist-item">
-              <input
-                type="checkbox"
-                checked={checklistState.check04 || false}
-                onChange={() => handleChecklistToggle('check04')}
-              />
-              <span>{t("j.check04")}</span>
-            </label>
-            <label className="checklist-item">
-              <input
-                type="checkbox"
-                checked={checklistState.check05 || false}
-                onChange={() => handleChecklistToggle('check05')}
-              />
-              <span>{t("j.check05")}</span>
-            </label>
+      {/* =========================================================================
+          REFUSAL / SAFE STOP STATE
+         ========================================================================= */}
+      {stage === "refusal" && result && (
+        <ScreenFrame
+          whereAmI={locale === "hi" ? "सुरक्षित विराम" : "Safe Stop"}
+          whatDoesThisMean={text(result.headline, locale) || t("scrutiny.safeStop")}
+          whatDoINeedToDo={
+            text(result.why, locale) ||
+            "The system identified high extraction uncertainty or non-standard provisions."
+          }
+          primaryAction={
+            <PrimaryButton onClick={() => setStage("requests")}>
+              ← {t("scrutiny.reviewAgain")}
+            </PrimaryButton>
+          }
+          secondaryAction={null}
+          whatHappensNext="Consult a Chartered Accountant or review your notice directly on incometax.gov.in."
+        >
+          <div className="space-y-4">
+            <div className="p-4 bg-slate-50 border border-slate-200">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                {t("scrutiny.refusalSuggestion")}
+              </p>
+              <p className="text-sm text-slate-800">{text(result.suggestion, locale)}</p>
+            </div>
+
+            {result.official_links && result.official_links.length > 0 && (
+              <div className="p-4 bg-white border border-slate-200 space-y-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                  {locale === "hi" ? "आधिकारिक स्रोत" : "Official Resources"}
+                </p>
+                {result.official_links.map((link, idx) => (
+                  <a
+                    key={idx}
+                    className="block text-xs font-semibold text-blue-600 hover:underline"
+                    href={verifiedIncomeTaxUrl(link.url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {text(link.label, locale)} ↗
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-
-        <div className="value-summary my-6">
-          <p className="app-section-label">{t("j.whatTaxMitraDid")}</p>
-          <ul className="value-list">
-            <li>{t("j.help01")}</li>
-            <li>{t("j.help02")}</li>
-            <li>{t("j.help03")}</li>
-            <li>{t("j.help04")}</li>
-            <li>{t("j.help05")}</li>
-            <li>{t("j.help06")}</li>
-          </ul>
-          <p className="app-body mt-2 italic">{t("j.yourSubmission")}</p>
-        </div>
-
-        <Card className="my-4">
-          <p className="app-section-label">[ {t("j.downloadDraft")} ]</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
-            <button onClick={downloadDraft} className="app-primary">{t("j.downloadTxt")}</button>
-            <button onClick={downloadAsMarkdown} className="app-primary">{t("j.downloadMd")}</button>
-            <button onClick={downloadAsPdf} className="app-primary">{t("j.downloadPdf")}</button>
-          </div>
-          <button onClick={async()=>{await navigator.clipboard.writeText(draft);setFinalCopied(true);setTimeout(()=>setFinalCopied(false),2000)}} className="text-sm text-stone-600 underline py-2 mt-3">{finalCopied ? t("scrutiny.copied") : t("scrutiny.copyDraft")}</button>
-        </Card>
-
-        <div className="notice-boundary mb-4">
-          <p className="app-section-label">[ IMPORTANT ]</p>
-          <p className="app-body font-medium">{t("j.finalBoundary")}</p>
-          <p className="app-body mt-2">{t("j.finalInstruction")}</p>
-        </div>
-
-        <div className="final-actions">
-          <a className="app-primary" href={OFFICIAL_EFILING_PORTAL_URL} target="_blank" rel="noopener noreferrer">{t("j.continuePortal")}</a>
-        </div>
-        <button className="app-back" onClick={()=>setStage("review")}>← {t("j.back")}</button>
-      </div></>}
-
-    {stage === "refusal" && result && <><p className="app-eyebrow">[ {t("scrutiny.safeStop")} ]</p><h1 className="app-title">{text(result.headline,locale)}</h1><div className="refusal-layout"><Card><p className="app-section-label">[ {t("scrutiny.refusalWhy")} ]</p><p className="app-body">{text(result.why,locale)}</p></Card><Card><p className="app-section-label">[ {t("scrutiny.refusalSuggestion")} ]</p><p className="app-body">{text(result.suggestion,locale)}</p></Card><Card>{result.official_links?.map(link=><a key={link.url} className="app-text-action block mb-3" href={verifiedIncomeTaxUrl(link.url)} target="_blank" rel="noopener noreferrer">{text(link.label,locale)} ↗</a>)}</Card></div><button className="app-back" onClick={()=>setStage("requests")}>← {t("scrutiny.reviewAgain")}</button></>}
-  </div>;
+        </ScreenFrame>
+      )}
+    </WorkflowLayout>
+  );
 }
