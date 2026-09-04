@@ -7,7 +7,7 @@ export default function Start() {
 
   return (
     <div className="app-page start-page">
-      <p className="app-eyebrow">[ TM / GUIDE / 00 ]</p>
+      <p className="app-eyebrow font-semibold tracking-wider text-slate-500">STARTING POINT</p>
       <h1 className="app-title">{hi ? "आप कैसे शुरू करना चाहते हैं?" : "How do you want to start?"}</h1>
       <p className="app-lead">
         {hi
@@ -19,7 +19,7 @@ export default function Start() {
         <article className="start-option">
           <p className="start-number">01</p>
           <div>
-            <p className="app-section-label">[ {hi ? "सुरक्षित डेमो" : "SAFE DEMO"} ]</p>
+            <p className="app-section-label font-bold text-blue-600">{hi ? "सुरक्षित डेमो" : "SAFE DEMO"}</p>
             <h2>{hi ? "काल्पनिक नोटिस इस्तेमाल करें" : "Use a synthetic notice"}</h2>
             <p>{hi ? "काल्पनिक डेमो डेटा के साथ Tax Mitra का पूरा अनुभव देखें।" : "Explore the complete Tax Mitra experience with fictional demo data."}</p>
           </div>
@@ -31,7 +31,7 @@ export default function Start() {
         <article className="start-option is-upload">
           <p className="start-number">02</p>
           <div>
-            <p className="app-section-label">[ {hi ? "आपका PDF" : "YOUR PDF"} ]</p>
+            <p className="app-section-label font-bold text-blue-600">{hi ? "आपका PDF" : "YOUR PDF"}</p>
             <h2>{hi ? "अपना नोटिस इस्तेमाल करें" : "Use your own notice"}</h2>
             <p>{hi ? "आयकर नोटिस है? अपना PDF अपलोड करें और Tax Mitra आपके लिए अनुरोध निकालेगा।" : "Have an income-tax notice? Upload your PDF and Tax Mitra will extract the requests for you."}</p>
           </div>
@@ -40,7 +40,7 @@ export default function Start() {
       </div>
 
       <div className="notice-boundary start-boundary">
-        <p className="app-section-label">[ {hi ? "महत्वपूर्ण सीमा" : "IMPORTANT BOUNDARY"} ]</p>
+        <p className="app-section-label font-bold text-slate-700">{hi ? "महत्वपूर्ण सीमा" : "IMPORTANT BOUNDARY"}</p>
         <p className="app-body">{hi ? "Tax Mitra आपकी ओर से कुछ भी जमा नहीं करता है। आप हर महत्वपूर्ण कार्रवाई की समीक्षा और स्वीकृति करते हैं।" : "Tax Mitra does not submit anything on your behalf. You review and approve every important action."}</p>
       </div>
     </div>
