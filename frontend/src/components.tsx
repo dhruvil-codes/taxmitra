@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useI18n } from "./i18n";
 import { Citation, Locale, NoticeCard } from "./lib";
+import { lookupTaxTerm } from "./taxTerms";
 
 export function DisclaimerBanner() {
   const { t } = useI18n();
@@ -346,6 +347,82 @@ export function WhyDrawer({
       </summary>
       <div className="why-content">{children}</div>
     </details>
+  );
+}
+
+export function TaxTermExplanation({
+  term,
+  plainExplanation,
+  context,
+  applicability,
+  citations = [],
+}: {
+  term: string;
+  plainExplanation: string;
+  context: string;
+  applicability: string;
+  citations?: Citation[];
+}) {
+  const { t } = useI18n();
+  return (
+    <div className="tax-term-explanation">
+      <strong className="tax-term-name">{term}</strong>
+      <p><b>{t("term.whatItMeans")}</b> {plainExplanation}</p>
+      <p><b>{t("term.context")}</b> {context}</p>
+      <p><b>{t("term.applicability")}</b> {applicability}</p>
+      {citations.length > 0 && <CitationChips citations={citations} />}
+    </div>
+  );
+}
+
+export function TaxTermExplanationCard({
+  termKey,
+  customTerm,
+  customPlain,
+  citations = [],
+}: {
+  termKey: string;
+  customTerm?: string;
+  customPlain?: string;
+  citations?: Citation[];
+}) {
+  const { locale } = useI18n();
+  const def = lookupTaxTerm(termKey);
+  const termName = customTerm || (def.term[locale as "hi"] ?? def.term.en);
+  const plainMeaning = customPlain || (def.plain_explanation[locale as "hi"] ?? def.plain_explanation.en);
+  const why = def.why_asked[locale as "hi"] ?? def.why_asked.en;
+  const needed = def.what_needed[locale as "hi"] ?? def.what_needed.en;
+
+  return (
+    <div className="tax-term-card">
+      <div className="tax-term-header">
+        <span className="tax-term-badge">{locale === "hi" ? "तकनीकी शब्दावली" : "REAL TAX TERM"}</span>
+        <strong className="tax-term-title">{termName}</strong>
+      </div>
+
+      <div className="tax-term-plain-box">
+        <span className="tax-term-plain-label">{locale === "hi" ? "आसान अर्थ:" : "Plain meaning:"}</span>
+        <p className="tax-term-plain-text">{plainMeaning}</p>
+      </div>
+
+      <div className="tax-term-subgrid">
+        <div className="tax-term-subitem">
+          <span className="subitem-label">{locale === "hi" ? "यह क्यों पूछा जा रहा है?" : "Why is this asked?"}</span>
+          <p className="subitem-text">{why}</p>
+        </div>
+        <div className="tax-term-subitem">
+          <span className="subitem-label">{locale === "hi" ? "आवश्यक दस्तावेज / जानकारी:" : "What you may need:"}</span>
+          <p className="subitem-text">{needed}</p>
+        </div>
+      </div>
+
+      {citations.length > 0 && (
+        <div className="tax-term-citations">
+          <span className="subitem-label">{locale === "hi" ? "सांविधिक संदर्भ:" : "Statutory Source:"}</span>
+          <CitationChips citations={citations} />
+        </div>
+      )}
+    </div>
   );
 }
 
