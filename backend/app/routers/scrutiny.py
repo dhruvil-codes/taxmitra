@@ -25,6 +25,8 @@ from app.rules.scrutiny import (
 )
 from app.extraction.pdf import MAX_PDF_BYTES, extract_pdf
 from app.extraction.sessions import confirm_session, create_session, get_session
+from app.evidence.mapping import DOCUMENT_STATUSES, map_evidence, missing_evidence
+from app.review.safety import evaluate
 
 router = APIRouter(prefix="/api/scrutiny", tags=["scrutiny"])
 
@@ -32,6 +34,19 @@ router = APIRouter(prefix="/api/scrutiny", tags=["scrutiny"])
 class ScrutinyResolveRequest(BaseModel):
     notice_id: str
     answers: dict[str, str]
+    extraction_confirmed: bool = True
+    document_statuses: dict[str, str] = {}
+
+
+class EvidenceStatusUpdate(BaseModel):
+    statuses: dict[str, str] = {}
+
+
+class ScrutinyReviewRequest(BaseModel):
+    answers: dict[str, str]
+    document_statuses: dict[str, str] = {}
+    draft: str
+    approved: bool = False
     extraction_confirmed: bool = True
 
 
@@ -128,6 +143,20 @@ def _citations_by_request(requests) -> dict[str, list[dict]]:
     }
 
 
+def _sources_verified(requests) -> bool:
+    """Rules and draft generation may proceed only with current official sources."""
+    citations = _citations_by_request(requests)
+    return bool(requests) and all(
+        any(c.get("verification_status") == "VERIFIED_OFFICIAL" and c.get("status") == "CURRENT" for c in citations.get(request.id, []))
+        for request in requests
+    )
+
+
+def _evidence_for_notice(notice: dict, statuses: dict[str, str] | None = None) -> list[dict]:
+    found = build_scrutiny_requests(notice, extraction_confirmed=True)
+    return map_evidence(found, statuses)
+
+
 def _grounding_payload(notice: dict) -> dict:
     settings = get_settings()
     query = f"explain section 142(1) scrutiny notice accounts documents information {notice.get('assessment_year', '')}"
@@ -136,6 +165,8 @@ def _grounding_payload(notice: dict) -> dict:
         "method": result.method,
         "confidence": round(result.confidence, 3),
         "below_floor": result.below_floor,
+        "verified_source_count": result.verified_source_count,
+        "verified": result.verified_source_count > 0,
     }
 
 
@@ -149,6 +180,8 @@ def requests(
     found = build_scrutiny_requests(notice, extraction_confirmed=extraction_confirmed)
     if not found:
         return insufficient_information_refusal("Extraction has not been confirmed or no annexure requests were found.")
+    if not _sources_verified(found):
+        return insufficient_information_refusal("At least one request has no current verified official source, so Tax Mitra cannot safely explain it.")
     return {
         "supported": True,
         "notice_id": notice_id,
@@ -159,6 +192,7 @@ def requests(
             "confirmed": extraction_confirmed,
         },
         "requests": request_payload(found, _citations_by_request(found)),
+        "evidence": _evidence_for_notice(notice),
         "grounding": _grounding_payload(notice),
     }
 
@@ -173,6 +207,8 @@ def questions(
     found = build_scrutiny_requests(notice, extraction_confirmed=extraction_confirmed)
     if not found:
         return insufficient_information_refusal("Extraction has not been confirmed or no annexure requests were found.")
+    if not _sources_verified(found):
+        return insufficient_information_refusal("At least one request has no current verified official source, so Tax Mitra cannot safely ask for evidence.")
     return {
         "supported": True,
         "notice_id": notice_id,
@@ -183,11 +219,45 @@ def questions(
 @router.post("/resolve")
 def resolve(payload: ScrutinyResolveRequest):
     notice = _scrutiny_notice(payload.notice_id)
+    if not _sources_verified(build_scrutiny_requests(notice, extraction_confirmed=payload.extraction_confirmed)):
+        return insufficient_information_refusal("The request sources are not verified enough to prepare a safe response path.")
     try:
-        return resolve_scrutiny(
+        response = resolve_scrutiny(
             notice,
             payload.answers,
             extraction_confirmed=payload.extraction_confirmed,
         )
+        evidence = _evidence_for_notice(notice, payload.document_statuses)
+        review = evaluate(notice, build_scrutiny_requests(notice, payload.extraction_confirmed), payload.answers, evidence, response.get("draft", ""), supported=True, extraction_confirmed=payload.extraction_confirmed, verified_sources=True)
+        return {**response, "evidence": evidence, "missing_evidence": missing_evidence(evidence), "safety_review": review}
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/{notice_id}/evidence")
+def update_evidence_status(notice_id: str, payload: EvidenceStatusUpdate):
+    """Validate and project local document statuses; no taxpayer files are stored."""
+    notice = _scrutiny_notice(notice_id)
+    invalid = {key: value for key, value in payload.statuses.items() if value not in DOCUMENT_STATUSES}
+    if invalid:
+        raise HTTPException(status_code=422, detail=f"Invalid document status for: {', '.join(sorted(invalid))}")
+    evidence = _evidence_for_notice(notice, payload.statuses)
+    return {"notice_id": notice_id, "evidence": evidence, "missing_evidence": missing_evidence(evidence), "storage": "local_or_browser_only"}
+
+
+@router.post("/{notice_id}/review")
+def approve_review(notice_id: str, payload: ScrutinyReviewRequest):
+    """Final approval gate. It never submits or uploads anything."""
+    notice = _scrutiny_notice(notice_id)
+    found = build_scrutiny_requests(notice, payload.extraction_confirmed)
+    if not _sources_verified(found):
+        return {"status": "blocked", "handoff_allowed": False, "message": "Tax Mitra can't safely prepare this yet.", "missing": ["Important explanations are not grounded in verified sources."]}
+    try:
+        resolved = resolve_scrutiny(notice, payload.answers, payload.extraction_confirmed)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    evidence = _evidence_for_notice(notice, payload.document_statuses)
+    safety = evaluate(notice, found, payload.answers, evidence, payload.draft, supported=True, extraction_confirmed=payload.extraction_confirmed, verified_sources=True)
+    if not payload.approved or not safety["ready"]:
+        return {"status": "blocked", "handoff_allowed": False, "message": "Tax Mitra can't safely prepare this yet.", "missing": safety["missing"], "safety_review": safety, "missing_evidence": missing_evidence(evidence)}
+    return {"status": "approved", "handoff_allowed": True, "safety_review": safety, "official_step": resolved["official_step"], "message": "Your response is ready to review on the official Income Tax e-Filing portal.", "boundary": "Tax Mitra does not submit anything to the government."}
