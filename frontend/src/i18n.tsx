@@ -136,6 +136,10 @@ const en: Dict = {
   "step.answer": "Your position",
   "step.prepare": "Evidence and response",
   "step.act": "Official action",
+  "step.questions": "Questions",
+  "step.documents": "Documents",
+  "step.response": "Response",
+  "step.review": "Review",
 
   "notice.official": "What the notice says",
   "notice.officialShow": "Show the wording in the notice",
@@ -427,6 +431,10 @@ const hi: Dict = {
   "step.answer": "आपकी स्थिति",
   "step.prepare": "साक्ष्य और उत्तर",
   "step.act": "आधिकारिक कार्रवाई",
+  "step.questions": "सवाल",
+  "step.documents": "दस्तावेज़",
+  "step.response": "उत्तर",
+  "step.review": "समीक्षा",
 
   "notice.official": "नोटिस में क्या कहा गया है",
   "notice.officialShow": "नोटिस में लिखे शब्द देखें",

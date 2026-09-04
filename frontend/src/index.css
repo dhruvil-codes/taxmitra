@@ -730,3 +730,38 @@ body:has(option[value="hi"]:checked) .start-action { line-height: 1.6; }
 /* No visible interface copy drops below the caption floor. */
 small, .app-brand small, .upload-file small, .tm-start-note,
 .tm-footer-disclaimer, .app-loading { font-size: var(--tm-type-caption) !important; line-height: 1.45; }
+/* Guided-tool shell: one clear task area, with progress kept in view. */
+.app-main-shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); align-items: start; max-width: 1280px; margin: 0 auto; }
+.app-main-shell > .workflow-rail { grid-column: 1; grid-row: 1; }
+.app-main-shell > :not(.workflow-rail) { grid-column: 2; min-width: 0; }
+.workflow-rail { position: sticky; top: 24px; margin: 52px 0 0 20px; padding: 18px 0; border-top: 2px solid var(--tm-black); }
+.workflow-rail-kicker { margin: 0 0 14px; color: var(--tm-muted); font: 11px var(--font-mono); letter-spacing: .08em; }
+.workflow-rail ol { margin: 0; padding: 0; list-style: none; }
+.workflow-rail li { border-bottom: 1px solid var(--tm-line); }
+.workflow-rail a { display: flex; gap: 10px; align-items: center; min-height: 42px; color: var(--tm-muted); font-size: 13px; text-decoration: none; }
+.workflow-rail a span { width: 23px; color: var(--tm-blue); font: 11px var(--font-mono); }
+.workflow-rail li.is-current a { color: var(--tm-black); font-weight: 700; }
+.workflow-rail li.is-done a { color: var(--tm-black); }
+.workflow-next { display: grid; gap: 4px; margin: 22px 0 0; padding: 12px; background: #f3f6ff; border-left: 3px solid var(--tm-blue); }
+.workflow-next strong { color: var(--tm-blue); font: 10px var(--font-mono); letter-spacing: .08em; }
+.workflow-next span { color: var(--tm-black); font-size: 14px; font-weight: 650; }
+.app-main-shell .app-page { width: min(100% - 48px, 960px); margin-left: 0; }
+.app-stepper { grid-template-columns: repeat(6, 1fr); width: 100%; margin-bottom: 34px; }
+.app-stepper li { min-width: 0; padding: 0 10px; }
+.app-stepper strong { font-size: 10px; }
+.app-page > .app-title + .app-lead { max-width: 620px; }
+.app-page details > summary { cursor: pointer; }
+.app-page .app-primary { max-width: 360px; }
+
+@media (max-width: 800px) {
+  .app-main-shell { display: block; }
+  .workflow-rail { position: static; margin: 0; padding: 0 16px; border-top: 0; border-bottom: 1px solid var(--tm-line); }
+  .workflow-rail-kicker, .workflow-next { display: none; }
+  .workflow-rail ol { display: grid; grid-template-columns: repeat(6, 1fr); }
+  .workflow-rail li { border: 0; }
+  .workflow-rail a { display: grid; justify-items: center; gap: 3px; min-height: 58px; padding: 9px 2px 7px; text-align: center; font-size: 10px; }
+  .workflow-rail a span { width: auto; font-size: 10px; }
+  .workflow-rail li.is-current { border-bottom: 3px solid var(--tm-blue); }
+  .app-main-shell .app-page { width: min(100% - 32px, 620px); margin: 0 auto; }
+  .app-stepper { display: none; }
+}

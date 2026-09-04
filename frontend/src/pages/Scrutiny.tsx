@@ -147,7 +147,7 @@ ${draft}
   if (!data || (!notice && !isUploaded)) return null;
   const requests = data.requests ?? [];
   const q = questions[index];
-  const step = stage === "requests" || stage === "confirm" ? 0 : stage === "questions" ? 1 : stage === "result" || stage === "draft" ? 2 : 3;
+  const step = stage === "requests" || stage === "confirm" ? 0 : stage === "questions" ? 1 : stage === "result" ? 2 : stage === "draft" ? 3 : stage === "review" ? 4 : 5;
 
   return <div className="app-page scrutiny-page">
     <Stepper current={step} />

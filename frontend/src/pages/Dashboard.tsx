@@ -27,7 +27,7 @@ export default function Dashboard() {
     <div className="app-page">
       <p className="app-eyebrow">[ TM / NOTICE INDEX ]</p>
       <h1 className="app-title">{t("dash.title")}</h1>
-      <p className="app-lead">Select a fictional notice to understand what it means and prepare the next step.</p>
+      <p className="app-lead">Choose a notice to see what it requires and take the next step.</p>
       {notices.length === 0 ? <div className="app-empty mt-8"><p className="app-section-label">[ NO NOTICES FOUND ]</p><p>There are no demo notices available for this profile.</p></div> : <div className="app-grid">
         {notices.map((n) => (
           <Card key={n.id}>

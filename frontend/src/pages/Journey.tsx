@@ -118,8 +118,8 @@ ${draft}
     }
   };
 
-  const stepperFor = (p: Phase): 0 | 1 | 2 | 3 =>
-    p === "questions" ? 1 : p === "checklist" ? 2 : p === "draft" ? 2 : 3;
+  const stepperFor = (p: Phase): 0 | 1 | 2 | 3 | 4 | 5 =>
+    p === "questions" ? 1 : p === "checklist" ? 2 : p === "draft" ? 3 : p === "review" ? 4 : p === "final" ? 5 : 0;
 
   if (!id) return null;
   if (!questions) return <div className="app-page"><div className="app-loading">PREPARING GUIDED QUESTIONS</div></div>;
@@ -171,7 +171,10 @@ ${draft}
           <Card className="mb-4 workflow-guidance">
             <p className="app-section-label">[ YOUR GUIDED PATH ]</p>
             <h2 className="text-xl font-medium leading-snug mb-2">{result.path?.headline[locale] ?? result.path?.headline.en}</h2>
-            <p className="app-body text-sm leading-relaxed">{result.path?.guidance[locale] ?? result.path?.guidance.en}</p>
+            <details>
+              <summary>{locale === "hi" ? "यह रास्ता क्यों?" : "Why this path?"}</summary>
+              <p className="app-body text-sm leading-relaxed mt-2">{result.path?.guidance[locale] ?? result.path?.guidance.en}</p>
+            </details>
           </Card>
           <p className="app-section-label mb-3">[ EVIDENCE YOU MAY NEED ]</p>
           <div className="checklist-list">

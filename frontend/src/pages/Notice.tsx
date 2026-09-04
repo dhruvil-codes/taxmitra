@@ -39,10 +39,10 @@ export default function Notice() {
           <p className="app-body">
             {explanation?.content.plain_language ?? "…"}
           </p>
-          <div className="notice-boundary">
-            <p className="app-section-label">[ {t("notice.notMean")} ]</p>
-            <p className="app-body">{explanation?.content.what_this_does_not_mean ?? "…"}</p>
-          </div>
+          <details className="notice-boundary">
+            <summary>{t("notice.notMean")}</summary>
+            <p className="app-body mt-3">{explanation?.content.what_this_does_not_mean ?? "…"}</p>
+          </details>
         </Card>
 
         <Link
@@ -54,10 +54,12 @@ export default function Notice() {
 
         {explanation && explanation.content.possible_reasons.length > 0 && (
           <Card className="mb-4">
-            <h2 className="app-section-label">[ {t("notice.reasons")} ]</h2>
+            <details>
+            <summary className="app-section-label">[ {t("notice.reasons")} ]</summary>
             <ol className="reason-list">
               {explanation.content.possible_reasons.map((r, i) => <li key={i}><span>{String(i + 1).padStart(2, "0")}</span>{r}</li>)}
             </ol>
+            </details>
           </Card>
         )}
 

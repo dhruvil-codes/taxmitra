@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useI18n } from "./i18n";
 import { Citation, Locale } from "./lib";
 
@@ -34,9 +34,9 @@ export function Header() {
   );
 }
 
-export function Stepper({ current }: { current: 0 | 1 | 2 | 3 }) {
+export function Stepper({ current }: { current: 0 | 1 | 2 | 3 | 4 | 5 }) {
   const { t } = useI18n();
-  const steps = ["step.understand", "step.answer", "step.prepare", "step.act"];
+  const steps = ["step.understand", "step.questions", "step.documents", "step.response", "step.review", "step.act"];
   return (
     <ol className="app-stepper" aria-label="Progress">
       {steps.map((key, i) => (
@@ -46,6 +46,21 @@ export function Stepper({ current }: { current: 0 | 1 | 2 | 3 }) {
       ))}
     </ol>
   );
+}
+
+export function WorkflowRail({ current = 0 }: { current?: 0 | 1 | 2 | 3 | 4 | 5 }) {
+  const { locale } = useI18n();
+  const labels = locale === "hi"
+    ? ["समझें", "सवाल", "दस्तावेज़", "उत्तर", "समीक्षा", "कार्रवाई"]
+    : ["Understand", "Questions", "Documents", "Response", "Review", "Act"];
+  const paths = ["/notices", "/notices", "/notices", "/notices", "/notices", "/notices"];
+  return <aside className="workflow-rail" aria-label={locale === "hi" ? "आपकी प्रगति" : "Your progress"}>
+    <p className="workflow-rail-kicker">{locale === "hi" ? "आपकी यात्रा" : "YOUR JOURNEY"}</p>
+    <ol>{labels.map((label, index) => <li key={label} className={index === current ? "is-current" : index < current ? "is-done" : ""}>
+      <Link to={paths[index]} aria-current={index === current ? "step" : undefined}><span>{index < current ? "✓" : String(index + 1).padStart(2, "0")}</span>{label}</Link>
+    </li>)}</ol>
+    <p className="workflow-next"><strong>{locale === "hi" ? "अगला कदम" : "NEXT"}</strong><span>{labels[Math.min(current + 1, labels.length - 1)]}</span></p>
+  </aside>;
 }
 
 export function SavedGuidanceBadge({ show }: { show: boolean }) {
