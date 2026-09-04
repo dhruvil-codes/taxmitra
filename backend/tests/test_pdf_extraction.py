@@ -117,6 +117,21 @@ def test_confirmation_fingerprint_is_required_and_unlocks_dynamic_questions():
     assert "Tax Mitra has not submitted" in resolved.json()["official_step"]["boundary"]["en"]
 
 
+def test_confirmation_accepts_corrections_before_downstream_questions():
+    extracted = client.post("/api/scrutiny/extract", files={"file": ("notice.pdf", pdf_with_text(NOTICE), "application/pdf")}).json()
+    request_id = extracted["requests"][0]["request_id"]
+    corrected = "Corrected original request wording from the taxpayer review."
+    response = client.post("/api/scrutiny/confirm", json={
+        "extraction_id": extracted["extraction_id"],
+        "fingerprint": extracted["fingerprint"],
+        "confirmed": True,
+        "corrections": {request_id: corrected},
+    })
+    assert response.status_code == 200
+    assert response.json()["status"] == "confirmed"
+    assert response.json()["requests"][0]["original_text"] == corrected
+
+
 def test_scanned_empty_malformed_and_unsupported_files_refuse():
     empty = client.post("/api/scrutiny/extract", files={"file": ("notice.pdf", b"", "application/pdf")}).json()
     assert empty["supported"] is False and empty["extraction"]["refusal_reason"] == "empty_pdf"

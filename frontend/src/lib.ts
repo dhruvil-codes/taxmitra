@@ -146,6 +146,8 @@ export interface ScrutinyRequest {
   confidence: number;
   warnings: string[];
   grounding: Grounding;
+  page_number?: number;
+  source_location?: string;
 }
 
 export interface ExtractionResult {
@@ -159,15 +161,19 @@ export interface ExtractionResult {
   };
   requests: ScrutinyRequest[];
   extraction: {
-    status: "needs_confirmation" | "refused";
+    status: "uploaded" | "extracted" | "needs_confirmation" | "confirmed" | "unsupported" | "refused";
     confidence: number;
     warnings: string[];
     refusal_reason: string | null;
+    error_code?: string | null;
+    method?: "text" | "ocr" | "none";
+    page_count?: number;
   };
   grounding: Grounding;
   extraction_id?: string;
   fingerprint?: string;
   requires_human_confirmation?: boolean;
+  document?: { status: string; page_count: number; sha256: string; pages: { page_number: number; text: string; source: string }[] };
 }
 
 export interface ExtractionConfirmationResult {
@@ -276,8 +282,8 @@ export const api = {
     const url = "/api/scrutiny/extract";
     return request<ExtractionResult>(url, { method: "POST", body, signal });
   },
-  confirmExtraction: (extractionId: string, fingerprint: string, confirmed: boolean, signal?: AbortSignal) =>
-    post<ExtractionConfirmationResult>("/api/scrutiny/confirm", { extraction_id: extractionId, fingerprint, confirmed }, signal),
+  confirmExtraction: (extractionId: string, fingerprint: string, confirmed: boolean, corrections: Record<string, string> = {}, signal?: AbortSignal) =>
+    post<ExtractionConfirmationResult>("/api/scrutiny/confirm", { extraction_id: extractionId, fingerprint, confirmed, corrections }, signal),
   scrutinyRequests: (id: string, locale: Locale, extractionConfirmed = true, signal?: AbortSignal) =>
     get<ScrutinyRequestsResult>(`/api/scrutiny/${id}/requests?locale=${locale}&extraction_confirmed=${extractionConfirmed}`, signal),
   scrutinyQuestions: (id: string, locale: Locale, extractionConfirmed = true, signal?: AbortSignal) =>

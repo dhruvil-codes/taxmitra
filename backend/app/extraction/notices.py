@@ -20,6 +20,8 @@ class ExtractedRequest:
     confidence: float = 1.0
     warnings: tuple[str, ...] = ()
     grounding: dict | None = None
+    page_number: int | None = None
+    source_location: str | None = None
 
 
 @dataclass(frozen=True)
@@ -48,6 +50,8 @@ def extract_notice_requests(notice: dict) -> ExtractedNotice:
             confidence=float(item.get("confidence", 1.0)),
             warnings=tuple(str(w) for w in item.get("warnings", ())),
             grounding=item.get("grounding"),
+            page_number=item.get("page_number"),
+            source_location=item.get("source_location"),
         )
         for item in extraction.get("requests", ())
     )

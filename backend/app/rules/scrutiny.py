@@ -29,6 +29,8 @@ class ScrutinyRequest:
     confidence: float = 1.0
     warnings: tuple[str, ...] = ()
     grounding: dict | None = None
+    page_number: int | None = None
+    source_location: str | None = None
 
 
 @dataclass(frozen=True)
@@ -235,6 +237,8 @@ def _enrich_request(item: ExtractedRequest) -> ScrutinyRequest:
         confidence=float(getattr(item, "confidence", 1.0)),
         warnings=tuple(getattr(item, "warnings", ())),
         grounding=getattr(item, "grounding", None),
+        page_number=getattr(item, "page_number", None),
+        source_location=getattr(item, "source_location", None),
     )
 
 
@@ -290,6 +294,8 @@ def request_payload(requests: tuple[ScrutinyRequest, ...], citations_by_id: dict
             "confidence": request.confidence,
             "warnings": list(request.warnings),
             "grounding": request.grounding,
+            "page_number": request.page_number,
+            "source_location": request.source_location,
         }
         for request in requests
     ]

@@ -39,6 +39,7 @@ class ExtractionConfirmation(BaseModel):
     extraction_id: str
     fingerprint: str
     confirmed: bool
+    corrections: dict[str, str] = {}
 
 
 def _session_notice(extraction_id: str) -> dict | None:
@@ -89,16 +90,21 @@ async def extract(file: UploadFile = File(...)):
         "metadata": result.metadata,
         "requests": request_payload(enriched, _citations_by_request(enriched)),
         "extraction": {
-            "status": "refused" if result.refusal_reason else "needs_confirmation",
+            "status": result.status if not result.refusal_reason else "refused",
             "confidence": result.extraction_confidence,
             "warnings": list(result.warnings),
             "refusal_reason": result.refusal_reason,
+            "error_code": result.error_code,
+            "method": result.extraction_method,
+            "page_count": result.page_count,
         },
         "grounding": {"method": result.grounding_method, "confidence": result.grounding_confidence, "below_floor": result.grounding_below_floor},
+        "document": {"status": "extracted" if not result.refusal_reason else "uploaded", "page_count": result.page_count, "sha256": result.original_pdf_sha256, "pages": list(result.pages)},
+        "states": ["uploaded", "extracted" if result.pages else "uploaded", "needs_confirmation" if not result.refusal_reason else ("unsupported" if result.refusal_reason == "unsupported_notice" else "needs_confirmation"), "supported" if not result.refusal_reason else "unsupported"],
     }
     if result.refusal_reason:
         return {**payload, "supported": False}
-    extraction_id, fingerprint = create_session(payload)
+    extraction_id, fingerprint = create_session(payload, content)
     return {**payload, "supported": True, "extraction_id": extraction_id, "fingerprint": fingerprint, "requires_human_confirmation": True}
 
 
@@ -106,11 +112,11 @@ async def extract(file: UploadFile = File(...)):
 def confirm(payload: ExtractionConfirmation):
     if not payload.confirmed:
         return {"supported": False, "status": "refused", "reason": "Human confirmation was not provided."}
-    session = confirm_session(payload.extraction_id, payload.fingerprint)
+    session = confirm_session(payload.extraction_id, payload.fingerprint, payload.corrections)
     if session is None:
         raise HTTPException(status_code=409, detail="Extraction session or fingerprint is invalid or expired")
     notice = _session_notice(payload.extraction_id)
-    return {"supported": True, "status": "confirmed", "extraction_id": payload.extraction_id, "notice_id": payload.extraction_id, "requests": request_payload(build_scrutiny_requests(notice, True), _citations_by_request(build_scrutiny_requests(notice, True)))}
+    return {"supported": True, "status": "confirmed", "states": ["uploaded", "extracted", "needs_confirmation", "confirmed", "supported"], "extraction_id": payload.extraction_id, "notice_id": payload.extraction_id, "requests": request_payload(build_scrutiny_requests(notice, True), _citations_by_request(build_scrutiny_requests(notice, True)))}
 
 
 def _citations_by_request(requests) -> dict[str, list[dict]]:

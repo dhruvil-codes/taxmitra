@@ -2,13 +2,12 @@
 from __future__ import annotations
 
 import hashlib
-import io
 import logging
 import re
 from dataclasses import dataclass
 from datetime import date
 
-from pypdf import PdfReader
+from app.ingestion.pipeline import ingest_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +24,12 @@ class PdfExtraction:
     grounding_below_floor: bool
     warnings: tuple[str, ...]
     refusal_reason: str | None = None
+    status: str = "needs_confirmation"
+    extraction_method: str = "text"
+    pages: tuple[dict, ...] = ()
+    page_count: int = 0
+    original_pdf_sha256: str | None = None
+    error_code: str | None = None
 
 def _clean(value: str) -> str:
     return re.sub(r"\s+", " ", value).strip(" \t\r\n-–—")
@@ -125,35 +130,26 @@ def _is_heading(item: str) -> bool:
     return "following accounts or documents or information" in value or ("142(1)" in value and "furnish" not in value)
 
 def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
-    if not content:
-        return PdfExtraction({}, (), "", 0, 0, "lexical", True, ("The PDF is empty.",), "empty_pdf")
-    if len(content) > MAX_PDF_BYTES:
-        return PdfExtraction({}, (), "", 0, 0, "lexical", True, ("The PDF exceeds the 10 MB limit.",), "file_too_large")
-    try:
-        reader = PdfReader(io.BytesIO(content), strict=False)
-        page_count = len(reader.pages)
-        text = "\n".join("\n".join(_clean(line) for line in (page.extract_text() or "").splitlines()) for page in reader.pages)
-        logger.info(f"PyPDF EXTRACTION: pages={page_count}, text_length={len(text)}, is_empty={len(text.strip()) == 0}")
-        if len(text) > 0:
-            preview = text[:200].replace('\n', ' ') if len(text) > 200 else text.replace('\n', ' ')
-            logger.info(f"TEXT PREVIEW: {preview}")
-    except Exception:
-        return PdfExtraction({}, (), "", 0, 0, "lexical", True, ("The PDF could not be read safely.",), "malformed_pdf")
-    text = text.strip()
-    if len(text) < 80:
-        return PdfExtraction({}, (), text, 0, 0, "lexical", True, ("OCR is not supported in V1; this PDF has no reliably extractable text.",), "ocr_not_supported")
-    metadata = _metadata(text)
-    if metadata["section"] != "142(1)":
-        return PdfExtraction(metadata, (), text, 0, 0, "lexical", True, ("Only Section 142(1) scrutiny notices are supported in V1.",), "unsupported_notice")
-    items = _items(text)
+    result = ingest_pdf(content, "notice.pdf", "application/pdf")
+    text = "\n".join(page.get("text", "") for page in result.pages).strip()
+    # Keep legacy refusal identifiers stable for existing clients while the
+    # explicit error_code/status fields expose the new deterministic states.
+    refusal = result.refusal_reason
+    if refusal == "invalid_pdf":
+        refusal = "malformed_pdf"
+    if refusal == "ocr_failure":
+        refusal = "ocr_not_supported"
+    if result.refusal_reason and result.refusal_reason not in {"unsupported_notice", "missing_critical_information"}:
+        if result.refusal_reason == "low_extraction_confidence" and result.extraction_method == "ocr":
+            refusal = "ocr_not_supported"
+        return PdfExtraction(result.metadata, (), text, result.confidence, 0, "lexical", False, result.warnings, refusal, result.status, result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256, result.refusal_reason)
+    if result.refusal_reason == "unsupported_notice":
+        return PdfExtraction(result.metadata, (), text, 0, 0, "not_run", True, result.warnings, "unsupported_notice", "unsupported", result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256, result.refusal_reason)
+    metadata = result.metadata
+    items = [(item["original_text"], item["page_number"]) for item in result.requests]
     logger.info(f"DETECTED NUMBERED ITEMS: count={len(items)}")
-    # Log retrieval method before processing items
-    import os
-    vectors_path = os.path.join(os.path.dirname(__file__), "..", "knowledge", "vectors.json")
-    vectors_exists = os.path.exists(vectors_path)
-    logger.info(f"RETRIEVAL SETUP: vectors.json_exists={vectors_exists}, path={vectors_path}")
     extracted, scores, warnings = [], [], []
-    for idx, item in enumerate(items):
+    for idx, (item, page_number) in enumerate(items):
         truncated = item[:100] if len(item) > 100 else item
         logger.info(f"ITEM[{idx}]: {truncated}")
         classified = _classify(item)
@@ -162,24 +158,24 @@ def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
             if _is_heading(item):
                 continue
             warnings.append("One numbered item could not be classified safely.")
-            return PdfExtraction(metadata, (), text, 0, 0, "lexical", True, tuple(warnings), "unsupported_request")
+            return PdfExtraction(metadata, (), text, 0, 0, "not_run", True, tuple(warnings), "unsupported_request", "unsupported", result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256, "unsupported_request")
         kind, response_section, citations = classified
         logger.info(f"CLASSIFICATION[{idx}]: SUCCESS - kind={kind}, response_section={response_section}")
-        result = ground_query("section 142(1) accounts documents verified written information " + item)
-        logger.info(f"GROUNDING[{idx}]: method={result.method}, confidence={result.confidence:.3f}, below_floor={result.below_floor}")
-        scores.append(result.confidence)
-        authoritative = [chunk.id for chunk in result.chunks if chunk.verification_status == "VERIFIED_OFFICIAL" and chunk.status == "CURRENT"]
-        if not authoritative:
-            authoritative = list(citations)
+        # Retrieval is intentionally deferred until confirmation. These are
+        # classification citations only, not evidence that the request is safe.
+        scores.append(0.0)
+        authoritative = list(citations)
         extracted.append({
             "request_id": "req-" + hashlib.sha256(item.encode("utf-8")).hexdigest()[:16],
             "classification_id": kind,
             "original_text": item,
             "response_section": response_section,
             "citations": authoritative,
-            "grounding": {"method": result.method, "confidence": round(result.confidence, 3), "below_floor": result.below_floor},
-            "confidence": round(min(0.98, 0.72 + (0.20 if result.confidence >= 0.25 else 0)), 3),
-            "warnings": ["Grounding is below the confidence floor; confirm this item carefully."] if result.below_floor else [],
+            "page_number": page_number,
+            "source_location": f"page {page_number}",
+            "grounding": {"method": "lexical", "confidence": 0.0, "below_floor": False},
+            "confidence": round(result.confidence, 3),
+            "warnings": ["Retrieval and guidance are intentionally deferred until confirmation."],
         })
     logger.info(f"CLASSIFICATION COMPLETE: classified_items={len(extracted)}, total_items={len(items)}")
     if not extracted:
@@ -191,11 +187,8 @@ def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
         else:
             reason = "no_supported_requests_empty_extraction"
         logger.error(f"NO_SUPPORTED_REQUESTS: detected_items={len(items)}, classified_items={len(extracted)}, reason={reason}")
-        return PdfExtraction(metadata, (), text, 0, 0, "lexical", True, tuple(warnings) or ("No supported numbered scrutiny requests were found.",), "no_supported_requests")
-    grounding = min(scores)
+        return PdfExtraction(metadata, (), text, 0, 0, "not_run", True, tuple(warnings) or ("No supported numbered scrutiny requests were found.",), "no_supported_requests", "unsupported", result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256, "no_supported_requests")
+    grounding = 0.0
     warnings = list(dict.fromkeys(warnings))
-    if grounding < 0.25:
-        warnings.append("Grounding is below the safe floor for at least one request.")
-        return PdfExtraction(metadata, tuple(extracted), text, 0, round(grounding, 3), "lexical", True, tuple(warnings), "grounding_below_floor")
-    confidence = min(0.98, 0.70 + (0.15 if metadata["assessment_year"] else 0) + (0.10 if metadata["response_deadline"] else 0))
-    return PdfExtraction(metadata, tuple(extracted), text, round(confidence, 3), round(grounding, 3), "lexical", grounding < 0.25, tuple(warnings))
+    confidence = result.confidence
+    return PdfExtraction(metadata, tuple(extracted), text, round(confidence, 3), grounding, "lexical", False, tuple(dict.fromkeys(warnings + list(result.warnings))), None, "needs_confirmation", result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256)
