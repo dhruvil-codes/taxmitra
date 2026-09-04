@@ -43,46 +43,66 @@
       "hi": "काल्पनिक प्रोप्राइटरशिप व्यवसाय के लिए स्क्रूटनी जानकारी अनुरोध"
     },
     "official_reference": "DIN-DEMO-2026-000003 (fictional)",
-    "official_text": "Office of the Assessing Officer (Faceless Assessment Unit - DEMO)\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000003 (fictional)   |   Date of issue: 21/08/2026\n\nSubject: Notice under section 142(1) of the Income-tax Act, 1961 for Assessment Year 2024-25\n\nSir/Madam,\n\nFor the purpose of making assessment under the Income-tax Act, 1961, you are required to furnish the information and documents listed in Annexure A on or before 18/09/2026 through the e-Filing portal.\n\nAnnexure A:\n1. Detailed computation of total income for Assessment Year 2024-25.\n2. Balance sheet as at 31/03/2024.\n3. Profit and Loss account for Financial Year 2023-24.\n4. Complete bank statements for all business and personal accounts used for business transactions during Financial Year 2023-24.\n5. Explanation of sources of cash deposits appearing in the bank accounts during Financial Year 2023-24.\n6. Explanation and supporting evidence for significant credits and debits identified in the bank statements.\n\nThis is a fictional synthetic notice for demonstration only. No real taxpayer data is used.",
+    "official_text": "Office of the Assessing Officer (Faceless Assessment Unit - DEMO)\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000003 (fictional)   |   Date of issue: 21/08/2026\n\nSubject: Notice under section 142(1) of the Income-tax Act, 1961 for Assessment Year 2024-25\n\nSir/Madam,\n\nFor the purpose of making assessment under the Income-tax Act, 1961, you are required to furnish the information and documents listed in Annexure A on or before 18/09/2026 through the e-Filing portal.\n\nAnnexure A:\n1. Detailed computation of total income for Assessment Year 2024-25.\n2. Balance sheet as at 31/03/2024.\n3. Profit and Loss account for Financial Year 2023-24.\n4. Complete bank statements for all business and personal accounts used for business transactions during Financial Year 2023-24.\n5. Explanation of sources of cash deposits appearing in the bank accounts during Financial Year 2023-24.\n6. Explanation and supporting evidence for significant credits and debits identified in the bank statements.\n7. Supporting documents for deductions and exemptions claimed in the return.\n8. Any other information or document specifically requested in this notice.\n\nThis is a fictional synthetic notice for demonstration only. No real taxpayer data is used.",
     "synthetic_extraction": {
       "source_type": "synthetic_pdf",
       "requires_human_confirmation": true,
       "requests": [
         {
           "id": "req_computation_income",
+          "page": 2,
           "original_text": "Detailed computation of total income for Assessment Year 2024-25.",
           "response_section": "Computation of total income",
           "citations": ["kb-142-1-scrutiny-documents"]
         },
         {
           "id": "req_balance_sheet",
+          "page": 2,
           "original_text": "Balance sheet as at 31/03/2024.",
           "response_section": "Balance sheet",
           "citations": ["kb-142-1-scrutiny-documents"]
         },
         {
           "id": "req_profit_loss",
+          "page": 2,
           "original_text": "Profit and Loss account for Financial Year 2023-24.",
           "response_section": "Profit and Loss account",
           "citations": ["kb-142-1-scrutiny-documents"]
         },
         {
           "id": "req_bank_statements",
+          "page": 2,
           "original_text": "Complete bank statements for all business and personal accounts used for business transactions during Financial Year 2023-24.",
           "response_section": "Bank statements",
           "citations": ["kb-142-1-scrutiny-documents"]
         },
         {
           "id": "req_cash_deposits",
+          "page": 3,
           "original_text": "Explanation of sources of cash deposits appearing in the bank accounts during Financial Year 2023-24.",
           "response_section": "Sources of cash deposits",
           "citations": ["kb-142-1-written-information"]
         },
         {
           "id": "req_significant_transactions",
+          "page": 3,
           "original_text": "Explanation and supporting evidence for significant credits and debits identified in the bank statements.",
           "response_section": "Significant credits and debits",
           "citations": ["kb-142-1-written-information"]
+        },
+        {
+          "id": "req_deductions_exemptions",
+          "page": 3,
+          "original_text": "Supporting documents for deductions and exemptions claimed in the return.",
+          "response_section": "Deductions and exemptions",
+          "citations": ["kb-142-1-scrutiny-documents"]
+        },
+        {
+          "id": "req_notice_document",
+          "page": 3,
+          "original_text": "Any other information or document specifically requested in this notice.",
+          "response_section": "Other notice-specific information",
+          "citations": ["sec-142-0001"]
         }
       ]
     }
