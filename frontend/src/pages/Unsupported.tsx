@@ -19,7 +19,7 @@ export default function Unsupported() {
   return (
     <div className="app-page">
       <div className="mb-8">
-        <p className="app-eyebrow">[ OUTSIDE GUIDED SCOPE ]</p>
+        <p className="app-eyebrow font-semibold tracking-wider text-slate-500">OUTSIDE GUIDED SCOPE</p>
         <h1 className="app-title">
           {refusal?.headline?.[locale] ?? refusal?.headline?.en ?? t("unsupported.title")}
         </h1>
@@ -27,19 +27,19 @@ export default function Unsupported() {
 
       <div className="refusal-layout">
         <Card>
-          <p className="app-section-label">[ WHY WE STOP HERE ]</p>
+          <p className="app-section-label font-bold text-slate-700">WHY WE STOP HERE</p>
           <p className="app-body">{refusal?.why?.[locale] ?? refusal?.why?.en ?? "…"}</p>
         </Card>
         {refusal?.official_links && (
           <Card>
-            <h2 className="app-section-label">[ {t("unsupported.links")} ]</h2>
+            <h2 className="app-section-label font-bold text-slate-700">{t("unsupported.links")}</h2>
             <ul className="official-links">
               {refusal.official_links.map((l) => <li key={l.url}><a href={verifiedIncomeTaxUrl(l.url)} target="_blank" rel="noopener noreferrer">{l.label[locale] ?? l.label.en} ↗</a></li>)}
             </ul>
           </Card>
         )}
         <Card className="app-dots refusal-suggestion">
-          <h2 className="app-section-label">[ {t("unsupported.suggestionTitle")} ]</h2>
+          <h2 className="app-section-label font-bold text-blue-600">{t("unsupported.suggestionTitle")}</h2>
           <p className="app-body">{refusal?.suggestion?.[locale] ?? refusal?.suggestion?.en ?? "…"}</p>
         </Card>
       </div>
