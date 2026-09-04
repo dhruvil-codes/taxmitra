@@ -25,7 +25,16 @@ def test_provenance_survives_pack_chunking_and_citation_resolution():
     citation = citations_for((chunk.id,), os.path.join(get_settings().kb_dir, "corpus"))[0]
     assert citation["source_id"] == "SEC-142"
     assert citation["verification_status"] == "VERIFIED_OFFICIAL"
+    assert citation["verification_state"] == "Verified"
+    assert "why_supports" in citation
     assert citation["source_url"].startswith("https://www.incometaxindia.gov.in/")
+
+
+def test_pending_is_distinct_from_verified():
+    citations = citations_for(("kb-143-1-overview",), os.path.join(get_settings().kb_dir, "corpus"))
+    assert citations[0]["verification"] == "pending"
+    assert citations[0]["verification_status"] == "PENDING_VERIFICATION"
+    assert citations[0]["verification_state"] == "Pending verification"
 
 
 def test_historical_and_unknown_sources_are_not_preferred_over_current():
