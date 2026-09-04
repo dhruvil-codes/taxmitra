@@ -1,8 +1,9 @@
 """Corpus loader: parses markdown chunks with simple frontmatter.
 
 Frontmatter keys include source_id, document_title, document_type,
-official_organization, source_url, section, rule, form, assessment_year,
-tax_year, effective_from, effective_to, status, verification_status, and tags.
+official_organization, source_url, section, page_location, excerpt, summary,
+applicability, effective_period, rule, form, assessment_year, tax_year,
+effective_from, effective_to, verified_date, status, verification_status, and tags.
 """
 
 from __future__ import annotations
@@ -11,7 +12,7 @@ import os
 from dataclasses import dataclass, field
 from functools import lru_cache
 
-_TEXT_KEYS = {"section", "title", "source_name", "official_url", "accessed_date", "verification", "source_id", "document_title", "document_type", "official_organization", "source_url", "rule", "form", "assessment_year", "tax_year", "effective_from", "effective_to", "status", "verification_status"}
+_TEXT_KEYS = {"section", "title", "source_name", "official_url", "accessed_date", "verification", "source_id", "document_title", "document_type", "official_organization", "source_url", "page_location", "excerpt", "summary", "applicability", "effective_period", "rule", "form", "assessment_year", "tax_year", "effective_from", "effective_to", "verified_date", "status", "verification_status"}
 
 
 @dataclass(frozen=True)
@@ -30,6 +31,12 @@ class Chunk:
     document_type: str = ""
     official_organization: str = ""
     source_url: str = ""
+    page_location: str = ""
+    excerpt: str = ""
+    summary: str = ""
+    applicability: str = ""
+    effective_period: str = ""
+    verified_date: str = ""
     rule: str = ""
     form: str = ""
     assessment_year: str = ""
@@ -89,7 +96,11 @@ def parse_chunk(raw: str) -> Chunk:
         assessment_year=meta.get("assessment_year", ""), tax_year=meta.get("tax_year", ""),
         effective_from=meta.get("effective_from", ""), effective_to=meta.get("effective_to", ""),
         status=meta.get("status", "CURRENT"),
-        verification_status=meta.get("verification_status", meta.get("verification", "NEEDS_REVIEW")),
+        verification_status={"verified": "VERIFIED_OFFICIAL", "VERIFIED_OFFICIAL": "VERIFIED_OFFICIAL", "pending": "PENDING_VERIFICATION", "not_applicable": "NOT_APPLICABLE", "unknown": "UNKNOWN"}.get(meta.get("verification_status", meta.get("verification", "unknown")), "UNKNOWN"),
+        page_location=meta.get("page_location", ""), excerpt=meta.get("excerpt", ""),
+        summary=meta.get("summary", ""), applicability=meta.get("applicability", ""),
+        effective_period=meta.get("effective_period", "") or " to ".join(filter(None, (meta.get("effective_from", ""), meta.get("effective_to", "")))),
+        verified_date=meta.get("verified_date", ""),
     )
 
 
@@ -133,6 +144,12 @@ def citations_for(chunk_ids: tuple[str, ...], corpus_dir: str) -> list[dict]:
                 "document_type": chunk.document_type,
                 "official_organization": chunk.official_organization,
                 "source_url": chunk.source_url or chunk.official_url,
+                "page_location": chunk.page_location,
+                "excerpt": chunk.excerpt or chunk.text[:600],
+                "summary": chunk.summary or chunk.text[:240],
+                "applicability": chunk.applicability or chunk.assessment_year or chunk.tax_year or "Unknown",
+                "effective_period": chunk.effective_period,
+                "verified_date": chunk.verified_date,
                 "rule": chunk.rule,
                 "form": chunk.form,
                 "assessment_year": chunk.assessment_year,
@@ -141,7 +158,8 @@ def citations_for(chunk_ids: tuple[str, ...], corpus_dir: str) -> list[dict]:
                 "effective_to": chunk.effective_to,
                 "status": chunk.status,
                 "verification_status": chunk.verification_status,
-                "excerpt": chunk.text[:600],
+                "verification_state": {"VERIFIED_OFFICIAL": "Verified", "PENDING_VERIFICATION": "Pending verification", "NOT_APPLICABLE": "Not applicable", "UNKNOWN": "Unknown"}.get(chunk.verification_status, "Unknown"),
+                "why_supports": f"This source covers {chunk.section or chunk.title}, which is relevant to the explanation.",
             }
         )
     return out
