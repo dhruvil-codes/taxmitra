@@ -21,8 +21,8 @@ export default function Dashboard() {
     ])
       .then(([owned, scrutiny]) =>
         setNotices(
-          scrutiny && !owned.some((n) => n.id === scrutiny.id)
-            ? [...owned, scrutiny]
+          scrutiny
+            ? [scrutiny, ...owned.filter((n) => n.id !== scrutiny.id)]
             : owned
         )
       )
