@@ -22,9 +22,9 @@ def test_142_notice_structure_and_extraction_boundary():
     assert extracted.notice_id == "N-2026-003"
     assert extracted.source_type == "synthetic_pdf"
     assert extracted.requires_human_confirmation is True
-    assert len(extracted.requests) == 6
+    assert len(extracted.requests) == 8
     assert confirmed_requests(extracted, confirmed=False) == ()
-    assert len(confirmed_requests(extracted, confirmed=True)) == 6
+    assert len(confirmed_requests(extracted, confirmed=True)) == 8
 
 
 def test_scrutiny_requests_are_enriched_and_cited():
@@ -33,7 +33,7 @@ def test_scrutiny_requests_are_enriched_and_cited():
     body = response.json()
     assert body["supported"] is True
     assert body["extraction"]["requires_human_confirmation"] is True
-    assert len(body["requests"]) == 6
+    assert len(body["requests"]) == 8
     first = body["requests"][0]
     assert first["id"] == "req_computation_income"
     assert first["original_text"]
@@ -43,6 +43,11 @@ def test_scrutiny_requests_are_enriched_and_cited():
     assert first["required_evidence"]
     assert first["response_section"] == "Computation of total income"
     assert first["citations"][0]["id"] == "kb-142-1-scrutiny-documents"
+    assert first["category"] == "income_computation"
+    assert first["page"] == 2
+    assert "Detailed computation" in first["what_department_is_asking"]
+    assert first["status"] == "not_started"
+    assert first["clarifying_questions"]
     assert body["grounding"]["method"] in ("lexical", "embedding")
     assert body["grounding"]["below_floor"] is False
 
@@ -50,15 +55,28 @@ def test_scrutiny_requests_are_enriched_and_cited():
 def test_dynamic_questions_are_derived_from_requests():
     requests = build_scrutiny_requests(get_notice("N-2026-003"))
     questions = scrutiny_questions(requests)
-    assert len(questions) == len(requests) == 6
+    assert len(questions) == len(requests) == 8
     assert {q.request_id for q in questions} == {r.id for r in requests}
 
     body = client.get("/api/scrutiny/N-2026-003/questions", params={"locale": "hi"}).json()
     assert body["supported"] is True
-    assert len(body["questions"]) == 6
+    assert len(body["questions"]) == 8
     assert body["questions"][0]["id"] == "evidence_req_computation_income"
     assert {option["id"] for option in body["questions"][0]["options"]} == {"yes", "no", "unsure"}
     assert body["questions"][0]["text"]
+
+
+def test_evidence_mapping_is_request_scoped_and_keeps_missing_items_visible():
+    response = client.get("/api/scrutiny/N-2026-003/requests")
+    body = response.json()
+    assert body["evidence"]
+    cash = [item for item in body["evidence"] if item["request_id"] == "req_cash_deposits"]
+    assert any(item["document_name"]["en"] == "Cash book, if maintained" and item["requirement_level"] == "possibly_relevant" for item in cash)
+    assert all(item["status"] == "not_sure" for item in cash)
+    projected = client.post("/api/scrutiny/N-2026-003/evidence", json={"statuses": {cash[0]["document_id"]: "have"}})
+    assert projected.status_code == 200
+    assert projected.json()["storage"] == "local_or_browser_only"
+    assert any(item["status"] == "not_sure" for item in projected.json()["missing_evidence"])
 
 
 def test_resolve_all_yes_generates_ready_checklist_and_draft():
@@ -71,11 +89,23 @@ def test_resolve_all_yes_generates_ready_checklist_and_draft():
     assert body["supported"] is True
     assert body["path"]["path_id"] == "ready_to_respond"
     assert body["path"]["professional_help_recommended"] is False
-    assert len(body["checklist"]) == 6
+    assert len(body["checklist"]) == 8
     assert all(item["status"] == "yes" for item in body["checklist"])
+    assert all(item["workflow_status"] == "ready_for_response" for item in body["checklist"])
     assert "Computation of total income" in body["draft"]
     assert "Tax Mitra has not verified taxpayer facts" in body["draft"]
     assert body["official_step"]["url"].startswith("https://www.incometax.gov.in")
+
+
+def test_final_review_requires_explicit_approval_and_preserves_handoff_boundary():
+    resolved = client.post("/api/scrutiny/resolve", json={"notice_id": "N-2026-003", "answers": _answers("yes")}).json()
+    blocked = client.post("/api/scrutiny/N-2026-003/review", json={"answers": _answers("yes"), "draft": resolved["draft"], "approved": False})
+    assert blocked.status_code == 200
+    assert blocked.json()["handoff_allowed"] is False
+    approved = client.post("/api/scrutiny/N-2026-003/review", json={"answers": _answers("yes"), "draft": resolved["draft"], "approved": True})
+    assert approved.status_code == 200
+    assert approved.json()["handoff_allowed"] is True
+    assert "does not submit" in approved.json()["boundary"]
 
 
 def test_resolve_no_marks_missing_evidence_without_inventing_facts():
@@ -116,6 +146,9 @@ def test_scrutiny_validation_and_routing_errors():
     invalid = _answers("yes")
     invalid["evidence_req_balance_sheet"] = "maybe"
     assert client.post("/api/scrutiny/resolve", json={"notice_id": "N-2026-003", "answers": invalid}).status_code == 422
+    unexpected = _answers("yes")
+    unexpected["stale_answer"] = "no"
+    assert client.post("/api/scrutiny/resolve", json={"notice_id": "N-2026-003", "answers": unexpected}).status_code == 422
     assert client.get("/api/scrutiny/N-2026-001/requests").status_code == 400
     assert client.get("/api/workflow/questions/N-2026-003").status_code == 400
     assert client.get("/api/ai/explanation/N-2026-003").status_code == 400
