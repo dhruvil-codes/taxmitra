@@ -46,17 +46,17 @@ class ScrutinyQuestion:
 
 
 _OPTIONS = (
-    Option("yes", {"en": "Yes", "hi": "हाँ"}),
-    Option("no", {"en": "No", "hi": "नहीं"}),
-    Option("unsure", {"en": "I'm not sure", "hi": "मुझे पक्का नहीं है"}),
+    Option("yes", {"en": "I have it", "hi": "मेरे पास है"}),
+    Option("no", {"en": "I don't have it", "hi": "मेरे पास नहीं है"}),
+    Option("unsure", {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}),
 )
 
 
 _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
     "req_computation_income": {
         "plain": {
-            "en": "The Assessing Officer has requested a computation of total income for the Assessment Year. In simple terms, this shows how your income heads and totals were calculated.",
-            "hi": "आकलन अधिकारी ने आकलन वर्ष के लिए कुल आय की computation मांगी है। आसान भाषा में, इसमें आपकी आय के अलग-अलग शीर्ष और कुल राशि की गणना दिखाई जाती है।",
+            "en": "The Assessing Officer has requested the computation of total income. Plain meaning: The calculation used to arrive at the income on which your tax is determined.",
+            "hi": "आकलन अधिकारी ने कुल आय की गणना (computation) मांगी है। आसान अर्थ: वह गणना जिससे आपकी कुल कर-योग्य आय और देय कर निर्धारित होता है।",
         },
         "why": {
             "en": "The computation lets the Department reconcile the return of income with your books and supporting documents.",
@@ -69,8 +69,8 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
     },
     "req_balance_sheet": {
         "plain": {
-            "en": "The Assessing Officer has requested a balance sheet showing assets, liabilities, and capital at the end of the year.",
-            "hi": "अधिकारी वर्ष के अंत की परिसंपत्तियों, देनदारियों और पूंजी का विवरण चाहते हैं।",
+            "en": "The Assessing Officer has requested the balance sheet. Plain meaning: Shows your financial position, including what you own and what you owe.",
+            "hi": "आकलन अधिकारी ने बैलेंस शीट मांगी है। आसान अर्थ: आपकी वित्तीय स्थिति दिखाता है, जिसमें आपकी संपत्ति और देनदारियां शामिल हैं।",
         },
         "why": {
             "en": "The balance sheet helps reconcile capital, loans, bank balances, and business position with the return.",
@@ -83,8 +83,8 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
     },
     "req_profit_loss": {
         "plain": {
-            "en": "The Assessing Officer has requested the Profit and Loss Account for the Financial Year.",
-            "hi": "अधिकारी वित्त वर्ष का व्यवसाय आय-विवरण चाहते हैं।",
+            "en": "The Assessing Officer has requested the Profit and Loss Account. Plain meaning: Shows the income earned and expenses incurred during the relevant period.",
+            "hi": "आकलन अधिकारी ने लाभ और हानि खाता (P&L) मांगा है। आसान अर्थ: संबंधित अवधि के दौरान अर्जित आय और किए गए खर्चों का विवरण दिखाता है।",
         },
         "why": {
             "en": "The Profit and Loss account supports turnover, expenses, gross profit, and net profit reported in the return.",
@@ -97,8 +97,8 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
     },
     "req_bank_statements": {
         "plain": {
-            "en": "The Assessing Officer has requested complete bank statements for accounts used for business transactions.",
-            "hi": "अधिकारी व्यवसाय लेनदेन में उपयोग किए गए खातों के पूरे बैंक विवरण चाहते हैं।",
+            "en": "The Assessing Officer has requested complete bank statements. Plain meaning: Official records from your bank showing all money coming in and going out during the year.",
+            "hi": "आकलन अधिकारी ने बैंक विवरण मांगे हैं। आसान अर्थ: बैंक के आधिकारिक रिकॉर्ड जो वित्तीय वर्ष के दौरान खाते में आए और गए सभी पैसों को दिखाते हैं।",
         },
         "why": {
             "en": "Bank statements let the officer match reported turnover, receipts, payments, and balances against actual account activity.",
@@ -111,8 +111,8 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
     },
     "req_cash_deposits": {
         "plain": {
-            "en": "The Assessing Officer has requested a source-wise explanation for cash deposits in the bank accounts.",
-            "hi": "अधिकारी बैंक खातों में जमा नकद का स्रोत-वार स्पष्टीकरण चाहते हैं।",
+            "en": "The Assessing Officer has requested an explanation of cash deposits. Plain meaning: Clear explanation and source documents showing where physical cash deposited into your bank came from.",
+            "hi": "आकलन अधिकारी ने नकद जमा का स्पष्टीकरण मांगा है। आसान अर्थ: स्पष्टीकरण और रिकॉर्ड कि आपके बैंक खातों में जमा किया गया नकद कहाँ से आया।",
         },
         "why": {
             "en": "Cash deposits are checked to understand whether they match recorded sales, withdrawals, capital, loans, or other explained sources.",
@@ -126,8 +126,8 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
     },
     "req_significant_transactions": {
         "plain": {
-            "en": "The Assessing Officer has requested an explanation and supporting documents for significant credits and debits.",
-            "hi": "अधिकारी बड़े या असामान्य क्रेडिट और डेबिट का स्पष्टीकरण और प्रमाण चाहते हैं।",
+            "en": "The Assessing Officer has requested an explanation of significant transactions. Plain meaning: Explanations and supporting proof for unusually large receipts or payments in your accounts.",
+            "hi": "आकलन अधिकारी ने महत्वपूर्ण लेन-देन का स्पष्टीकरण मांगा है। आसान अर्थ: आपके खातों में असामान्य रूप से बड़े लेन-देन या भुगतानों का स्पष्टीकरण और प्रमाण।",
         },
         "why": {
             "en": "Significant transactions may affect income, expenses, loans, investments, or unexplained money, so each material item needs a record-backed explanation.",
