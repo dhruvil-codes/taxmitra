@@ -118,6 +118,7 @@ def _classify(item: str):
         (("ledger extract", "supporting invoices", "professional receipts"), "req_ledger_extract", "Ledger extract and supporting invoices", ("kb-142-1-scrutiny-documents",)),
         (("high-value transactions", "ais", "sft"), "req_high_value_transactions", "Explanation of high-value transactions", ("kb-142-1-written-information",)),
         (("tax payments", "tds", "tcs", "challan"), "req_tax_payments", "Details of tax payments and challans", ("kb-142-1-scrutiny-documents",)),
+        (("deduction", "exemption", "80c", "80d"), "req_deductions_exemptions", "Supporting documents for deductions and exemptions", ("kb-142-1-scrutiny-documents",)),
         (("evidence", "support of the return"), "req_evidence", "Supporting evidence for the return", ("kb-142-1-scrutiny-documents",)),
     )
     for needles, kind, section, citations in rules:
@@ -140,8 +141,6 @@ def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
     if refusal == "ocr_failure":
         refusal = "ocr_not_supported"
     if result.refusal_reason and result.refusal_reason not in {"unsupported_notice", "missing_critical_information"}:
-        if result.refusal_reason == "low_extraction_confidence" and result.extraction_method == "ocr":
-            refusal = "ocr_not_supported"
         return PdfExtraction(result.metadata, (), text, result.confidence, 0, "lexical", False, result.warnings, refusal, result.status, result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256, result.refusal_reason)
     if result.refusal_reason == "unsupported_notice":
         return PdfExtraction(result.metadata, (), text, 0, 0, "not_run", True, result.warnings, "unsupported_notice", "unsupported", result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256, result.refusal_reason)
