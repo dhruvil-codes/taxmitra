@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { I18nProvider } from "./i18n";
-import { DisclaimerBanner, Header, WorkflowRail } from "./components";
+import { DisclaimerBanner, Header } from "./components";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -14,15 +14,12 @@ import Start from "./pages/Start";
 function AppShell() {
   const { pathname } = useLocation();
   const isLanding = pathname === "/";
-  const workflowPath = pathname !== "/" && pathname !== "/guide" && pathname !== "/login" && pathname !== "/notices";
-  const current = pathname === "/upload" || pathname.includes("/notices/") && !pathname.includes("/journey") && !pathname.includes("/scrutiny") ? 0 : pathname.includes("/journey") ? 1 : pathname.includes("/scrutiny") ? 2 : 0;
 
   return (
     <>
       {!isLanding && <DisclaimerBanner />}
       {!isLanding && <Header />}
       <main className={isLanding ? undefined : "min-h-[80vh] app-main-shell"}>
-        {workflowPath && <WorkflowRail current={current as 0 | 1 | 2 | 3 | 4 | 5} />}
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/guide" element={<Start />} />
