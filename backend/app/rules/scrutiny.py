@@ -31,6 +31,9 @@ class ScrutinyRequest:
     grounding: dict | None = None
     page_number: int | None = None
     source_location: str | None = None
+    category: str = "other_notice_request"
+    clarifying_questions: tuple[dict, ...] = ()
+    status: str = "not_started"
 
 
 @dataclass(frozen=True)
@@ -207,6 +210,42 @@ _GENERIC_REQUEST = {
     "evidence": (),
 }
 _REQUEST_LIBRARY["req_notice_document"] = _GENERIC_REQUEST
+_REQUEST_LIBRARY["req_deductions_exemptions"] = {
+    "plain": {
+        "en": "The Assessing Officer has requested records supporting the deductions or exemptions claimed in the return. In simple terms, provide the documents that support each claim.",
+        "hi": "आकलन अधिकारी ने return में claim की गई deductions या exemptions के समर्थन में रिकॉर्ड मांगे हैं। आसान भाषा में, हर claim के समर्थन वाले दस्तावेज़ दें।",
+    },
+    "why": {
+        "en": "These records allow the Department to verify the eligibility and amount of each deduction or exemption claimed.",
+        "hi": "इन रिकॉर्ड से विभाग हर deduction या exemption की पात्रता और claim की गई राशि की जांच कर सकता है।",
+    },
+    "evidence": (
+        {"en": "Evidence supporting each deduction or exemption claimed", "hi": "हर claim की गई deduction या exemption का supporting evidence"},
+        {"en": "Relevant certificates, receipts, payment records, or policy documents", "hi": "संबंधित certificates, receipts, payment records या policy documents"},
+    ),
+}
+
+_REQUEST_CATEGORIES = {
+    "req_computation_income": "income_computation",
+    "req_balance_sheet": "balance_sheet",
+    "req_profit_loss": "profit_loss_statement",
+    "req_bank_statements": "bank_statements",
+    "req_cash_deposits": "cash_deposits",
+    "req_significant_transactions": "credits_debits",
+    "req_deductions_exemptions": "deductions_exemptions",
+    "req_notice_document": "other_notice_request",
+}
+
+_REQUEST_QUESTIONS = {
+    "req_computation_income": {"en": "Do you have the computation of total income for this Assessment Year?", "hi": "क्या आपके पास इस आकलन वर्ष की कुल आय की computation है?"},
+    "req_balance_sheet": {"en": "Do you have the balance sheet for the period named in the notice?", "hi": "क्या आपके पास नोटिस में बताए गए समय की balance sheet है?"},
+    "req_profit_loss": {"en": "Do you have the Profit and Loss Account for the Financial Year named in the notice?", "hi": "क्या आपके पास नोटिस में बताए गए वित्त वर्ष का Profit and Loss Account है?"},
+    "req_bank_statements": {"en": "Can you obtain the complete bank statements requested in the notice?", "hi": "क्या आप नोटिस में मांगे गए पूरे bank statements प्राप्त कर सकते हैं?"},
+    "req_cash_deposits": {"en": "Can you identify the source of each relevant cash deposit?", "hi": "क्या आप संबंधित cash deposits के स्रोत की पहचान कर सकते हैं?"},
+    "req_significant_transactions": {"en": "Can you explain the significant credits and debits using your records?", "hi": "क्या आप अपने रिकॉर्ड से महत्वपूर्ण credits और debits समझा सकते हैं?"},
+    "req_deductions_exemptions": {"en": "Do you have records supporting the deductions or exemptions claimed in the return?", "hi": "क्या आपके पास return में claim की गई deductions या exemptions के supporting records हैं?"},
+    "req_notice_document": {"en": "Do you have records that address this specific request in the notice?", "hi": "क्या आपके पास नोटिस के इस विशेष अनुरोध से संबंधित रिकॉर्ड हैं?"},
+}
 
 
 def is_scrutiny_notice(notice: dict) -> bool:
@@ -226,6 +265,7 @@ def _enrich_request(item: ExtractedRequest) -> ScrutinyRequest:
     configured = _REQUEST_LIBRARY.get(item.classification_id or item.id)
     if configured is None:
         raise KeyError(f"Unknown scrutiny request id: {item.id}")
+    citations = tuple(dict.fromkeys((*item.citations, "sec-142-0001")))
     return ScrutinyRequest(
         id=item.id,
         original_text=item.original_text,
@@ -233,12 +273,15 @@ def _enrich_request(item: ExtractedRequest) -> ScrutinyRequest:
         why_required=configured["why"],
         required_evidence=tuple(configured["evidence"]),
         response_section=item.response_section,
-        citations=item.citations,
+        citations=citations,
         confidence=float(getattr(item, "confidence", 1.0)),
         warnings=tuple(getattr(item, "warnings", ())),
         grounding=getattr(item, "grounding", None),
         page_number=getattr(item, "page_number", None),
         source_location=getattr(item, "source_location", None),
+        category=getattr(item, "category", None) or _REQUEST_CATEGORIES.get(item.classification_id or item.id, "other_notice_request"),
+        clarifying_questions=getattr(item, "clarifying_questions", ()) or ({"id": f"has_{item.id}", "text": _REQUEST_QUESTIONS.get(item.classification_id or item.id, _REQUEST_QUESTIONS["req_notice_document"])},),
+        status=getattr(item, "status", "not_started"),
     )
 
 
@@ -287,7 +330,7 @@ def request_payload(requests: tuple[ScrutinyRequest, ...], citations_by_id: dict
             "plain_language_explanation": request.plain_language_explanation,
             "why_required": request.why_required,
             "required_evidence": list(request.required_evidence),
-            "what_department_is_asking": request.response_section,
+            "what_department_is_asking": request.original_text,
             "expected_evidence": list(request.required_evidence),
             "response_section": request.response_section,
             "citations": citations_by_id.get(request.id, []),
@@ -295,7 +338,13 @@ def request_payload(requests: tuple[ScrutinyRequest, ...], citations_by_id: dict
             "warnings": list(request.warnings),
             "grounding": request.grounding,
             "page_number": request.page_number,
+            "page": request.page_number,
             "source_location": request.source_location,
+            "category": request.category,
+            "clarifying_questions": list(request.clarifying_questions),
+            "status": request.status,
+            "workflow_status": request.status,
+            "sources": citations_by_id.get(request.id, []),
         }
         for request in requests
     ]
@@ -306,6 +355,9 @@ def validate_answers(questions: tuple[ScrutinyQuestion, ...], answers: dict[str,
     missing = expected - set(answers)
     if missing:
         raise ValueError(f"Missing answers for: {sorted(missing)}")
+    unexpected = set(answers) - expected
+    if unexpected:
+        raise ValueError(f"Unexpected answers for: {sorted(unexpected)}")
     invalid = {key: value for key, value in answers.items() if key in expected and value not in YES_NO_UNSURE_IDS}
     if invalid:
         first_key = next(iter(invalid))
@@ -414,6 +466,7 @@ def _checklist(requests: tuple[ScrutinyRequest, ...], statuses: dict[str, str]) 
                 "id": f"check_{request.id}",
                 "request_id": request.id,
                 "status": answer,
+                "workflow_status": {ANSWER_YES: "ready_for_response", ANSWER_NO: "documents_needed", ANSWER_UNSURE: "need_information"}[answer],
                 "title": {
                     "en": f"{prefix['en']}: {request.response_section}",
                     "hi": f"{prefix['hi']}: {request.response_section}",
