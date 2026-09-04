@@ -53,6 +53,8 @@ def _grounding_payload(result: RetrievalResult) -> dict:
         "method": result.method,
         "confidence": round(result.confidence, 3),
         "below_floor": result.below_floor,
+        "verified_source_count": result.verified_source_count,
+        "verified": result.verified_source_count > 0,
     }
 
 
@@ -95,7 +97,7 @@ def explanation(request: Request, notice_id: str, locale: str = Query(default="e
         if not store.live_allowed():
             raise _http_unavailable()
         grounding = ground(settings, query)
-        if grounding.below_floor:
+        if grounding.below_floor or grounding.verified_source_count == 0:
             raise _http_unavailable()
         if not grounding.chunks:
             raise _http_unavailable()
