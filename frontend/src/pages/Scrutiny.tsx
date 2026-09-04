@@ -20,6 +20,7 @@ import {
   PrimaryButton,
   ScreenFrame,
   SecondaryButton,
+  TaxTermExplanationCard,
   WhyDrawer,
   WorkflowLayout,
 } from "../components";
@@ -66,6 +67,8 @@ export default function Scrutiny() {
   const [stage, setStageState] = useState<Stage>(
     restored === "questions" && !store.extractionConfirmed(id) ? "requests" : restored || "requests"
   );
+  const [requestIndex, setRequestIndex] = useState(0);
+  const [viewAllRequests, setViewAllRequests] = useState(false);
   const [notice, setNotice] = useState<NoticeCard | null>(null);
   const [data, setData] = useState<ScrutinyRequestsResult | null>(null);
   const [questions, setQuestions] = useState<ScrutinyQuestion[]>([]);
@@ -390,9 +393,17 @@ ${draft}
               : "Review each item requested by the Department. The Department's original wording is preserved below."
           }
           primaryAction={
-            <PrimaryButton onClick={isUploaded ? ensureQuestions : () => setStage("confirm")}>
-              {isUploaded ? t("scrutiny.checkRecords") : t("scrutiny.confirmList")} →
-            </PrimaryButton>
+            viewAllRequests || requestIndex === requests.length - 1 ? (
+              <PrimaryButton onClick={isUploaded ? ensureQuestions : () => setStage("confirm")}>
+                {isUploaded ? t("scrutiny.checkRecords") : t("scrutiny.confirmList")} →
+              </PrimaryButton>
+            ) : (
+              <PrimaryButton onClick={() => setRequestIndex(requestIndex + 1)}>
+                {locale === "hi"
+                  ? `अगला अनुरोध (${requestIndex + 2}/${requests.length}) →`
+                  : `Next Request (${requestIndex + 2}/${requests.length}) →`}
+              </PrimaryButton>
+            )
           }
           secondaryAction={
             <Link to={isUploaded ? "/upload" : `/notices/${id}`} className="app-back-link">
@@ -419,74 +430,152 @@ ${draft}
               </p>
             </div>
 
-            {/* Scrutiny Request Cards */}
-            <div className="space-y-4">
-              {requests.map((r, i) => (
-                <div key={r.id} className="scrutiny-request-card">
-                  <div className="scrutiny-request-header">
-                    <span className="request-num-badge">{String(i + 1).padStart(2, "0")}</span>
-                    <div className="request-header-content">
-                      <p className="text-xs font-bold uppercase tracking-wider text-blue-600 mb-1">
-                        {locale === "hi" ? "विभाग क्या मांग रहा है" : "What the Department is Asking"}
-                      </p>
-                      <blockquote className="request-original-quote">
-                        "{r.original_text}"
-                      </blockquote>
-                      <p className="request-meaning-text">
-                        <strong>{locale === "hi" ? "इसका अर्थ:" : "What this means:"}</strong>{" "}
-                        {text(r.plain_language_explanation, locale) || r.response_section}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="scrutiny-request-details">
-                    <div className="request-detail-row">
-                      <span className="detail-label">
-                        {locale === "hi" ? "आवश्यक जानकारी" : "Information You Need to Provide"}
-                      </span>
-                      <p className="detail-text">
-                        {r.why_required
-                          ? text(r.why_required, locale)
-                          : locale === "hi"
-                          ? "लेन-देन का ब्योरा एवं संबंधित खाता बही में प्रविष्टियां।"
-                          : "Clarification of transaction dates, amounts, and ledger reconciliation."}
-                      </p>
-                    </div>
-
-                    {r.required_evidence.length > 0 && (
-                      <div className="request-detail-row">
-                        <span className="detail-label">
-                          {locale === "hi" ? "मददगार दस्तावेज़" : "Documents That May Help"}
-                        </span>
-                        <ul className="list-disc pl-5 text-xs text-slate-700 space-y-1">
-                          {r.required_evidence.map((e, j) => (
-                            <li key={j}>{text(e, locale)}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-xs">
-                      <span className="font-semibold text-slate-500">
-                        {locale === "hi" ? "स्थिति:" : "Status:"}{" "}
-                        <span className="text-slate-900 font-bold">
-                          {statusLabel(r.workflow_status, locale)}
-                        </span>
-                      </span>
-
-                      {r.citations.length > 0 && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-slate-400">
-                            {locale === "hi" ? "स्रोत:" : "Sources:"}
-                          </span>
-                          <CitationChips citations={r.citations} />
-                        </div>
-                      )}
-                    </div>
+            {/* Stepper Control Bar */}
+            {!viewAllRequests && requests.length > 1 && (
+              <div className="request-stepper-bar">
+                <div className="flex items-center gap-3">
+                  <span className="stepper-progress-pill">
+                    {locale === "hi"
+                      ? `अनुरोध ${String(requestIndex + 1).padStart(2, "0")} / ${String(requests.length).padStart(2, "0")}`
+                      : `REQUEST ${String(requestIndex + 1).padStart(2, "0")} OF ${String(requests.length).padStart(2, "0")}`}
+                  </span>
+                  <div className="request-jump-pills">
+                    {requests.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setRequestIndex(i)}
+                        className={`request-jump-pill ${i === requestIndex ? "is-active" : ""}`}
+                        title={`Go to request ${i + 1}`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => setViewAllRequests(true)}
+                  className="text-xs font-semibold text-blue-600 hover:underline"
+                >
+                  {locale === "hi" ? `सभी ${requests.length} अनुरोध एक साथ देखें` : `View all ${requests.length} requests at once`}
+                </button>
+              </div>
+            )}
+
+            {viewAllRequests && (
+              <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200">
+                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  {locale === "hi" ? `सभी ${requests.length} अनुरोध दिखाए जा रहे हैं` : `Showing all ${requests.length} requests`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setViewAllRequests(false)}
+                  className="text-xs font-semibold text-blue-600 hover:underline"
+                >
+                  {locale === "hi" ? "एक-एक करके देखें (चरणबद्ध)" : "Focus on one request at a time"}
+                </button>
+              </div>
+            )}
+
+            {/* Scrutiny Request Cards */}
+            <div className="space-y-4">
+              {(viewAllRequests ? requests : requests.slice(requestIndex, requestIndex + 1)).map((r, i) => {
+                const actualIndex = viewAllRequests ? i : requestIndex;
+                return (
+                  <div key={r.id} className="scrutiny-request-card">
+                    <div className="scrutiny-request-header">
+                      <span className="request-num-badge">{String(actualIndex + 1).padStart(2, "0")}</span>
+                      <div className="request-header-content">
+                        <p className="text-xs font-bold uppercase tracking-wider text-blue-600 mb-1">
+                          {locale === "hi" ? "विभाग क्या मांग रहा है" : "What the Department is Asking"}
+                        </p>
+                        <blockquote className="request-original-quote">
+                          "{r.original_text}"
+                        </blockquote>
+                        <TaxTermExplanationCard
+                          termKey={r.response_section}
+                          customTerm={r.response_section}
+                          customPlain={text(r.plain_language_explanation, locale) || r.response_section}
+                          citations={r.citations}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="scrutiny-request-details">
+                      <div className="request-detail-row">
+                        <span className="detail-label">
+                          {locale === "hi" ? "आवश्यक जानकारी" : "Information You Need to Provide"}
+                        </span>
+                        <p className="detail-text">
+                          {r.why_required
+                            ? text(r.why_required, locale)
+                            : locale === "hi"
+                            ? "लेन-देन का ब्योरा एवं संबंधित खाता बही में प्रविष्टियां।"
+                            : "Clarification of transaction dates, amounts, and ledger reconciliation."}
+                        </p>
+                      </div>
+
+                      {r.required_evidence.length > 0 && (
+                        <div className="request-detail-row">
+                          <span className="detail-label">
+                            {locale === "hi" ? "मददगार दस्तावेज़" : "Documents That May Help"}
+                          </span>
+                          <ul className="list-disc pl-5 text-xs text-slate-700 space-y-1">
+                            {r.required_evidence.map((e, j) => (
+                              <li key={j}>{text(e, locale)}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-xs">
+                        <span className="font-semibold text-slate-500">
+                          {locale === "hi" ? "स्थिति:" : "Status:"}{" "}
+                          <span className="text-slate-900 font-bold">
+                            {statusLabel(r.workflow_status, locale)}
+                          </span>
+                        </span>
+
+                        {r.citations.length > 0 && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-slate-400">
+                              {locale === "hi" ? "स्रोत:" : "Sources:"}
+                            </span>
+                            <CitationChips citations={r.citations} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+
+            {/* Stepper bottom navigation buttons when in focused view */}
+            {!viewAllRequests && requests.length > 1 && (
+              <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                <SecondaryButton
+                  onClick={() => setRequestIndex(Math.max(0, requestIndex - 1))}
+                  disabled={requestIndex === 0}
+                >
+                  ← {locale === "hi" ? "पिछला अनुरोध" : "Previous Request"}
+                </SecondaryButton>
+                {requestIndex < requests.length - 1 ? (
+                  <PrimaryButton onClick={() => setRequestIndex(requestIndex + 1)}>
+                    {locale === "hi"
+                      ? `अगला अनुरोध (${requestIndex + 2}/${requests.length}) →`
+                      : `Next Request (${requestIndex + 2}/${requests.length}) →`}
+                  </PrimaryButton>
+                ) : (
+                  <PrimaryButton onClick={isUploaded ? ensureQuestions : () => setStage("confirm")}>
+                    {locale === "hi"
+                      ? `सभी ${requests.length} अनुरोधों की समीक्षा पूर्ण · प्रश्नों पर आगे बढ़ें →`
+                      : `All ${requests.length} Requests Reviewed · Continue to Questions →`}
+                  </PrimaryButton>
+                )}
+              </div>
+            )}
 
             {isUploaded && (
               <div className="p-4 bg-slate-50 border border-slate-200 text-xs text-slate-600">
@@ -569,6 +658,15 @@ ${draft}
           }
         >
           <div className="space-y-6">
+            {q.help && (
+              <div className="upfront-why-banner">
+                <span className="upfront-why-title">
+                  {locale === "hi" ? "यह प्रश्न क्यों पूछा जा रहा है?" : "WHY ARE WE ASKING THIS?"}
+                </span>
+                <p className="upfront-why-text">{q.help}</p>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {q.options.map((o) => {
                 const isSelected = answers[q.id] === o.id;
@@ -587,14 +685,6 @@ ${draft}
                 );
               })}
             </div>
-
-            {q.help && (
-              <WhyDrawer
-                title={locale === "hi" ? "यह प्रश्न क्यों पूछा जा रहा है?" : "Why is this question asked?"}
-              >
-                <p className="text-sm text-slate-700 leading-relaxed">{q.help}</p>
-              </WhyDrawer>
-            )}
           </div>
         </ScreenFrame>
       )}
@@ -806,7 +896,7 @@ ${draft}
             {/* Guided Context Box */}
             <div className="p-4 bg-slate-50 border border-slate-200">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                {locale === "hi" ? "आपके उत्तरों के आधार पर" : "Based On Your Answers"}
+                {locale === "hi" ? "आपके उत्तरों के आधार पर" : "Based On Your Confirmed Answers"}
               </p>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(answers).map(([qid, val]) => (
@@ -818,10 +908,10 @@ ${draft}
                   </span>
                 ))}
               </div>
-              <p className="text-xs text-slate-500 mt-2">
+              <p className="text-xs text-slate-600 mt-2">
                 {locale === "hi"
-                  ? "तथ्य आपके उत्तरों से लिए गए हैं; कानूनी भाषा सीबीडीटी धारा 142(1) नियमों पर आधारित है।"
-                  : "Facts are drawn directly from your answers; statutory format adheres strictly to Section 142(1) standards."}
+                  ? "टैक्स मित्र ने आपके द्वारा पुष्टि की गई जानकारी के आधार पर यह उत्तर तैयार किया है। आगे बढ़ने से पहले इसकी समीक्षा करें।"
+                  : "Tax Mitra prepared this response based on the information you confirmed. Review it before continuing."}
               </p>
             </div>
 
