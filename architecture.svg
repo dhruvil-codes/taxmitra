@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1260 410" width="1260" height="410" style="background:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <filter id="card-shadow" x="-3%" y="-4%" width="106%" height="110%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.05"/>
+    </filter>
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#3b82f6" />
+    </marker>
+    <marker id="arr-sky" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+    <marker id="arr-purple" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#9333ea" />
+    </marker>
+    <marker id="arr-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+    </marker>
+  </defs>
+
+  <!-- TOP HEADER -->
+  <rect x="40" y="25" width="1180" height="65" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5" filter="url(#card-shadow)"/>
+  <text x="60" y="52" font-size="18" font-weight="700" fill="#15803d">Tax Mitra 🇮🇳  Architecture</text>
+  <text x="60" y="74" font-size="12" font-weight="600" fill="#166534">AI EXPLAINS  →  RULES DECIDE  →  HUMANS APPROVE</text>
+  <text x="1200" y="62" font-size="12" fill="#64748b" text-anchor="end">Frontend: Vercel  •  Backend: Railway</text>
+
+  <!-- 1. CITIZEN & NOTICE -->
+  <rect x="40" y="110" width="200" height="215" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" filter="url(#card-shadow)"/>
+  <text x="54" y="136" font-size="14" font-weight="700" fill="#1d4ed8">1. Citizen &amp; Notice</text>
+  <rect x="180" y="122" width="48" height="18" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1"/>
+  <text x="204" y="135" font-size="10" font-weight="600" fill="#1e40af" text-anchor="middle">Input</text>
+  <line x1="54" y1="148" x2="226" y2="148" stroke="#3b82f6" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="54" y="174" font-size="12" fill="#334155">• Receives IT notice</text>
+  <text x="54" y="200" font-size="12" fill="#334155">• Sec 143(1)(a) mismatch</text>
+  <text x="54" y="226" font-size="12" fill="#334155">• Sec 142(1) scrutiny PDF</text>
+  <text x="54" y="252" font-size="12" fill="#334155">• Seeks plain guidance</text>
+
+  <!-- Arrow 1 -> 2 -->
+  <line x1="244" y1="217" x2="278" y2="217" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-blue)"/>
+
+  <!-- 2. REACT FRONTEND -->
+  <rect x="285" y="110" width="200" height="215" rx="8" fill="#ffffff" stroke="#0284c7" stroke-width="1.5" filter="url(#card-shadow)"/>
+  <text x="299" y="136" font-size="14" font-weight="700" fill="#0369a1">2. React Frontend</text>
+  <rect x="420" y="122" width="54" height="18" rx="4" fill="#e0f2fe" stroke="#0284c7" stroke-width="1"/>
+  <text x="447" y="135" font-size="10" font-weight="600" fill="#0369a1" text-anchor="middle">Vercel</text>
+  <line x1="299" y1="148" x2="471" y2="148" stroke="#0284c7" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="299" y="174" font-size="12" fill="#334155">• Understand breakdown</text>
+  <text x="299" y="200" font-size="12" fill="#334155">• Answer guided questions</text>
+  <text x="299" y="226" font-size="12" fill="#334155">• Prepare response draft</text>
+  <text x="299" y="252" font-size="12" fill="#334155">• Act: Portal instructions</text>
+
+  <!-- Arrow 2 -> 3 -->
+  <line x1="489" y1="217" x2="523" y2="217" stroke="#0284c7" stroke-width="2" marker-end="url(#arr-sky)"/>
+
+  <!-- 3. FASTAPI BACKEND -->
+  <rect x="530" y="110" width="200" height="215" rx="8" fill="#faf5ff" stroke="#9333ea" stroke-width="1.5" filter="url(#card-shadow)"/>
+  <text x="544" y="136" font-size="14" font-weight="700" fill="#7e22ce">3. FastAPI Backend</text>
+  <rect x="660" y="122" width="60" height="18" rx="4" fill="#f3e8ff" stroke="#9333ea" stroke-width="1"/>
+  <text x="690" y="135" font-size="10" font-weight="600" fill="#7e22ce" text-anchor="middle">Railway</text>
+  <line x1="544" y1="148" x2="716" y2="148" stroke="#9333ea" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="544" y="174" font-size="12" fill="#334155">• PDF text extraction</text>
+  <text x="544" y="200" font-size="12" fill="#334155">• Notice classification</text>
+  <text x="544" y="226" font-size="12" fill="#334155">• Statutory deadlines (30d)</text>
+  <text x="544" y="252" font-size="12" fill="#334155">• API orchestration</text>
+
+  <!-- Arrow 3 -> 4 -->
+  <line x1="734" y1="217" x2="768" y2="217" stroke="#9333ea" stroke-width="2" marker-end="url(#arr-purple)"/>
+
+  <!-- 4. RULES & AI -->
+  <rect x="775" y="110" width="200" height="215" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5" filter="url(#card-shadow)"/>
+  <text x="789" y="136" font-size="14" font-weight="700" fill="#b45309">4. Rules &amp; AI</text>
+  <rect x="910" y="122" width="54" height="18" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+  <text x="937" y="135" font-size="10" font-weight="600" fill="#92400e" text-anchor="middle">Corpus</text>
+  <line x1="789" y1="148" x2="961" y2="148" stroke="#d97706" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="789" y="174" font-size="12" fill="#334155">• Official IT Dept corpus</text>
+  <text x="789" y="200" font-size="12" fill="#334155">• Deterministic math</text>
+  <text x="789" y="226" font-size="12" fill="#334155">• AI plain explanations</text>
+  <text x="789" y="252" font-size="12" fill="#334155">• Evidence checklist</text>
+
+  <!-- Arrow 4 -> 5 -->
+  <line x1="979" y1="217" x2="1013" y2="217" stroke="#d97706" stroke-width="2" marker-end="url(#arr-amber)"/>
+
+  <!-- 5. HUMAN & PORTAL -->
+  <rect x="1020" y="110" width="200" height="215" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5" filter="url(#card-shadow)"/>
+  <text x="1034" y="136" font-size="14" font-weight="700" fill="#15803d">5. Human &amp; Portal</text>
+  <rect x="1145" y="122" width="65" height="18" rx="4" fill="#dcfce7" stroke="#16a34a" stroke-width="1"/>
+  <text x="1177" y="135" font-size="10" font-weight="600" fill="#166534" text-anchor="middle">Official Filing</text>
+  <line x1="1034" y1="148" x2="1206" y2="148" stroke="#16a34a" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="1034" y="174" font-size="12" fill="#334155">• Human reviews draft</text>
+  <text x="1034" y="200" font-size="12" fill="#334155">• Attaches checklist docs</text>
+  <text x="1034" y="226" font-size="12" fill="#334155">• Files on incometax.gov.in</text>
+  <text x="1034" y="252" font-size="12" fill="#334155">• Zero auto-submission</text>
+
+  <!-- BOTTOM SAFETY STRIP -->
+  <rect x="40" y="340" width="1180" height="38" rx="6" fill="#fff1f2" stroke="#e11d48" stroke-width="1"/>
+  <text x="630" y="364" font-size="12" font-weight="600" fill="#be123c" text-anchor="middle">🔒 Human-in-the-loop: Tax Mitra never submits to government servers automatically.</text>
+</svg>
