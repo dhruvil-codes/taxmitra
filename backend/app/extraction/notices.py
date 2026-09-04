@@ -22,6 +22,11 @@ class ExtractedRequest:
     grounding: dict | None = None
     page_number: int | None = None
     source_location: str | None = None
+    category: str | None = None
+    required_evidence: tuple[dict, ...] = ()
+    clarifying_questions: tuple[dict, ...] = ()
+    status: str = "not_started"
+    sources: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -50,8 +55,13 @@ def extract_notice_requests(notice: dict) -> ExtractedNotice:
             confidence=float(item.get("confidence", 1.0)),
             warnings=tuple(str(w) for w in item.get("warnings", ())),
             grounding=item.get("grounding"),
-            page_number=item.get("page_number"),
-            source_location=item.get("source_location"),
+            page_number=item.get("page_number", item.get("page")),
+            source_location=item.get("source_location") or (f"page {item.get('page_number', item.get('page'))}" if item.get("page_number", item.get("page")) else None),
+            category=str(item["category"]) if item.get("category") else None,
+            required_evidence=tuple(item.get("required_evidence", ())),
+            clarifying_questions=tuple(item.get("clarifying_questions", ())),
+            status=str(item.get("status", "not_started")),
+            sources=tuple(str(source) for source in item.get("sources", item.get("citations", ()))),
         )
         for item in extraction.get("requests", ())
     )
