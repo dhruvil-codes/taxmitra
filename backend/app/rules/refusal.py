@@ -14,12 +14,12 @@ OFFICIAL_HELP_URL = "https://www.incometax.gov.in/iec/helpcenter"
 
 _REFUSAL_TEXT = {
     "headline": {
-        "en": "We can't safely guide you through this yet",
-        "hi": "हम अभी इसमें आपका सुरक्षित मार्गदर्शन नहीं कर सकते",
+        "en": "This notice is outside Tax Mitra's supported workflows",
+        "hi": "यह नोटिस Tax Mitra के समर्थित कार्यप्रवाहों के दायरे में नहीं है",
     },
     "why": {
-        "en": "This notice type is outside the workflows Tax Mitra supports today. Rather than guess — which could harm you — we step back and point you to the right places.",
-        "hi": "यह नोटिस प्रकार अभी Tax Mitra के समर्थित कार्यप्रवाहों के दायरे में नहीं है। अनुमान लगाने के बजाय — जो आपको नुकसान पहुँचा सकता है — हम आपको सही जगहों की ओर ले जाते हैं।",
+        "en": "Tax Mitra does not have a notice-specific workflow for this notice type. It therefore cannot interpret the notice or prepare response guidance without risking an unsupported conclusion.",
+        "hi": "इस नोटिस प्रकार के लिए Tax Mitra के पास नोटिस-विशिष्ट कार्यप्रवाह नहीं है। इसलिए बिना पर्याप्त आधार के नोटिस की व्याख्या या उत्तर की मार्गदर्शिका देना उचित नहीं होगा।",
     },
     "suggestion": {
         "en": "Notices of this kind can have serious consequences and strict timelines. Consider consulting a chartered accountant or an authorized tax professional before responding.",

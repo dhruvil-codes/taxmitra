@@ -86,7 +86,7 @@ def test_resolve_unsupported_notice_returns_refusal():
     }
     body = client.post("/api/workflow/resolve", json=payload).json()
     assert body["supported"] is False
-    assert body["headline"]["en"].startswith("We can't safely guide you")
+    assert body["headline"]["en"] == "This notice is outside Tax Mitra's supported workflows"
     assert any("incometax.gov.in" in link["url"] for link in body["official_links"])
 
 
@@ -102,8 +102,10 @@ def test_explanation_static_en_and_hi_with_citations():
         assert body["source"] == "static"
         assert body["degraded"] is False
         assert "₹45,000" in body["content"]["plain_language"]
-        assert "does not automatically mean" in body["content"]["what_this_does_not_mean"] or \
-               "मतलब नहीं" in body["content"]["what_this_does_not_mean"]
+        assert (
+            "not, by itself, a final conclusion" in body["content"]["what_this_does_not_mean"]
+            or "अंतिम निष्कर्ष" in body["content"]["what_this_does_not_mean"]
+        )
         assert len(body["content"]["possible_reasons"]) >= 3
         citations = body["citations"]
         assert len(citations) >= 3

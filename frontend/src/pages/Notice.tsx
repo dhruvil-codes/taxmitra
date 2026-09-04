@@ -35,8 +35,8 @@ export default function Notice() {
         </div>
 
         <Card className="mb-4">
-          <p className="app-section-label">[ IN PLAIN LANGUAGE ]</p>
-          <p className="text-stone-700 leading-relaxed">
+          <p className="app-section-label">[ {t("notice.plain")} ]</p>
+          <p className="app-body">
             {explanation?.content.plain_language ?? "…"}
           </p>
           <div className="notice-boundary">

@@ -24,23 +24,23 @@ _DOCUMENTS: dict[str, ChecklistItem] = {
         id="doc_26as",
         title={"en": "Form 26AS / AIS statement", "hi": "फॉर्म 26AS / AIS विवरण"},
         why_needed={
-            "en": "Shows the income information the Department received about you, so you can see exactly what it is comparing against.",
-            "hi": "यह दिखाता है कि विभाग को आपकी आय के बारे में क्या जानकारी मिली थी, ताकि आप देख सकें कि तुलना किससे की जा रही है।",
+            "en": "Shows the income and transaction information reported to the Department, so you can compare it with your return of income.",
+            "hi": "इसमें विभाग को रिपोर्ट की गई आय और लेनदेन की जानकारी दिखती है, ताकि आप इसे अपने आय के रिटर्न से मिला सकें।",
         },
     ),
     "doc_itr_extract": ChecklistItem(
         id="doc_itr_extract",
         title={"en": "Relevant pages of your filed tax return", "hi": "आपके दाखिल टैक्स रिटर्न के संबंधित पृष्ठ"},
         why_needed={
-            "en": "Proves the income in question was already reported in your return for this assessment year.",
-            "hi": "सिद्ध करता है कि विवादित आय इस मूल्यांकन वर्ष के लिए आपके रिटर्न में पहले से दर्ज थी।",
+            "en": "Shows whether the income in question was already reported in your return of income for this Assessment Year.",
+            "hi": "इससे पता चलता है कि संबंधित आय इस आकलन वर्ष के आपके आय के रिटर्न में पहले से बताई गई थी या नहीं।",
         },
     ),
     "doc_bank_statement": ChecklistItem(
         id="doc_bank_statement",
         title={"en": "Bank statement for the relevant period", "hi": "संबंधित अवधि का बैंक विवरण"},
         why_needed={
-            "en": "Shows whether the income in question was actually credited to your account.",
+            "en": "Shows whether the income in question was actually credited to your bank account during the relevant period.",
             "hi": "दिखाता है कि विवादित आय वास्तव में आपके खाते में आई थी या नहीं।",
         },
     ),
@@ -48,7 +48,7 @@ _DOCUMENTS: dict[str, ChecklistItem] = {
         id="doc_interest_certificate",
         title={"en": "Interest certificate / Form 16A from the payer", "hi": "भुगतानकर्ता से ब्याज प्रमाणपत्र / फॉर्म 16A"},
         why_needed={
-            "en": "Confirms the exact amount the payer reported paying you, and any tax they deducted.",
+            "en": "Confirms the amount reported by the payer and any tax deducted at source (TDS).",
             "hi": "पुष्टि करता है कि भुगतानकर्ता ने आपको कितनी राशि की सूचना दी थी और कोई कर काटा था या नहीं।",
         },
     ),
@@ -56,7 +56,7 @@ _DOCUMENTS: dict[str, ChecklistItem] = {
         id="doc_computation",
         title={"en": "Computation of total income", "hi": "कुल आय की गणना"},
         why_needed={
-            "en": "A simple sheet showing your income heads and totals, so the response is easy for the Department to verify.",
+            "en": "Shows each income head and the total income used in your return, so the Department can verify the response.",
             "hi": "आपकी आय के स्रोतों और कुल राशि की सरल तालिका, ताकि विभाग के लिए सत्यापन आसान हो।",
         },
     ),
@@ -64,7 +64,7 @@ _DOCUMENTS: dict[str, ChecklistItem] = {
         id="doc_ais_download",
         title={"en": "Download your AIS statement (how-to)", "hi": "अपना AIS विवरण डाउनलोड करें (कैसे करें)"},
         why_needed={
-            "en": "You don't have a supporting document yet — start by downloading the Annual Information Statement from the e-Filing portal.",
+            "en": "If you do not have the supporting document yet, download your Annual Information Statement (AIS) from the e-Filing portal.",
             "hi": "आपके पास अभी समर्थन दस्तावेज़ नहीं है — पहले e-Filing पोर्टल से वार्षिक सूचना विवरण (AIS) डाउनलोड कीजिए।",
         },
     ),
@@ -72,7 +72,7 @@ _DOCUMENTS: dict[str, ChecklistItem] = {
         id="doc_payer_confirmation",
         title={"en": "Written confirmation from the payer", "hi": "भुगतानकर्ता से लिखित पुष्टि"},
         why_needed={
-            "en": "If you're not sure about the income, ask the bank or payer to confirm what they reported and to whom.",
+            "en": "If the income cannot be matched to your records, ask the bank or payer to confirm what was reported and in whose name.",
             "hi": "यदि आय के बारे में पक्का नहीं हैं, तो बैंक या भुगतानकर्ता से पूछिए कि उन्होंने क्या और किसके लिए रिपोर्ट किया था।",
         },
     ),

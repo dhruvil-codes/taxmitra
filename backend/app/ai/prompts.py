@@ -6,12 +6,14 @@ from __future__ import annotations
 import json
 
 from app.knowledge.corpus_loader import Chunk
+from app.rules.terminology import TERMINOLOGY_GUIDANCE
 
 EXPLAIN_SYSTEM = (
     "You explain Indian income tax notices to ordinary citizens in plain language. "
     "You answer ONLY from the provided context. If the context does not support an "
     "answer, say so instead of guessing. Never state or imply that the taxpayer owes "
-    "money unless the context explicitly says so. Reply with a single JSON object."
+    "money unless the context explicitly says so. "
+    f"{TERMINOLOGY_GUIDANCE} Reply with a single JSON object."
 )
 
 TRANSLATE_SYSTEM = (

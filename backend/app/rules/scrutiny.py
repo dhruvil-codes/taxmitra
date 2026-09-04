@@ -50,21 +50,21 @@ _OPTIONS = (
 _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
     "req_computation_income": {
         "plain": {
-            "en": "The officer wants a clear calculation showing how total income was arrived at for the assessment year.",
-            "hi": "अधिकारी यह देखना चाहते हैं कि आकलन वर्ष के लिए कुल आय की गणना कैसे की गई।",
+            "en": "The Assessing Officer has requested a computation of total income for the Assessment Year. In simple terms, this shows how your income heads and totals were calculated.",
+            "hi": "आकलन अधिकारी ने आकलन वर्ष के लिए कुल आय की computation मांगी है। आसान भाषा में, इसमें आपकी आय के अलग-अलग शीर्ष और कुल राशि की गणना दिखाई जाती है।",
         },
         "why": {
-            "en": "A computation connects the return, books, and supporting records into one verifiable summary.",
+            "en": "The computation lets the Department reconcile the return of income with your books and supporting documents.",
             "hi": "कुल आय की गणना रिटर्न, बही-खातों और सहायक रिकॉर्ड को एक सत्यापन योग्य सारांश में जोड़ती है।",
         },
         "evidence": (
-            {"en": "Computation sheet by income head", "hi": "आय शीर्षों के अनुसार गणना पत्रक"},
+            {"en": "Computation of total income by income head", "hi": "आय शीर्षों के अनुसार कुल आय की computation"},
             {"en": "Filed return acknowledgement and schedules", "hi": "दाखिल रिटर्न की पावती और अनुसूचियां"},
         ),
     },
     "req_balance_sheet": {
         "plain": {
-            "en": "The officer wants a statement of assets, liabilities, and capital as at year end.",
+            "en": "The Assessing Officer has requested a balance sheet showing assets, liabilities, and capital at the end of the year.",
             "hi": "अधिकारी वर्ष के अंत की परिसंपत्तियों, देनदारियों और पूंजी का विवरण चाहते हैं।",
         },
         "why": {
@@ -78,7 +78,7 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
     },
     "req_profit_loss": {
         "plain": {
-            "en": "The officer wants the business income statement for the financial year.",
+            "en": "The Assessing Officer has requested the Profit and Loss Account for the Financial Year.",
             "hi": "अधिकारी वित्त वर्ष का व्यवसाय आय-विवरण चाहते हैं।",
         },
         "why": {
@@ -92,7 +92,7 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
     },
     "req_bank_statements": {
         "plain": {
-            "en": "The officer wants complete bank statements for accounts used in business transactions.",
+            "en": "The Assessing Officer has requested complete bank statements for accounts used for business transactions.",
             "hi": "अधिकारी व्यवसाय लेनदेन में उपयोग किए गए खातों के पूरे बैंक विवरण चाहते हैं।",
         },
         "why": {
@@ -106,7 +106,7 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
     },
     "req_cash_deposits": {
         "plain": {
-            "en": "The officer wants a source-wise explanation for cash deposited into bank accounts.",
+            "en": "The Assessing Officer has requested a source-wise explanation for cash deposits in the bank accounts.",
             "hi": "अधिकारी बैंक खातों में जमा नकद का स्रोत-वार स्पष्टीकरण चाहते हैं।",
         },
         "why": {
@@ -121,7 +121,7 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
     },
     "req_significant_transactions": {
         "plain": {
-            "en": "The officer wants explanations and evidence for large or unusual credits and debits.",
+            "en": "The Assessing Officer has requested an explanation and supporting documents for significant credits and debits.",
             "hi": "अधिकारी बड़े या असामान्य क्रेडिट और डेबिट का स्पष्टीकरण और प्रमाण चाहते हैं।",
         },
         "why": {
@@ -129,28 +129,28 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
             "hi": "महत्वपूर्ण लेनदेन आय, खर्च, ऋण, निवेश या अस्पष्टीकृत धन को प्रभावित कर सकते हैं, इसलिए हर महत्वपूर्ण मद का रिकॉर्ड-आधारित स्पष्टीकरण चाहिए।",
         },
         "evidence": (
-            {"en": "Transaction-wise explanation for significant credits and debits", "hi": "महत्वपूर्ण क्रेडिट और डेबिट का लेनदेन-वार स्पष्टीकरण"},
+            {"en": "Transaction-wise explanation for significant credits and debits", "hi": "महत्वपूर्ण credits और debits का लेनदेन-वार स्पष्टीकरण"},
             {"en": "Invoices, agreements, confirmations, receipts, or ledger extracts", "hi": "इनवॉइस, अनुबंध, पुष्टि, रसीदें या लेजर अंश"},
         ),
     },
     # Additional request types for demo PDF items
     "req_ledger_extract": {
         "plain": {
-            "en": "The officer wants a ledger extract showing professional receipts and supporting invoices.",
-            "hi": "अधिकारी पेशेवरियल रसीदें और सहायक इनवॉइस दिखाने वाला लेजर अंश चाहते हैं।",
+            "en": "The Assessing Officer has requested a ledger extract showing professional receipts and the related invoices.",
+            "hi": "आकलन अधिकारी ने professional receipts और उनसे जुड़े invoices दिखाने वाला ledger extract मांगा है।",
         },
         "why": {
-            "en": "Ledger extracts help verify the accuracy of reported professional income and reconcile it with invoices.",
-            "hi": "लेजर अंश रिपोर्ट किए गए पेशेवरियल आय की सटीकता की पुष्टि करने और इनवॉइस से मिलाने में मदद करते हैं।",
+            "en": "The ledger extract helps reconcile professional income reported in the return with the related invoices.",
+            "hi": "ledger extract से रिटर्न में बताई गई professional income को संबंधित invoices से मिलाने में मदद मिलती है।",
         },
         "evidence": (
-            {"en": "Ledger extract for professional receipts", "hi": "पेशेवरियल रसीदें का लेजर अंश"},
-            {"en": "Supporting invoices for professional receipts", "hi": "पेशेवरियल रसीदें की सहायक इनवॉइस"},
+            {"en": "Ledger extract for professional receipts", "hi": "professional receipts का ledger extract"},
+            {"en": "Supporting invoices for professional receipts", "hi": "professional receipts के supporting invoices"},
         ),
     },
     "req_high_value_transactions": {
         "plain": {
-            "en": "The officer wants an explanation for high-value transactions appearing in AIS / SFT.",
+            "en": "The Assessing Officer has requested an explanation for high-value transactions appearing in AIS or SFT information.",
             "hi": "अधिकारी AIS / SFT में दिखाई देने वाले उच्च-मूल्य लेनदेन का स्पष्टीकरण चाहते हैं।",
         },
         "why": {
@@ -164,7 +164,7 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
     },
     "req_tax_payments": {
         "plain": {
-            "en": "The officer wants details of tax payments, TDS, TCS, and challan numbers.",
+            "en": "The Assessing Officer has requested details of tax payments, including TDS, TCS, and challan numbers.",
             "hi": "अधिकारी कर भुगतान, TDS, TCS और चल्लन नंबर का विवरण चाहते हैं।",
         },
         "why": {
@@ -172,13 +172,13 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
             "hi": "कर भुगतान का विवरण यह सत्यापित करने में मदद करता है कि अग्रिम कर और काटे गए कर रिटर्न आंकड़ों से मेल खाते हैं।",
         },
         "evidence": (
-            {"en": "Challan copies for tax payments", "hi": "कर भुगतान के लिए चल्लन की प्रतियां"},
-            {"en": "Form 26AS / AIS showing TDS/TCS", "hi": "TDS/TCS दिखाने वाला Form 26AS / AIS"},
+            {"en": "Challan copies for tax payments", "hi": "कर भुगतान के चालान की प्रतियां"},
+            {"en": "Form 26AS / AIS statement showing TDS/TCS", "hi": "TDS/TCS दिखाने वाला Form 26AS / AIS statement"},
         ),
     },
     "req_evidence": {
         "plain": {
-            "en": "The officer wants any other evidence relied upon in support of the return.",
+            "en": "The Assessing Officer has requested any other supporting documents relied on for the return of income.",
             "hi": "अधिकारी रिटर्न के समर्थन में भरोसे किए गए किसी भी अन्य प्रमाण चाहते हैं।",
         },
         "why": {
@@ -187,7 +187,7 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
         },
         "evidence": (
             {"en": "Any supporting documents referenced in the return", "hi": "रिटर्न में संदर्भित किसी भी सहायक दस्तावेज़"},
-            {"en": "Records that support claimed deductions or exemptions", "hi": "दावा किए गए कटौट या छूट का समर्थन करने वाले रिकॉर्ड"},
+            {"en": "Records that support claimed deductions or exemptions", "hi": "दावा की गई कटौती या छूट का समर्थन करने वाले रिकॉर्ड"},
         ),
     },
 }
@@ -195,8 +195,8 @@ _REQUEST_LIBRARY: dict[str, dict[str, Any]] = {
 
 _GENERIC_REQUEST = {
     "plain": {
-        "en": "The notice asks for the item shown below. Tax Mitra does not decide whether it applies; check the notice and your records.",
-        "hi": "नोटिस में नीचे दी गई वस्तु मांगी गई है। Tax Mitra यह तय नहीं करता कि यह आप पर लागू है; नोटिस और अपने रिकॉर्ड देखें।",
+        "en": "The notice requests the item shown below. Tax Mitra does not decide whether the request applies to your facts; check the notice and your records.",
+        "hi": "नोटिस में नीचे दी गई जानकारी या दस्तावेज़ मांगा गया है। Tax Mitra यह तय नहीं करता कि यह अनुरोध आपके मामले में लागू है; नोटिस और अपने रिकॉर्ड देखें।",
     },
     "why": {
         "en": "Section 142(1) permits an Assessing Officer to require accounts, documents, or verified written information. This explanation does not add a legal requirement beyond the notice.",
@@ -386,7 +386,7 @@ def _headline(path: str) -> Text:
     if path == "needs_evidence":
         return {
             "en": "You identified discrepancies that need clarification",
-            "hi": "आपने विसंगतियां पहचानी हैं जिनकी स्पष्टीकरण चाहिए",
+            "hi": "आपने ऐसी विसंगतियां पहचानी हैं जिनका स्पष्टीकरण देना होगा",
         }
     return {
         "en": "You indicated some items need verification from your records",

@@ -2,8 +2,8 @@
   "kind": "explanation",
   "category": "income_mismatch_143_1a",
   "locale": "en",
-  "plain_language": "The Income Tax Department compared your return for Assessment Year {assessment_year} with third-party information in its records — {income_source}. The Department's records show {amount} that does not appear in your return, so it has proposed adding this amount to your income and recomputing the tax.",
-  "what_this_does_not_mean": "This does not automatically mean you owe tax on {amount} — it means the Department's records and your return don't match, and you are being asked to explain the difference.",
+  "plain_language": "The Income Tax Department compared your return of income for Assessment Year {assessment_year} with information reported by another party: {income_source}. The Department's records show {amount}, which does not match the income reported in your return. The intimation therefore records a proposed adjustment and recomputation of tax.",
+  "what_this_does_not_mean": "A proposed adjustment is not, by itself, a final conclusion that additional tax is payable. It means the Department has identified an information mismatch and is asking you to explain or correct it.",
   "possible_reasons": [
     "The income was received but was not included in your return",
     "The income was already included in your return under a different head",

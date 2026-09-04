@@ -47,7 +47,7 @@ _BASE_PATHS: dict[tuple[str, str], ResponsePath] = {
             "hi": "आप असहमत हैं: यह आय आपको प्राप्त ही नहीं हुई",
         },
         guidance={
-            "en": "Your response will state that this income was never credited to your account and is not attributable to you — the payer's report may be inaccurate or may belong to someone else. Attach the bank statement for that period to support this.",
+            "en": "Your response will state that this income was not credited to your bank account and is not attributable to you. The payer's report may be inaccurate or may relate to another person. Attach the bank statement for the relevant period.",
             "hi": "आपका उत्तर बताएगा कि यह आय आपके खाते में आई ही नहीं और आपसे संबंधित नहीं है — संभव है कि भुगतानकर्ता की रिपोर्ट गलत हो या किसी अन्य व्यक्ति से संबंधित हो। इसके समर्थन में उस अवधि का बैंक विवरण संलग्न करें।",
         },
         checklist_ids=("doc_bank_statement", "doc_26as", "doc_payer_confirmation"),
@@ -63,7 +63,7 @@ _BASE_PATHS: dict[tuple[str, str], ResponsePath] = {
             "hi": "अभी पक्का नहीं: भुगतानकर्ता से पुष्टि कीजिए कि क्या रिपोर्ट किया गया",
         },
         guidance={
-            "en": "Ask the bank or payer in writing: what amount was reported, for which account, and to whom. Also check accounts of family members — income credited to a relative is a common cause of mismatch. Until this is resolved, your draft will record that you are verifying the information.",
+            "en": "Ask the bank or payer in writing what amount was reported, for which account, and in whose name. Also check whether the information relates to a family member. Until this is resolved, your draft will state that you are verifying the information.",
             "hi": "बैंक या भुगतानकर्ता से लिखित में पूछिए: कितनी राशि रिपोर्ट की गई, किस खाते के लिए, और किस व्यक्ति के लिए। परिवार के सदस्यों के खाते भी जाँचिए — अक्सर बेमेल का कारण यही होता है। जब तक पुष्टि न हो जाए, आपका मसौदा यह दर्ज करेगा कि आप जानकारी सत्यापित कर रहे हैं।",
         },
         checklist_ids=("doc_payer_confirmation", "doc_26as", "doc_bank_statement"),
@@ -79,7 +79,7 @@ _BASE_PATHS: dict[tuple[str, str], ResponsePath] = {
             "hi": "आप असहमत हैं: यह आय आपके रिटर्न में पहले से शामिल है",
         },
         guidance={
-            "en": "Your response will point out that this income was already included in your return, so the difference is an information-matching issue, not an omission. Attach the relevant pages of your return and a computation of total income so the Department can verify it easily.",
+            "en": "Your response will state that this income was already included in your return of income. The difference may be an information-matching issue rather than an omission. Attach the relevant return pages and your computation of total income.",
             "hi": "आपका उत्तर बताएगा कि यह आय आपके रिटर्न में पहले से दर्ज है, अतः यह बेमेल सूचना-मिलान की समस्या है, चूक नहीं। आसान सत्यापन के लिए अपने रिटर्न के संबंधित पृष्ठ और कुल आय की गणना संलग्न करें।",
         },
         checklist_ids=("doc_itr_extract", "doc_computation", "doc_26as"),
@@ -93,8 +93,8 @@ _BASE_PATHS: dict[tuple[str, str], ResponsePath] = {
             "hi": "आप सहमत हैं: यह आय आपके रिटर्न में छूट गई थी",
         },
         guidance={
-            "en": "Your response will accept that this income should be part of your total income. Additional tax and applicable interest may result — the Department will recompute and inform you. This is a routine outcome and accepting a genuine omission avoids penalties later.",
-            "hi": "आपका उत्तर स्वीकार करेगा कि यह आय आपकी कुल आय का हिस्सा होनी चाहिए। इससे अतिरिक्त कर और लागू ब्याज हो सकता है — विभाग पुनः गणना कर सूचित करेगा। यह सामान्य परिणाम है, और सही चूक स्वीकारना आगे जुर्माने से बचाता है।",
+            "en": "Your response will state that this income was received but was not included in your return of income. Additional tax and applicable interest may result after the Department recomputes your total income. Review this position and the supporting records before submitting.",
+            "hi": "आपका उत्तर बताएगा कि यह आय आपको मिली थी, लेकिन आपके आय के रिटर्न में शामिल नहीं हुई। विभाग द्वारा कुल आय की पुनर्गणना के बाद अतिरिक्त कर और लागू ब्याज हो सकता है। जमा करने से पहले इस स्थिति और सहायक रिकॉर्ड की समीक्षा करें।",
         },
         checklist_ids=("doc_interest_certificate", "doc_computation", "doc_bank_statement", "doc_26as"),
         draft_template_id="agree_report_now",
@@ -107,7 +107,7 @@ _BASE_PATHS: dict[tuple[str, str], ResponsePath] = {
             "hi": "अभी पक्का नहीं: पहले अपने रिटर्न की AIS से तुलना कीजिए",
         },
         guidance={
-            "en": "Most mismatches are resolved at this step. Compare the mismatch amount line-by-line with your return and your AIS/26AS statement. If the figure appears in both, your response will disagree; if it is genuinely missing, your response will accept the income.",
+            "en": "Compare the amount line by line with your return of income and your AIS or Form 26AS statement. If it appears in both, your response can explain the information mismatch. If it is genuinely missing, review the consequences before accepting the proposed adjustment.",
             "hi": "अधिकांश बेमेल इसी चरण में सुलझ जाते हैं। बेमेल की राशि को अपने रिटर्न और AIS/26AS विवरण से पंक्ति-दर-पंक्ति मिलाइए। यदि राशि दोनों में है तो उत्तर असहमति होगा; यदि वास्तव में छूटी है तो उत्तर स्वीकृति होगी।",
         },
         checklist_ids=("doc_26as", "doc_itr_extract"),
