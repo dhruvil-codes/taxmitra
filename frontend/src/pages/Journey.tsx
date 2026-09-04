@@ -1,53 +1,79 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useI18n } from "../i18n";
-import { api, Question, ResolveResult, formatINR, OFFICIAL_EFILING_PORTAL_URL, store } from "../lib";
-import { Card, PrimaryButton, Stepper } from "../components";
+import { api, Question, ResolveResult, formatINR, OFFICIAL_EFILING_PORTAL_URL, store, NoticeCard } from "../lib";
+import {
+  PrimaryButton,
+  SecondaryButton,
+  ScreenFrame,
+  WorkflowLayout,
+  WhyDrawer,
+} from "../components";
 
 type Phase = "questions" | "checklist" | "draft" | "review" | "final";
 
 export default function Journey() {
-  const { id } = useParams<{ id: string }>();
-  const { t, locale } = useI18n();
+  const { id = "" } = useParams();
+  const { locale, t } = useI18n();
+
   const [phase, setPhase] = useState<Phase>("questions");
-  const [questions, setQuestions] = useState<Question[] | null>(null);
-  const [notice, setNotice] = useState<Awaited<ReturnType<typeof api.notice>> | null>(null);
+  const [notice, setNotice] = useState<NoticeCard | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [qIndex, setQIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>(() => (id ? store.answers(id) : {}));
+  const [answers, setAnswers] = useState<Record<string, string>>(() => store.answers(id));
   const [result, setResult] = useState<ResolveResult | null>(null);
   const [draft, setDraft] = useState("");
   const [copied, setCopied] = useState(false);
-  const [checklistState, setChecklistState] = useState<Record<string, boolean>>({});
-
-  const handleChecklistToggle = (key: string) => {
-    setChecklistState(prev => ({ ...prev, [key]: !prev[key] }));
-  };
+  const [docStatuses, setDocStatuses] = useState<Record<string, "have" | "need_to_find" | "dont_have" | "not_sure">>({});
+  const [reviewApproved, setReviewApproved] = useState(false);
 
   useEffect(() => {
     if (!id) return;
-    api.questions(id, locale).then((r) => setQuestions(r.questions)).catch(() => setQuestions([]));
-    api.notice(id).then(setNotice).catch(() => setNotice(null));
+    api.notice(id).then(setNotice).catch(() => null);
+    api.questions(id, locale).then((res) => {
+      setQuestions(res.questions);
+      const firstUnanswered = res.questions.findIndex((q) => !answers[q.id]);
+      setQIndex(firstUnanswered === -1 ? 0 : firstUnanswered);
+    });
   }, [id, locale]);
 
-  const answer = (optionId: string) => {
-    if (!id || !questions || questions.length === 0) return;
+  const handleAnswer = (optionId: string) => {
     const q = questions[qIndex];
-    const next = { ...answers, [q.id]: optionId };
-    setAnswers(next);
-    store.setAnswers(id, next);
-    if (qIndex + 1 < questions.length) {
+    const updated = { ...answers, [q.id]: optionId };
+    setAnswers(updated);
+    store.setAnswers(id, updated);
+
+    if (qIndex < questions.length - 1) {
       setQIndex(qIndex + 1);
     } else {
-      api.resolve(id, next).then((r) => {
-        setResult(r);
-        setDraft(r.draft ?? "");
+      api.resolve(id, updated).then((res) => {
+        setResult(res);
+        const initialDraft = store.draft(id) || res.draft || "";
+        setDraft(initialDraft);
+        store.setDraft(id, initialDraft);
+        if (res.checklist) {
+          const initDoc: Record<string, "have" | "need_to_find" | "dont_have" | "not_sure"> = {};
+          res.checklist.forEach((item) => {
+            initDoc[item.id] = "need_to_find";
+          });
+          setDocStatuses(initDoc);
+        }
         setPhase("checklist");
       });
     }
   };
 
+  const setDocStatus = (docId: string, status: "have" | "need_to_find" | "dont_have" | "not_sure") => {
+    setDocStatuses((prev) => ({ ...prev, [docId]: status }));
+  };
+
+  const copyDraft = () => {
+    navigator.clipboard.writeText(draft);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const downloadAsTxt = () => {
-    if (!draft || !id) return;
     const blob = new Blob([draft], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -60,16 +86,8 @@ export default function Journey() {
   };
 
   const downloadAsMarkdown = () => {
-    if (!draft || !id || !notice) return;
-    const md = `# Tax Mitra Response Draft
-
-**Notice:** ${notice.section} · ${notice.title[locale] ?? notice.title.en}
-**Assessment Year:** ${notice.assessment_year}
-
----
-
-${draft}
-`;
+    if (!draft || !notice) return;
+    const md = `# Tax Mitra Response Draft\n\n**Notice:** ${notice.section} · ${notice.title[locale] ?? notice.title.en}\n**Assessment Year:** ${notice.assessment_year}\n**Reference DIN:** ${notice.official_reference || "DEMO"}\n\n---\n\n${draft}\n`;
     const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -82,34 +100,8 @@ ${draft}
   };
 
   const downloadAsPdf = () => {
-    if (!draft || !id || !notice) return;
-    const printContent = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Tax Mitra Response Draft</title>
-  <style>
-    body { font-family: 'Noto Sans Devanagari', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
-    h1 { border-bottom: 2px solid #333; padding-bottom: 10px; }
-    .meta { color: #666; margin-bottom: 30px; }
-    .draft { white-space: pre-wrap; }
-    .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 12px; color: #999; }
-  </style>
-</head>
-<body>
-  <h1>Tax Mitra Response Draft</h1>
-  <div class="meta">
-    <p><strong>Notice:</strong> ${notice.section} · ${notice.title[locale] ?? notice.title.en}</p>
-    <p><strong>Assessment Year:</strong> ${notice.assessment_year}</p>
-  </div>
-  <div class="draft">${draft}</div>
-  <div class="footer">
-    <p>This draft was generated by Tax Mitra, an independent prototype and is not affiliated with or endorsed by the Income Tax Department or Government of India.</p>
-    <p>Tax Mitra does not submit anything on your behalf. You must submit this response yourself through the official Income Tax e-Filing portal.</p>
-  </div>
-</body>
-</html>`;
+    if (!draft || !notice) return;
+    const printContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Tax Mitra Response Draft</title><style>body { font-family: 'Inter', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; color: #101115; } h1 { border-bottom: 2px solid #000; padding-bottom: 8px; font-size: 20px; } .meta { color: #555; margin-bottom: 24px; font-size: 13px; } .draft { white-space: pre-wrap; font-size: 14px; } .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #ccc; font-size: 11px; color: #777; }</style></head><body><h1>Tax Mitra Formal Response Draft</h1><div class="meta"><p><strong>Notice:</strong> ${notice.section} · ${notice.title[locale] ?? notice.title.en}</p><p><strong>Assessment Year:</strong> ${notice.assessment_year}</p><p><strong>Reference:</strong> ${notice.official_reference || "DEMO"}</p></div><div class="draft">${draft}</div><div class="footer"><p>This document is prepared via Tax Mitra for citizen filing on incometax.gov.in. Tax Mitra does not file on your behalf.</p></div></body></html>`;
     const printWindow = window.open("", "_blank");
     if (printWindow) {
       printWindow.document.write(printContent);
@@ -118,329 +110,394 @@ ${draft}
     }
   };
 
-  const stepperFor = (p: Phase): 0 | 1 | 2 | 3 | 4 | 5 =>
-    p === "questions" ? 1 : p === "checklist" ? 2 : p === "draft" ? 3 : p === "review" ? 4 : p === "final" ? 5 : 0;
+  const stepIndex: 0 | 1 | 2 | 3 | 4 | 5 =
+    phase === "questions" ? 1 : phase === "checklist" ? 2 : phase === "draft" ? 3 : phase === "review" ? 4 : 5;
 
-  if (!id) return null;
-  if (!questions) return <div className="app-page"><div className="app-loading">PREPARING GUIDED QUESTIONS</div></div>;
-  const q = questions[qIndex];
-  const positionLabel = (pos?: string) =>
-    pos === "agree" ? "AGREE" : pos === "disagree" ? "DISAGREE" : "NOT SURE";
+  const currentQ = questions[qIndex];
+  const totalQ = questions.length || 3;
 
   return (
-    <div className="app-page">
-      <Stepper current={stepperFor(phase)} />
-
+    <WorkflowLayout currentStep={stepIndex} notice={notice} noticeId={id}>
+      {/* =========================================================================
+          STEP 02: QUESTIONS
+         ========================================================================= */}
       {phase === "questions" && (
-        <div>
-          <h1 className="app-title">{t("j.qTitle")}</h1>
-          <p className="text-sm text-stone-600 mt-1 mb-5">{t("j.qHelp")}</p>
-          {q && (
-            <Card>
-              <div className="question-progress"><span>QUESTION {String(qIndex + 1).padStart(2, "0")}</span><span>{qIndex + 1} / {questions.length}</span></div>
-              <div className="question-meter" aria-hidden="true"><i style={{ width: `${((qIndex + 1) / questions.length) * 100}%` }} /></div>
-              <h2 className="question-title">{q.text}</h2>
-              {q.help && <p className="text-sm text-stone-500 mt-2">{q.help}</p>}
-              <div className="mt-5 grid gap-2">
-                {q.options.map((o) => (
-                  <button
-                    key={o.id}
-                    onClick={() => answer(o.id)}
-                    className={`journey-answer${answers[q.id] === o.id ? " is-selected" : ""}`}
-                  >
-                    {o.label}
-                  </button>
-                ))}
+        <ScreenFrame
+          whereAmI={
+            locale === "hi"
+              ? `चरण 02 / 06 · प्रश्न ${qIndex + 1} / ${totalQ}`
+              : `Step 02 of 06 · Question ${qIndex + 1} of ${totalQ}`
+          }
+          whatDoesThisMean={
+            currentQ?.text ||
+            (locale === "hi" ? "क्या रिपोर्ट की गई राशि आपके रिकॉर्ड से मेल खाती है?" : "Does the Department's reported amount match your records?")
+          }
+          whatDoINeedToDo={
+            currentQ?.help ||
+            (locale === "hi" ? "अपने बैंक विवरण या दाखिल रिटर्न के अनुसार उचित विकल्प चुनें।" : "Select Yes, No, or Not Sure based on your actual bank statements and filed return.")
+          }
+          primaryAction={null}
+          secondaryAction={
+            <div className="flex items-center gap-3">
+              {qIndex > 0 ? (
+                <SecondaryButton onClick={() => setQIndex(qIndex - 1)}>
+                  ← {locale === "hi" ? "पिछला प्रश्न" : "Previous Question"}
+                </SecondaryButton>
+              ) : (
+                <Link to={`/notices/${id}`} className="app-back-link">
+                  ← {locale === "hi" ? "नोटिस विवरण" : "Notice Details"}
+                </Link>
+              )}
+            </div>
+          }
+          whatHappensNext={
+            qIndex < totalQ - 1
+              ? (locale === "hi" ? `अगला कदम: प्रश्न ${qIndex + 2} / ${totalQ}` : `Next step: Question ${qIndex + 2} of ${totalQ}`)
+              : (locale === "hi" ? "अगला कदम: आपके उत्तरों के आधार पर आवश्यक दस्तावेज़ों की सूची।" : "Next step: Evidence and document checklist tailored to your answers.")
+          }
+        >
+          {currentQ && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {currentQ.options.map((opt) => {
+                  const isSelected = answers[currentQ.id] === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => handleAnswer(opt.id)}
+                      className={`p-4 text-center border font-semibold text-base transition-all min-h-[56px] flex items-center justify-center ${
+                        isSelected
+                          ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                          : "bg-white text-slate-900 border-slate-300 hover:border-slate-900"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
               </div>
-            </Card>
+
+              {currentQ.help && (
+                <WhyDrawer title={locale === "hi" ? "यह प्रश्न क्यों पूछा जा रहा है?" : "Why is this question asked?"}>
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    {currentQ.help}
+                  </p>
+                </WhyDrawer>
+              )}
+            </div>
           )}
-          {qIndex > 0 ? (
-            <button onClick={() => setQIndex(qIndex - 1)} className="app-back">
-              ← {t("j.back")}
-            </button>
-          ) : (
-            <Link to={`/notices/${id}`} className="app-back">← {t("j.back")}</Link>
-          )}
-        </div>
+        </ScreenFrame>
       )}
 
-      {phase === "checklist" && result?.checklist && (
-        <div>
-          <h1 className="app-title">{t("j.checklistTitle")}</h1>
-          <p className="text-sm text-stone-600 mt-1 mb-4">{t("j.checklistSub")}</p>
-          <Card className="mb-4 workflow-guidance">
-            <p className="app-section-label">[ YOUR GUIDED PATH ]</p>
-            <h2 className="text-xl font-medium leading-snug mb-2">{result.path?.headline[locale] ?? result.path?.headline.en}</h2>
-            <details>
-              <summary>{locale === "hi" ? "यह रास्ता क्यों?" : "Why this path?"}</summary>
-              <p className="app-body text-sm leading-relaxed mt-2">{result.path?.guidance[locale] ?? result.path?.guidance.en}</p>
-            </details>
-          </Card>
-          <p className="app-section-label mb-3">[ EVIDENCE YOU MAY NEED ]</p>
-          <div className="checklist-list">
-            {result.checklist.map((item, index) => (
-              <Card key={item.id}>
-                <p className="checklist-title"><span>{String(index + 1).padStart(2, "0")}</span>{item.title[locale] ?? item.title.en}</p>
-                <details><summary>{t("j.why")} ↓</summary><p className="app-body">{item.why_needed[locale] ?? item.why_needed.en}</p></details>
-              </Card>
-            ))}
-          </div>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <PrimaryButton onClick={() => setPhase("draft")}>{t("j.next")} →</PrimaryButton>
-            <button className="app-back !mt-0" onClick={() => setPhase("questions")}>← {t("j.back")}</button>
-          </div>
-        </div>
-      )}
-
-      {phase === "draft" && (
-        <div>
-          <h1 className="app-title">{t("j.draftTitle")}</h1>
-          <p className="text-sm text-stone-600 mt-1 mb-4">{t("j.draftSub")}</p>
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onBlur={() => store.setDraft(id, draft)}
-            placeholder={t("j.draftPlaceholder")}
-            rows={14}
-            className="w-full border border-stone-300 focus:border-blue-600 p-4 text-sm leading-relaxed outline-none"
-          />
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <PrimaryButton
-              onClick={() => {
-                store.setDraft(id, draft);
-                setPhase("review");
-              }}
-            >
-              {t("j.acceptDraft")} →
+      {/* =========================================================================
+          STEP 03: DOCUMENTS
+         ========================================================================= */}
+      {phase === "checklist" && result && (
+        <ScreenFrame
+          whereAmI={locale === "hi" ? "चरण 03 / 06 · दस्तावेज़ सूची" : "Step 03 of 06 · Document Checklist"}
+          whatDoesThisMean={result.path?.headline[locale] ?? result.path?.headline.en ?? "Supporting Documents Needed"}
+          whatDoINeedToDo={
+            locale === "hi"
+              ? "प्रत्येक दस्तावेज़ की स्थिति चिह्नित करें (मेरे पास है / ढूंढना है / नहीं है)।"
+              : "Mark the availability of each document so that missing evidence is clearly identified."
+          }
+          primaryAction={
+            <PrimaryButton onClick={() => setPhase("draft")}>
+              {locale === "hi" ? "उत्तर का प्रारूप तैयार करें" : "Prepare Draft Response"} →
             </PrimaryButton>
-            <button className="app-back !mt-0" onClick={() => setPhase("checklist")}>← {t("j.back")}</button>
-          </div>
-        </div>
-      )}
-
-      {phase === "review" && result?.path && (
-        <div>
-          <h1 className="app-title">{t("j.reviewTitle")}</h1>
-          <Card className="my-4">
-            <dl className="text-sm divide-y divide-stone-100">
-              <div className="py-2 flex justify-between gap-4">
-                <dt className="text-stone-500">{t("j.reviewIssue")}</dt>
-                <dd className="font-semibold text-right">{notice ? `${notice.section} · ${notice.title[locale] ?? notice.title.en}` : "—"}</dd>
-              </div>
-              <div className="py-2 flex justify-between gap-4">
-                <dt className="text-stone-500">{t("j.reviewAmount")}</dt>
-                <dd className="font-semibold">{notice ? formatINR(notice.amount_in_question) : "—"}</dd>
-              </div>
-              <div className="py-2 flex justify-between gap-4">
-                <dt className="text-stone-500">{t("j.reviewPosition")}</dt>
-                <dd className="font-semibold">{positionLabel(result.path.position)}</dd>
-              </div>
-              <div className="py-2 flex justify-between gap-4">
-                <dt className="text-stone-500">{t("j.reviewDocs")}</dt>
-                <dd className="font-semibold">{result.checklist?.length ?? 0}</dd>
-              </div>
-              <div className="py-2 flex justify-between gap-4">
-                <dt className="text-stone-500">{t("j.reviewDeadline")}</dt>
-                <dd className="font-semibold">{result.deadline?.due_date ?? "—"}</dd>
-              </div>
-            </dl>
-          </Card>
-          <p className="text-sm text-stone-600 mb-4">{t("j.reviewNote")}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <PrimaryButton onClick={() => setPhase("final")}>{t("j.next")} →</PrimaryButton>
-            <button className="app-back !mt-0" onClick={() => setPhase("draft")}>← {t("j.back")}</button>
-          </div>
-        </div>
-      )}
-
-      {phase === "final" && result?.official_step && (
-        <div>
-          <p className="app-eyebrow">[ TM / ACT / 04 ]</p>
-          <h1 className="app-title">{t("j.finalTitle")}</h1>
-          <p className="app-lead">{t("j.finalLead")}</p>
-          
-          <div className="app-content-spacing">
-            <p className="app-section-label">{t("j.actionPlan")}</p>
-            
-            <div className="action-timeline">
-              <div className="action-step">
-                <span className="action-number">01</span>
-                <div>
-                  <h3>{t("j.act01")}</h3>
-                  <p>{t("j.act01Desc")}</p>
-                </div>
-              </div>
-              
-              <div className="action-step">
-                <span className="action-number">02</span>
-                <div>
-                  <h3>{t("j.act02")}</h3>
-                  <p>{t("j.act02Desc")}</p>
-                  {result.checklist && result.checklist.length > 0 && (
-                    <ul className="action-checklist">
-                      {result.checklist.map((c) => (
-                        <li key={c.id}>• {c.title[locale] ?? c.title.en}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
-              
-              <div className="action-step">
-                <span className="action-number">03</span>
-                <div>
-                  <h3>{t("j.act03")}</h3>
-                  <p>{t("j.act03Desc")}</p>
-                </div>
-              </div>
-              
-              <div className="action-step">
-                <span className="action-number">04</span>
-                <div>
-                  <h3>{t("j.act04")}</h3>
-                  <p className="font-mono text-sm text-stone-600">{t("j.portalNav")}</p>
-                  {notice && (
-                    <div className="action-meta">
-                      <p><strong>{t("scrutiny.notice")}:</strong> {notice.section}</p>
-                      <p><strong>{t("dash.ay")}:</strong> {notice.assessment_year}</p>
+          }
+          secondaryAction={
+            <SecondaryButton onClick={() => setPhase("questions")}>
+              ← {locale === "hi" ? "प्रश्नों पर वापस जाएं" : "Back to Questions"}
+            </SecondaryButton>
+          }
+          whatHappensNext={
+            locale === "hi"
+              ? "अगला कदम: आपके उत्तरों और दस्तावेज़ों के आधार पर संपादन योग्य उत्तर प्रारूप।"
+              : "Next step: Editable statutory response draft pre-filled with your position."
+          }
+        >
+          <div className="space-y-4">
+            {result.checklist && result.checklist.length > 0 ? (
+              result.checklist.map((item) => {
+                const currentStatus = docStatuses[item.id] || "need_to_find";
+                return (
+                  <div key={item.id} className="evidence-item-card">
+                    <div className="evidence-header">
+                      <h3 className="evidence-name">{item.title[locale] ?? item.title.en}</h3>
+                      <span className={`evidence-status-pill ${currentStatus === "have" ? "bg-emerald-100 text-emerald-800" : currentStatus === "dont_have" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"}`}>
+                        {currentStatus === "have" ? "Have it" : currentStatus === "dont_have" ? "Don't have" : currentStatus === "not_sure" ? "Not sure" : "Need to find"}
+                      </span>
                     </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="action-step">
-                <span className="action-number">05</span>
-                <div>
-                  <h3>{t("j.act05")}</h3>
-                  <p>{notice?.section?.replace(/\s/g, "").startsWith("142(1)") ? t("j.act05Desc142") : t("j.act05Desc143")}</p>
-                </div>
-              </div>
-              
-              <div className="action-step">
-                <span className="action-number">06</span>
-                <div>
-                  <h3>{t("j.act06")}</h3>
-                  <p>{t("j.act06Desc")}</p>
-                </div>
-              </div>
-              
-              <div className="action-step">
-                <span className="action-number">07</span>
-                <div>
-                  <h3>{t("j.act07")}</h3>
-                  <p>{t("j.act07Desc")}</p>
-                </div>
-              </div>
-            </div>
+                    <p className="evidence-reason">{item.why_needed[locale] ?? item.why_needed.en}</p>
+                    <div className="evidence-status-actions-row">
+                      <button
+                        type="button"
+                        onClick={() => setDocStatus(item.id, "have")}
+                        className={`status-choice-btn ${currentStatus === "have" ? "is-have" : ""}`}
+                      >
+                        ✓ {locale === "hi" ? "मेरे पास है" : "Have it"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDocStatus(item.id, "need_to_find")}
+                        className={`status-choice-btn ${currentStatus === "need_to_find" ? "is-need-find" : ""}`}
+                      >
+                        🔍 {locale === "hi" ? "ढूंढना है" : "Need to find it"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDocStatus(item.id, "dont_have")}
+                        className={`status-choice-btn ${currentStatus === "dont_have" ? "is-dont-have" : ""}`}
+                      >
+                        ✗ {locale === "hi" ? "नहीं है" : "Don't have it"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDocStatus(item.id, "not_sure")}
+                        className={`status-choice-btn ${currentStatus === "not_sure" ? "is-not-sure" : ""}`}
+                      >
+                        ? {locale === "hi" ? "पक्का नहीं" : "Not sure"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-slate-600">No specific documents required for this notice type.</p>
+            )}
 
-            <div className="checklist-visual my-6">
-              <p className="app-section-label">{t("j.beforeSubmit")}</p>
-              <div className="checklist-items">
-                <label className="checklist-item">
-                  <input
-                    type="checkbox"
-                    checked={checklistState.check01 || false}
-                    onChange={() => handleChecklistToggle('check01')}
-                  />
-                  <span>{t("j.check01")}</span>
-                </label>
-                <label className="checklist-item">
-                  <input
-                    type="checkbox"
-                    checked={checklistState.check02 || false}
-                    onChange={() => handleChecklistToggle('check02')}
-                  />
-                  <span>{t("j.check02")}</span>
-                </label>
-                <label className="checklist-item">
-                  <input
-                    type="checkbox"
-                    checked={checklistState.check03 || false}
-                    onChange={() => handleChecklistToggle('check03')}
-                  />
-                  <span>{t("j.check03")}</span>
-                </label>
-                <label className="checklist-item">
-                  <input
-                    type="checkbox"
-                    checked={checklistState.check04 || false}
-                    onChange={() => handleChecklistToggle('check04')}
-                  />
-                  <span>{t("j.check04")}</span>
-                </label>
-                <label className="checklist-item">
-                  <input
-                    type="checkbox"
-                    checked={checklistState.check05 || false}
-                    onChange={() => handleChecklistToggle('check05')}
-                  />
-                  <span>{t("j.check05")}</span>
-                </label>
-              </div>
-            </div>
+            {result.path?.guidance && (
+              <WhyDrawer title={locale === "hi" ? "विस्तृत कानूनी मार्गदर्शन देखें" : "View statutory guidance reasoning"}>
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  {result.path.guidance[locale] ?? result.path.guidance.en}
+                </p>
+              </WhyDrawer>
+            )}
+          </div>
+        </ScreenFrame>
+      )}
 
-            <div className="value-summary my-6">
-              <p className="app-section-label">{t("j.whatTaxMitraDid")}</p>
-              <ul className="value-list">
-                <li>{t("j.help01")}</li>
-                <li>{t("j.help02")}</li>
-                <li>{t("j.help03")}</li>
-                <li>{t("j.help04")}</li>
-                <li>{t("j.help05")}</li>
-                <li>{t("j.help06")}</li>
-              </ul>
-              <p className="app-body mt-2 italic">{t("j.yourSubmission")}</p>
-            </div>
-
-            <Card className="my-4">
-              <p className="app-section-label">[ {t("j.downloadDraft")} ]</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
-                <button onClick={downloadAsTxt} className="app-primary">
-                  {t("j.downloadTxt")}
-                </button>
-                <button onClick={downloadAsMarkdown} className="app-primary">
-                  {t("j.downloadMd")}
-                </button>
-                <button onClick={downloadAsPdf} className="app-primary">
-                  {t("j.downloadPdf")}
-                </button>
+      {/* =========================================================================
+          STEP 04: RESPONSE DRAFT
+         ========================================================================= */}
+      {phase === "draft" && (
+        <ScreenFrame
+          whereAmI={locale === "hi" ? "चरण 04 / 06 · उत्तर प्रारूप" : "Step 04 of 06 · Response Draft"}
+          whatDoesThisMean={locale === "hi" ? "आपके उत्तरों पर आधारित वैधानिक उत्तर प्रारूप" : "Formal Statutory Response Draft"}
+          whatDoINeedToDo={
+            locale === "hi"
+              ? "प्रारूप की समीक्षा करें। आप सीधे नीचे दिए गए टेक्स्ट बॉक्स में बदलाव या संपादन कर सकते हैं।"
+              : "Review your draft response. You can freely edit or refine every sentence in the text area below."
+          }
+          primaryAction={
+            <PrimaryButton onClick={() => setPhase("review")}>
+              {locale === "hi" ? "कार्यकारी समीक्षा पर जाएं" : "Continue to Executive Review"} →
+            </PrimaryButton>
+          }
+          secondaryAction={
+            <SecondaryButton onClick={() => setPhase("checklist")}>
+              ← {locale === "hi" ? "दस्तावेज़ों पर वापस जाएं" : "Back to Documents"}
+            </SecondaryButton>
+          }
+          whatHappensNext={
+            locale === "hi"
+              ? "अगला कदम: आधिकारिक पोर्टल पर जाने से पहले अंतिम समीक्षा और मानव अनुमोदन।"
+              : "Next step: Executive safety check and explicit human approval before portal instructions."
+          }
+        >
+          <div className="space-y-4">
+            <div className="p-4 bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">TAXPAYER FACT CHECK</p>
+                <p className="text-xs text-slate-700 mt-0.5">
+                  Pre-filled using official Income Tax Department response templates. Facts supplied by you are preserved.
+                </p>
               </div>
               <button
-                onClick={() => {
-                  navigator.clipboard?.writeText(draft);
-                  setCopied(true);
-                }}
-                className="text-sm text-stone-600 underline py-2 mt-3"
+                type="button"
+                onClick={copyDraft}
+                className="text-xs font-bold text-blue-600 hover:text-blue-800 border border-blue-200 bg-white px-3 py-1.5"
               >
-                {copied ? t("j.finalCopied") : t("j.finalCopy")}
+                {copied ? "✓ Copied" : "Copy Draft"}
               </button>
-            </Card>
-
-            <div className="notice-boundary mb-4">
-              <p className="app-section-label">[ IMPORTANT ]</p>
-              <p className="app-body font-medium">{t("j.finalBoundary")}</p>
-              <p className="app-body mt-2">{t("j.finalInstruction")}</p>
             </div>
 
-            <div className="grid gap-2">
-              <a
-                href={OFFICIAL_EFILING_PORTAL_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="app-primary text-center"
-              >
-                {t("j.continuePortal")}
-              </a>
-            </div>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-5">
-              <button className="app-back !mt-0" onClick={() => setPhase("review")}>← {t("j.back")}</button>
-              <Link to="/notices" className="text-sm text-stone-500 underline">
-                {t("j.restart")}
-              </Link>
+            <div>
+              <label htmlFor="response-draft-editor" className="sr-only">Response draft editor</label>
+              <textarea
+                id="response-draft-editor"
+                value={draft}
+                onChange={(e) => {
+                  setDraft(e.target.value);
+                  store.setDraft(id, e.target.value);
+                }}
+                rows={14}
+                className="w-full p-4 font-mono text-sm leading-relaxed border border-slate-300 bg-white text-slate-900 focus:border-blue-600 focus:outline-none"
+                placeholder="Your response draft appears here..."
+              />
             </div>
           </div>
-        </div>
+        </ScreenFrame>
       )}
-    </div>
+
+      {/* =========================================================================
+          STEP 05: REVIEW & HUMAN APPROVAL GATE
+         ========================================================================= */}
+      {phase === "review" && (
+        <ScreenFrame
+          whereAmI={locale === "hi" ? "चरण 05 / 06 · अंतिम समीक्षा" : "Step 05 of 06 · Executive Review"}
+          whatDoesThisMean={locale === "hi" ? "अंतिम उत्तर की समीक्षा और अनुमोदन" : "Executive Pre-Filing Review"}
+          whatDoINeedToDo={
+            locale === "hi"
+              ? "सुनिश्चित करें कि सभी विवरण सही हैं और पोर्टल पर आगे बढ़ने के लिए अपनी स्पष्ट सहमति दें।"
+              : "Verify all components below and provide explicit approval to proceed to official filing."
+          }
+          primaryAction={
+            <PrimaryButton
+              disabled={!reviewApproved}
+              onClick={() => setPhase("final")}
+            >
+              {locale === "hi" ? "अनुमोदित करें और पोर्टल पर जाएं" : "Approve & Continue to Official Portal"} →
+            </PrimaryButton>
+          }
+          secondaryAction={
+            <SecondaryButton onClick={() => setPhase("draft")}>
+              ← {locale === "hi" ? "ड्राफ्ट संपादित करें" : "Edit Draft"}
+            </SecondaryButton>
+          }
+          whatHappensNext={
+            locale === "hi"
+              ? "अगला कदम: incometax.gov.in पर उत्तर दाखिल करने के लिए चरण-दर-चरण निर्देश।"
+              : "Next step: Step-by-step handoff to submit your approved draft on incometax.gov.in."
+          }
+        >
+          <div className="executive-review-card space-y-6">
+            <div className="review-items-list">
+              <div className="review-checklist-item">
+                <span className="review-item-name">Notice Section & Assessment Year</span>
+                <span className="review-item-status">{notice?.section} · AY {notice?.assessment_year || "2025-26"} ✓</span>
+              </div>
+              <div className="review-checklist-item">
+                <span className="review-item-name">Guided Questionnaire</span>
+                <span className="review-item-status">{totalQ}/{totalQ} Answered ✓</span>
+              </div>
+              <div className="review-checklist-item">
+                <span className="review-item-name">Evidence Document Readiness</span>
+                <span className="review-item-status">
+                  {Object.values(docStatuses).filter((s) => s === "have").length}/
+                  {Object.keys(docStatuses).length || 1} Ready
+                </span>
+              </div>
+              <div className="review-checklist-item">
+                <span className="review-item-name">Formal Statutory Draft</span>
+                <span className="review-item-status">{draft.length > 0 ? "Completed & Editable ✓" : "Pending"}</span>
+              </div>
+              <div className="review-checklist-item">
+                <span className="review-item-name">Authoritative Statutory Grounding</span>
+                <span className="review-item-status">Verified Official Corpus ✓</span>
+              </div>
+            </div>
+
+            {/* Explicit Human Approval Gate */}
+            <div className="approval-gate-box">
+              <label className="approval-gate-label">
+                <input
+                  type="checkbox"
+                  checked={reviewApproved}
+                  onChange={(e) => setReviewApproved(e.target.checked)}
+                />
+                <span>
+                  {locale === "hi"
+                    ? "मैंने response draft, आवश्यक दस्तावेज़ों और आधिकारिक स्रोतों की समीक्षा कर ली है। मैं आधिकारिक आयकर पोर्टल पर स्वयं उत्तर जमा करने के लिए आगे बढ़ने की अनुमति देता/देती हूँ।"
+                    : "I have reviewed the response draft, evidence checklist, and statutory citations. I approve moving forward to submit this response directly on the official Income Tax e-Filing portal."}
+                </span>
+              </label>
+            </div>
+          </div>
+        </ScreenFrame>
+      )}
+
+      {/* =========================================================================
+          STEP 06: ACT ON OFFICIAL PORTAL
+         ========================================================================= */}
+      {phase === "final" && result?.official_step && (
+        <ScreenFrame
+          whereAmI={locale === "hi" ? "चरण 06 / 06 · आधिकारिक पोर्टल" : "Step 06 of 06 · Submit on Official Portal"}
+          whatDoesThisMean={locale === "hi" ? "आधिकारिक ई-फाइलिंग पोर्टल पर जमा करें" : "Submit Your Response on incometax.gov.in"}
+          whatDoINeedToDo={
+            locale === "hi"
+              ? "अपना ड्राफ्ट डाउनलोड करें या कॉपी करें, और आधिकारिक पोर्टल पर 'Pending Actions' में जमा करें।"
+              : "Download or copy your approved draft, log in to the official Income Tax portal, and submit in Pending Actions."
+          }
+          primaryAction={
+            <PrimaryButton href={OFFICIAL_EFILING_PORTAL_URL}>
+              {locale === "hi" ? "आधिकारिक ई-फाइलिंग पोर्टल खोलें" : "Open Income Tax e-Filing Portal"} ↗
+            </PrimaryButton>
+          }
+          secondaryAction={
+            <SecondaryButton onClick={() => setPhase("review")}>
+              ← {locale === "hi" ? "समीक्षा पर वापस जाएं" : "Back to Review"}
+            </SecondaryButton>
+          }
+          whatHappensNext={
+            locale === "hi"
+              ? "अंतिम स्थिति: आधिकारिक पोर्टल पावती (Acknowledgement) संख्या को सुरक्षित रखें।"
+              : "Final: Keep your official e-Filing submission acknowledgement receipt for your tax records."
+          }
+        >
+          <div className="space-y-6">
+            {/* Step-by-Step Instructions */}
+            <div className="p-5 bg-white border border-slate-200">
+              <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3">
+                {locale === "hi" ? "ई-फाइलिंग पोर्टल पर कैसे जमा करें" : "OFFICIAL PORTAL SUBMISSION STEPS"}
+              </h3>
+              <ol className="list-decimal pl-5 space-y-2 text-sm text-slate-800 font-medium">
+                <li>Log in to your account at <strong>incometax.gov.in</strong> using your PAN and password.</li>
+                <li>Navigate to the <strong>Pending Actions</strong> tab in the top navigation bar.</li>
+                <li>Click on <strong>e-Proceedings</strong> and locate your notice DIN ({notice?.official_reference || "N-2026-001"}).</li>
+                <li>Select <strong>Submit Response</strong> and paste your approved text or upload supporting documents.</li>
+                <li>Verify using Aadhaar OTP / EVC and note the official acknowledgement number.</li>
+              </ol>
+            </div>
+
+            {/* Download Options */}
+            <div className="p-5 bg-slate-50 border border-slate-200">
+              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
+                {locale === "hi" ? "उत्तर का प्रारूप डाउनलोड करें" : "DOWNLOAD APPROVED RESPONSE"}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={downloadAsTxt}
+                  className="p-3 bg-white border border-slate-300 text-slate-900 font-semibold text-sm hover:border-slate-900"
+                >
+                  Download .TXT
+                </button>
+                <button
+                  type="button"
+                  onClick={downloadAsMarkdown}
+                  className="p-3 bg-white border border-slate-300 text-slate-900 font-semibold text-sm hover:border-slate-900"
+                >
+                  Download .MD
+                </button>
+                <button
+                  type="button"
+                  onClick={downloadAsPdf}
+                  className="p-3 bg-white border border-slate-300 text-slate-900 font-semibold text-sm hover:border-slate-900"
+                >
+                  Print / Save PDF
+                </button>
+              </div>
+            </div>
+
+            {/* Boundary Reassurance */}
+            <div className="p-4 bg-blue-50/60 border border-blue-200 text-xs text-blue-900 leading-relaxed">
+              <strong>STATUTORY BOUNDARY:</strong> Tax Mitra has not submitted this response to the Government of India. No taxpayer credentials or confidential return data are transmitted. Official filing remains 100% under citizen control on incometax.gov.in.
+            </div>
+          </div>
+        </ScreenFrame>
+      )}
+    </WorkflowLayout>
   );
 }
