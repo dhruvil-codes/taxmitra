@@ -40,7 +40,7 @@ def ground(
             retriever = Retriever.load(settings)
             assert retriever is not None  # available_method() checked
             vector = Embedder(settings).embed_texts([query])[0]
-            return retriever.retrieve(vector, top_k=top_k)
+            return retriever.retrieve(vector, top_k=top_k, assessment_year=assessment_year, tax_year=tax_year)
         except AIUnavailableError:
             pass  # fall through to lexical — grounding degrades, never dies
     return build_lexical_retriever(settings).retrieve(
