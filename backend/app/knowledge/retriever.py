@@ -26,6 +26,10 @@ class RetrievalResult:
     below_floor: bool
     method: str = "embedding"
 
+    @property
+    def verified_source_count(self) -> int:
+        return sum(1 for chunk in self.chunks if chunk.verification_status == "VERIFIED_OFFICIAL")
+
 
 class Retriever:
     def __init__(
@@ -61,15 +65,33 @@ class Retriever:
         query_vector: list[float],
         top_k: int | None = None,
         confidence_floor: float | None = None,
+        assessment_year: str | None = None,
+        tax_year: str | None = None,
     ) -> RetrievalResult:
         k = top_k or self._default_k
         floor = confidence_floor or self._default_floor
         q = np.array(query_vector, dtype=float)
         q = q / (np.linalg.norm(q) or 1.0)
         scores = self._matrix @ q
-        order = np.argsort(scores)[::-1][:k]
-        picked = tuple(self._chunks[i] for i in order)
-        picked_scores = tuple(float(scores[i]) for i in order)
+        ranked = []
+        for i, raw_score in enumerate(scores):
+            chunk = self._chunks[i]
+            score = float(raw_score)
+            if chunk.verification_status == "VERIFIED_OFFICIAL":
+                score += 0.08
+            else:
+                score -= 0.08
+            if chunk.status in {"SUPERSEDED", "HISTORICAL"}:
+                score -= 0.12
+            if assessment_year and chunk.assessment_year:
+                score += 0.12 if assessment_year in chunk.assessment_year else -0.12
+            if tax_year and chunk.tax_year:
+                score += 0.12 if tax_year in chunk.tax_year else -0.12
+            ranked.append((score, i))
+        ranked.sort(key=lambda pair: (-pair[0], pair[1]))
+        order = ranked[:k]
+        picked = tuple(self._chunks[i] for _, i in order)
+        picked_scores = tuple(score for score, _ in order)
         confidence = picked_scores[0] if picked_scores else 0.0
         return RetrievalResult(
             chunks=picked,
