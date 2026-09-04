@@ -90,7 +90,7 @@ ${draft}
   <meta charset="UTF-8">
   <title>Tax Mitra Response Draft</title>
   <style>
-    body { font-family: 'Times New Roman', serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+    body { font-family: 'Noto Sans Devanagari', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
     h1 { border-bottom: 2px solid #333; padding-bottom: 10px; }
     .meta { color: #666; margin-bottom: 30px; }
     .draft { white-space: pre-wrap; }

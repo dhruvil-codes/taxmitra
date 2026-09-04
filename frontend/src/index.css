@@ -336,6 +336,295 @@ button:disabled { cursor: wait; opacity: .55; }
   *,*::before,*::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
 
+/* Product-wide typography system. One family keeps English and Hindi aligned. */
+:root {
+  --tm-font-primary: "Noto Sans Devanagari", sans-serif;
+  --font-sans: var(--tm-font-primary);
+  --font-mono: var(--tm-font-primary);
+  --tm-muted: #4b5563;
+  --tm-type-display: clamp(3rem, 7vw, 5.5rem);
+  --tm-type-h1: clamp(2.25rem, 4.5vw, 3.5rem);
+  --tm-type-h2: clamp(1.875rem, 3.5vw, 2.75rem);
+  --tm-type-h3: 1.375rem;
+  --tm-type-body: 1rem;
+  --tm-type-small: 0.875rem;
+  --tm-type-label: 0.75rem;
+  --tm-type-caption: 0.75rem;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea,
+a,
+* {
+  font-family: var(--tm-font-primary) !important;
+}
+
+body {
+  font-size: var(--tm-type-body);
+  line-height: 1.6;
+}
+
+/* Tailwind's utility names remain available, but never introduce another typeface. */
+.font-sans,
+.font-mono {
+  font-family: var(--tm-font-primary) !important;
+}
+
+h1,
+.tm-hero-copy h1,
+.app-title,
+.confirmation-card h1 {
+  font-size: var(--tm-type-h1);
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+h2,
+.tm-intro h2,
+.tm-process h2,
+.tm-questions h2,
+.tm-trust h2,
+.tm-final h2,
+.workflow-guidance h2 {
+  font-size: var(--tm-type-h2);
+  line-height: 1.12;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+h3,
+.tm-compare-grid h3,
+.tm-trust-grid h3,
+.action-step h3,
+.source-head h3 {
+  font-size: var(--tm-type-h3);
+  line-height: 1.25;
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+p,
+li,
+dd,
+dt,
+blockquote,
+label,
+summary {
+  font-size: var(--tm-type-body);
+}
+
+small,
+.tm-meta,
+.tm-scroll,
+.tm-principles,
+.app-eyebrow,
+.app-section-label,
+.app-status small,
+.source-section,
+.source-verification,
+.source-footer p,
+.question-progress,
+.checklist-list summary,
+.review-row b,
+.app-footer small {
+  font-size: var(--tm-type-caption);
+  line-height: 1.45;
+}
+
+.tm-nav,
+.tm-nav nav a,
+.tm-languages,
+.tm-open,
+.tm-button,
+.tm-upload-action,
+.tm-watch,
+.tm-start-label,
+.app-disclaimer,
+.app-header nav a,
+.app-language select,
+.app-stepper,
+.app-primary,
+.app-text-action,
+.official-links a,
+.source-footer a,
+.app-back,
+.request-count,
+.request-label,
+.verification-label,
+.scrutiny-source,
+.upload-file button,
+.start-action,
+.start-number {
+  font-size: var(--tm-type-label);
+  line-height: 1.45;
+  letter-spacing: 0.015em;
+}
+
+.tm-hero-lede,
+.tm-intro-aside,
+.tm-questions-lede,
+.tm-section-lede,
+.app-lead,
+.app-body,
+.reason-list li,
+.action-step p,
+.action-checklist li,
+.action-meta p,
+.checklist-item,
+.citation-list button,
+.source-excerpt,
+.app-empty p,
+.scrutiny-explain p,
+.request-explanation,
+.evidence-list-simple li,
+.verification-row,
+.scrutiny-list blockquote,
+.scrutiny-list li,
+.review-row,
+.upload-zone small,
+.upload-error,
+.request-warning,
+.request-evidence ul,
+.official-wording blockquote,
+.app-footer p {
+  font-size: var(--tm-type-body);
+  line-height: 1.65;
+}
+
+.tm-intro h2 em,
+.tm-process h2 em,
+.tm-questions h2 em,
+.tm-final h2 em {
+  font-family: inherit !important;
+  font-weight: 700;
+}
+
+.tm-eyebrow,
+.app-eyebrow,
+.app-section-label,
+.app-stepper,
+.tm-meta,
+.tm-scroll,
+.tm-principles,
+.source-section,
+.source-verification,
+.request-grounding span,
+.scrutiny-meta span,
+.verification-citations a {
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.app-header,
+.tm-nav,
+.tm-process,
+.tm-privacy,
+.app-header nav a,
+.app-language select {
+  color: #ffffff;
+}
+
+.app-header .app-eyebrow,
+.tm-process .tm-eyebrow,
+.tm-privacy .tm-eyebrow,
+.app-header nav a,
+.app-language select,
+.tm-nav .tm-eyebrow {
+  color: #e5e7eb;
+}
+
+.app-primary,
+.tm-button,
+.tm-upload-action,
+.start-action,
+.app-back,
+.app-text-action,
+.official-links a,
+.source-footer a,
+.upload-file button {
+  font-weight: 700;
+}
+
+.app-primary,
+.tm-button,
+.start-action {
+  min-height: 50px;
+}
+
+.app-page {
+  padding-block: 56px 96px;
+}
+
+@media (max-width: 700px) {
+  body { font-size: var(--tm-type-body); }
+  .app-page { padding-block: 40px 72px; }
+  .tm-hero-copy h1,
+  .app-title,
+  .confirmation-card h1 { font-size: clamp(2.25rem, 12vw, 3.5rem); }
+  .tm-intro h2,
+  .tm-process h2,
+  .tm-questions h2,
+  .tm-trust h2,
+  .tm-final h2 { font-size: clamp(2rem, 10vw, 3.25rem); }
+  .app-stepper strong { font-size: var(--tm-type-label); }
+  .tm-nav,
+  .tm-nav nav a,
+  .tm-languages,
+  .tm-open,
+  .app-header nav a,
+  .app-language select { font-size: var(--tm-type-label); }
+}
+
+/* Final token pass: this is intentionally last so legacy screen rules cannot
+   reintroduce smaller type or a second visual language. */
+body { font-family: var(--tm-font-primary) !important; color: var(--tm-black); }
+button, input, select, textarea, a { font-family: var(--tm-font-primary) !important; }
+.tm-site, .tm-site p, .tm-site li, .tm-site a, .tm-site button,
+.app-page, .app-page p, .app-page li, .app-page a, .app-page button,
+.app-footer, .app-footer p, .app-footer small { font-family: var(--tm-font-primary) !important; }
+.tm-eyebrow, .tm-meta, .tm-scroll, .tm-principles, .app-eyebrow,
+.app-section-label, .app-status small, .source-section, .source-verification,
+.source-footer p, .question-progress, .checklist-list summary, .review-row b,
+.app-footer small, .request-grounding span, .scrutiny-meta span,
+.verification-citations a { font-size: var(--tm-type-caption) !important; line-height: 1.45; }
+.tm-nav nav a, .tm-languages, .tm-open, .tm-button, .tm-upload-action,
+.tm-watch, .tm-start-label, .app-disclaimer, .app-header nav a,
+.app-language select, .app-stepper, .app-primary, .app-text-action,
+.official-links a, .source-footer a, .app-back, .request-count, .request-label,
+.verification-label, .scrutiny-source, .upload-file button, .start-action,
+.start-number { font-size: var(--tm-type-label) !important; line-height: 1.45; }
+.tm-hero-lede, .tm-intro-aside, .tm-questions-lede, .tm-section-lede,
+.app-lead, .app-body, .reason-list li, .action-step p, .action-checklist li,
+.action-meta p, .checklist-item, .citation-list button, .source-excerpt,
+.app-empty p, .scrutiny-explain p, .request-explanation, .evidence-list-simple li,
+.verification-row, .scrutiny-list blockquote, .scrutiny-list li,
+.review-row, .upload-zone small, .upload-error, .request-warning,
+.request-evidence ul, .official-wording blockquote, .app-footer p {
+  font-size: var(--tm-type-body) !important;
+  line-height: 1.65;
+}
+.app-title, .confirmation-card h1, .tm-hero-copy h1 { font-size: var(--tm-type-h1) !important; line-height: 1.08; font-weight: 700; }
+.tm-intro h2, .tm-process h2, .tm-questions h2, .tm-trust h2,
+.tm-final h2, .workflow-guidance h2 { font-size: var(--tm-type-h2) !important; line-height: 1.12; font-weight: 700; }
+.action-step h3, .source-head h3, .tm-compare-grid h3, .tm-trust-grid h3,
+.extraction-status h2 { font-size: var(--tm-type-h3) !important; line-height: 1.25; font-weight: 700; }
+.app-primary, .tm-button, .start-action { font-weight: 700; }
+.app-card, .start-option, .notice-boundary, .checklist-visual, .value-summary,
+.human-check { border-radius: 0; }
+
+@media (max-width: 700px) {
+  .app-title, .confirmation-card h1, .tm-hero-copy h1 { font-size: clamp(2.25rem, 12vw, 3.5rem) !important; }
+  .tm-intro h2, .tm-process h2, .tm-questions h2, .tm-trust h2,
+  .tm-final h2 { font-size: clamp(2rem, 10vw, 3.25rem) !important; }
+}
+
 /* Readable product entry and application typography */
 .start-page { max-width: 1030px; }
 .start-page .app-lead { max-width: 680px; }
@@ -408,3 +697,36 @@ body:has(option[value="hi"]:checked) .start-action { line-height: 1.6; }
   .app-stepper strong { font-size: 10px; }
   .app-stepper span { font-size: 10px; }
 }
+
+/* Keep this last: screen-specific legacy rules must not override the system. */
+.app-title, .confirmation-card h1, .tm-hero-copy h1 { font-size: var(--tm-type-h1) !important; line-height: 1.08; font-weight: 700; }
+.tm-intro h2, .tm-process h2, .tm-questions h2, .tm-trust h2, .tm-final h2,
+.workflow-guidance h2, .start-option h2, .app-grid > .app-card h2, .question-title { font-size: var(--tm-type-h2) !important; line-height: 1.12; font-weight: 700; }
+.action-step h3, .source-head h3, .tm-compare-grid h3, .tm-trust-grid h3,
+.extraction-status h2 { font-size: var(--tm-type-h3) !important; line-height: 1.25; font-weight: 700; }
+.app-body, .app-lead, .tm-hero-lede, .tm-intro-aside, .tm-questions-lede,
+.tm-section-lede, .reason-list li, .action-step p, .action-checklist li,
+.action-meta p, .checklist-item, .citation-list button, .source-excerpt,
+.app-empty p, .scrutiny-explain p, .request-explanation, .evidence-list-simple li,
+.verification-row, .scrutiny-list blockquote, .scrutiny-list li, .review-row,
+.upload-zone small, .upload-error, .request-warning, .request-evidence ul,
+.official-wording blockquote, .app-footer p { font-size: var(--tm-type-body) !important; line-height: 1.65; }
+.app-eyebrow, .app-section-label, .app-status small, .source-section,
+.source-verification, .source-footer p, .question-progress, .checklist-list summary,
+.review-row b, .app-footer small, .request-grounding span, .scrutiny-meta span,
+.verification-citations a { font-size: var(--tm-type-caption) !important; line-height: 1.45; }
+.tm-nav nav a, .tm-languages, .tm-open, .tm-button, .tm-upload-action, .tm-watch,
+.tm-start-label, .app-disclaimer, .app-header nav a, .app-language select,
+.app-stepper, .app-primary, .app-text-action, .official-links a, .source-footer a,
+.app-back, .request-count, .request-label, .verification-label, .scrutiny-source,
+.upload-file button, .start-action, .start-number { font-size: var(--tm-type-label) !important; line-height: 1.45; }
+.app-status span, .upload-icon, .tm-promises article p { font-size: var(--tm-type-label) !important; line-height: 1.45; }
+.notice-record-meta, .app-saved, .action-number, .deadline-inline { font-size: var(--tm-type-caption) !important; line-height: 1.45; }
+@media (max-width: 700px) {
+  .app-title, .confirmation-card h1, .tm-hero-copy h1 { font-size: clamp(2.25rem, 12vw, 3.5rem) !important; }
+  .tm-intro h2, .tm-process h2, .tm-questions h2, .tm-trust h2, .tm-final h2 { font-size: clamp(2rem, 10vw, 3.25rem) !important; }
+}
+
+/* No visible interface copy drops below the caption floor. */
+small, .app-brand small, .upload-file small, .tm-start-note,
+.tm-footer-disclaimer, .app-loading { font-size: var(--tm-type-caption) !important; line-height: 1.45; }
