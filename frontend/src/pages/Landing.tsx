@@ -118,6 +118,7 @@ export default function Landing() {
               ? "समझें कि आपके नोटिस में क्या मांगा गया है, कौन-सी जानकारी चाहिए और अगला क्या करना है।"
               : "Understand what your notice asks, what information you may need, and what to do next."}
           </p>
+          <p className="tm-hero-scope">{t("landing.heroScope")}</p>
 
           <div className="tm-hero-actions">
             <button className="tm-button tm-button-blue" onClick={() => navigate("/upload")}>
@@ -155,18 +156,18 @@ export default function Landing() {
         <section className="tm-intro tm-wrap" id="india">
           <div>
             <p className="tm-eyebrow">
-              {locale === "hi" ? "मार्गदर्शित करदाता यात्रा" : "GUIDED TAXPAYER JOURNEY"}
+              {locale === "hi" ? "[ TM / गाइड / 01 ]" : "[ TM / GUIDE / 01 ]"}
             </p>
             {locale === "hi" ? (
               <h2>
                 अपनी टैक्स नोटिस<br />
-                को बिना किसी<br />
-                भ्रम के समझें।
+                <em>[ बिना किसी भ्रम ]</em><br />
+                के समझें।
               </h2>
             ) : (
               <h2>
                 Understand your<br />
-                tax notice<br />
+                <em>[&nbsp;tax notice&nbsp;]</em><br />
                 without the<br />
                 confusion.
               </h2>
