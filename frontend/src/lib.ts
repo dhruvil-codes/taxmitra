@@ -51,6 +51,14 @@ export interface Citation {
   official_url: string;
   accessed_date: string;
   verification: string;
+  verification_status?: string;
+  verification_state?: "Verified" | "Pending verification" | "Not applicable" | "Unknown";
+  verified_date?: string;
+  page_location?: string;
+  summary?: string;
+  applicability?: string;
+  effective_period?: string;
+  why_supports?: string;
   excerpt: string;
 }
 
@@ -129,6 +137,8 @@ export interface Grounding {
   method: string;
   confidence: number;
   below_floor: boolean;
+  verified_source_count?: number;
+  verified?: boolean;
 }
 
 export interface ScrutinyRequest {
@@ -145,9 +155,14 @@ export interface ScrutinyRequest {
   citations: Citation[];
   confidence: number;
   warnings: string[];
-  grounding: Grounding;
+  grounding?: Grounding;
   page_number?: number;
   source_location?: string;
+  category?: string;
+  clarifying_questions?: { id: string; text: Record<string, string> }[];
+  status?: "not_started" | "need_information" | "documents_needed" | "ready_for_response" | "reviewed";
+  workflow_status?: "not_started" | "need_information" | "documents_needed" | "ready_for_response" | "reviewed";
+  sources?: Citation[];
 }
 
 export interface ExtractionResult {
@@ -169,7 +184,7 @@ export interface ExtractionResult {
     method?: "text" | "ocr" | "none";
     page_count?: number;
   };
-  grounding: Grounding;
+  grounding?: Grounding;
   extraction_id?: string;
   fingerprint?: string;
   requires_human_confirmation?: boolean;
@@ -190,6 +205,7 @@ export interface ScrutinyRequestsResult {
   notice_id?: string;
   extraction?: { source_type: string; requires_human_confirmation: boolean; confirmed: boolean };
   requests?: ScrutinyRequest[];
+  evidence?: EvidenceRecommendation[];
   grounding?: { method: string; confidence: number; below_floor: boolean };
   headline?: Record<string, string>;
   why?: Record<string, string>;
@@ -205,11 +221,27 @@ export interface ScrutinyChecklistItem {
   title: Record<string, string>;
   required_evidence: Record<string, string>[];
   why_needed: Record<string, string>;
+  workflow_status?: "need_information" | "documents_needed" | "ready_for_response" | "reviewed";
+}
+
+export type EvidenceStatus = "have" | "need_to_find" | "dont_have" | "not_sure";
+export interface EvidenceRecommendation {
+  request_id: string;
+  document_id: string;
+  document_name: Record<string, string>;
+  reason: Record<string, string>;
+  requirement_level: "required" | "possibly_relevant";
+  required_or_possibly_relevant?: "required" | "possibly_relevant";
+  source: string[];
+  status: EvidenceStatus;
 }
 export interface ScrutinyResolveResult extends Omit<ResolveResult, "checklist" | "path"> {
   category: string;
   path?: { path_id: "ready_to_respond" | "needs_evidence" | "needs_review"; headline: Record<string, string>; professional_help_recommended: boolean };
   checklist?: ScrutinyChecklistItem[];
+  evidence?: EvidenceRecommendation[];
+  missing_evidence?: EvidenceRecommendation[];
+  safety_review?: { status: "ready" | "blocked"; ready: boolean; checks: { key: string; label: string; status: "passed" | "blocked"; missing: string | null }[]; missing: string[] };
 }
 
 function configuredApiBase(value: string | undefined): string {
@@ -288,8 +320,12 @@ export const api = {
     get<ScrutinyRequestsResult>(`/api/scrutiny/${id}/requests?locale=${locale}&extraction_confirmed=${extractionConfirmed}`, signal),
   scrutinyQuestions: (id: string, locale: Locale, extractionConfirmed = true, signal?: AbortSignal) =>
     get<{ supported: boolean; questions: ScrutinyQuestion[] }>(`/api/scrutiny/${id}/questions?locale=${locale}&extraction_confirmed=${extractionConfirmed}`, signal),
-  resolveScrutiny: (noticeId: string, answers: Record<string, string>, extractionConfirmed = true, signal?: AbortSignal) =>
-    post<ScrutinyResolveResult>("/api/scrutiny/resolve", { notice_id: noticeId, answers, extraction_confirmed: extractionConfirmed }, signal),
+  resolveScrutiny: (noticeId: string, answers: Record<string, string>, extractionConfirmed = true, signal?: AbortSignal, documentStatuses: Record<string, EvidenceStatus> = {}) =>
+    post<ScrutinyResolveResult>("/api/scrutiny/resolve", { notice_id: noticeId, answers, extraction_confirmed: extractionConfirmed, document_statuses: documentStatuses }, signal),
+  evidence: (noticeId: string, statuses: Record<string, EvidenceStatus> = {}, signal?: AbortSignal) =>
+    post<{ evidence: EvidenceRecommendation[]; missing_evidence: EvidenceRecommendation[] }>(`/api/scrutiny/${noticeId}/evidence`, { statuses }, signal),
+  approveScrutiny: (noticeId: string, answers: Record<string, string>, draft: string, approved: boolean, documentStatuses: Record<string, EvidenceStatus> = {}, signal?: AbortSignal) =>
+    post<{ status: string; handoff_allowed: boolean; message?: string; boundary?: string; missing?: string[]; safety_review?: ScrutinyResolveResult["safety_review"] }>(`/api/scrutiny/${noticeId}/review`, { answers, draft, approved, document_statuses: documentStatuses, extraction_confirmed: true }, signal),
 };
 
 // --- journey state ---
