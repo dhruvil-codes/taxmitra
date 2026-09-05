@@ -35,8 +35,8 @@ function AppShell() {
       {!isLanding && (
         <footer className="app-footer">
           <span><b>त</b> Tax Mitra</span>
-          <p>Independent prototype · Fictional data · Not affiliated with or endorsed by the Income Tax Department or Government of India</p>
-          <small>AI EXPLAINS → RULES DECIDE → HUMANS APPROVE</small>
+          <p>Independent prototype · Not affiliated with the Income Tax Department or Government of India</p>
+          <small>Nothing is submitted automatically.</small>
         </footer>
       )}
     </>
