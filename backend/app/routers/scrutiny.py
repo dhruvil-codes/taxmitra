@@ -18,6 +18,8 @@ from app.rules.notice_types import NoticeCategory, classify_notice
 from app.rules.scrutiny import (
     build_scrutiny_requests,
     insufficient_information_refusal,
+    minimum_question_plan,
+    minimum_question_plan_payload,
     questions_payload,
     request_payload,
     resolve_scrutiny,
@@ -55,6 +57,12 @@ class ExtractionConfirmation(BaseModel):
     fingerprint: str
     confirmed: bool
     corrections: dict[str, str] = {}
+
+
+class QuestionPlanRequest(BaseModel):
+    notice_id: str
+    answers: dict[str, str] = {}
+    extraction_confirmed: bool = True
 
 
 def _session_notice(extraction_id: str) -> dict | None:
@@ -213,6 +221,55 @@ def questions(
         "supported": True,
         "notice_id": notice_id,
         "questions": questions_payload(scrutiny_questions(found), locale),
+    }
+
+
+@router.get("/{notice_id}/question-plan")
+def question_plan(
+    notice_id: str,
+    locale: str = Query(default="en", pattern="^(en|hi)$"),
+    extraction_confirmed: bool = Query(default=True),
+):
+    """Return only questions whose answers can change the safe next step.
+
+    The original ``/questions`` endpoint remains unchanged for existing
+    clients. New clients should use this endpoint for the simplified flow.
+    """
+    notice = _scrutiny_notice(notice_id)
+    found = build_scrutiny_requests(notice, extraction_confirmed=extraction_confirmed)
+    if not found:
+        return insufficient_information_refusal("Extraction has not been confirmed or no annexure requests were found.")
+    if not _sources_verified(found):
+        return insufficient_information_refusal("At least one request has no current verified official source, so Tax Mitra cannot safely ask for evidence.")
+    plan = minimum_question_plan(found)
+    return {
+        "supported": True,
+        "notice_id": notice_id,
+        "locale": locale,
+        "request_count": len(found),
+        "question_count": len(plan),
+        "questions": minimum_question_plan_payload(plan, locale),
+        "evidence": _evidence_for_notice(notice),
+        "grounding": _grounding_payload(notice),
+    }
+
+
+@router.post("/question-plan")
+def next_question_plan(payload: QuestionPlanRequest):
+    """Return conditional follow-ups after answers to the minimum plan."""
+    notice = _scrutiny_notice(payload.notice_id)
+    found = build_scrutiny_requests(notice, extraction_confirmed=payload.extraction_confirmed)
+    if not found:
+        return insufficient_information_refusal("Extraction has not been confirmed or no annexure requests were found.")
+    if not _sources_verified(found):
+        return insufficient_information_refusal("At least one request has no current verified official source, so Tax Mitra cannot safely ask for evidence.")
+    plan = minimum_question_plan(found, payload.answers)
+    return {
+        "supported": True,
+        "notice_id": payload.notice_id,
+        "request_count": len(found),
+        "question_count": len(plan),
+        "questions": minimum_question_plan_payload(plan, "en"),
     }
 
 

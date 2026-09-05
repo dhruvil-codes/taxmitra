@@ -45,6 +45,21 @@ class ScrutinyQuestion:
     options: tuple[Option, ...]
 
 
+@dataclass(frozen=True)
+class MinimumQuestion:
+    """A question asked only when its answer changes the safe next step."""
+
+    id: str
+    text: Text
+    why: Text
+    question_type: str
+    options: tuple[Option, ...] = ()
+    related_request_ids: tuple[str, ...] = ()
+    required: bool = True
+    conditions: tuple[dict[str, Any], ...] = ()
+    status: str = "not_started"
+
+
 _OPTIONS = (
     Option("yes", {"en": "I have it", "hi": "मेरे पास है"}),
     Option("no", {"en": "I don't have it", "hi": "मेरे पास नहीं है"}),
@@ -304,6 +319,94 @@ def scrutiny_questions(requests: tuple[ScrutinyRequest, ...]) -> tuple[ScrutinyQ
     )
 
 
+_SOURCE_OPTIONS = (
+    Option("business_income", {"en": "Business income", "hi": "à¤µà¥à¤¯à¤µà¤¸à¤¾à¤¯ à¤†à¤¯"}),
+    Option("loan", {"en": "Loan or borrowing", "hi": "à¤‹à¤£ à¤¯à¤¾ à¤‰à¤§à¤¾à¤°"}),
+    Option("savings", {"en": "Personal savings", "hi": "à¤µà¥à¤¯à¤•à¥à¤¤à¤¿à¤—à¤¤ à¤¬à¤šà¤¤"}),
+    Option("gift", {"en": "Gift or transfer", "hi": "à¤‰à¤ªà¤¹à¤¾à¤° à¤¯à¤¾ à¤¹à¤¸à¥à¤¤à¤¾à¤‚à¤¤à¤°à¤£"}),
+    Option("other", {"en": "Another source", "hi": "à¤•à¥‹à¤ˆ à¤…à¤¨à¥à¤¯ à¤¸à¥à¤°à¥‹à¤¤"}),
+    Option("unsure", {"en": "Not sure", "hi": "à¤ªà¤•à¥à¤•à¤¾ à¤¨à¤¹à¥€à¤‚"}),
+)
+
+_AVAILABILITY_OPTIONS = _OPTIONS
+
+
+def minimum_question_plan(
+    requests: tuple[ScrutinyRequest, ...], answers: dict[str, Any] | None = None
+) -> tuple[MinimumQuestion, ...]:
+    """Build the minimum deterministic question set for a confirmed request list.
+
+    Documents explicitly requested by the notice stay in the evidence checklist.
+    Only unresolved facts that change response guidance become questions.
+    ``answers`` enables conditional follow-ups without making the frontend
+    reproduce this decision logic.
+    """
+    answers = answers or {}
+    by_category = {request.category: request for request in requests}
+    plan: list[MinimumQuestion] = []
+
+    cash = by_category.get("cash_deposits")
+    if cash:
+        plan.append(MinimumQuestion(
+            id="cash_deposit_source",
+            text={"en": "What was the source of the cash deposits?", "hi": "à¤¨à¤•à¤¦ à¤œà¤®à¤¾ à¤•à¤°à¤¨à¥‡ à¤•à¤¾ à¤¸à¥à¤°à¥‹à¤¤ à¤•à¥à¤¯à¤¾ à¤¥à¤¾?"},
+            why={"en": "Your answer changes which explanation and supporting records may help.", "hi": "à¤†à¤ªà¤•à¤¾ à¤‰à¤¤à¥à¤¤à¤° à¤¬à¤¦à¤² à¤¸à¤•à¤¤à¤¾ à¤¹à¥ˆ à¤•à¤¿ à¤•à¥Œà¤¨à¤¸à¤¾ à¤¸à¥à¤ªà¤·à¥à¤Ÿà¥€à¤•à¤°à¤£ à¤”à¤° à¤°à¤¿à¤•à¤¾à¤°à¥à¤¡ à¤®à¤¦à¤¦à¤—à¤¾à¤° à¤¹à¥‹à¤‚à¤—à¥‡।"},
+            question_type="single_choice",
+            options=_SOURCE_OPTIONS,
+            related_request_ids=(cash.id,),
+            conditions=({"if": "business_income", "then": "cash_business_records"}, {"if": "loan", "then": "cash_loan_records"}),
+        ))
+        source = answers.get("cash_deposit_source")
+        if source in {"business_income", "loan"}:
+            plan.append(MinimumQuestion(
+                id=f"cash_{source}_records",
+                text={"en": "Which records can support this source?", "hi": "à¤‡à¤¸ à¤¸à¥à¤°à¥‹à¤¤ à¤•à¥‡ à¤¸à¤®à¤°à¥à¤¥à¤¨ à¤®à¥‡à¤‚ à¤•à¥Œà¤¨à¤¸à¥‡ à¤°à¤¿à¤•à¤¾à¤°à¥à¤¡ à¤¹à¥ˆà¤‚?"},
+                why={"en": "This selects the relevant evidence guidance for your stated source.", "hi": "à¤‡à¤¸à¤¸à¥‡ à¤†à¤ªà¤•à¥‡ à¤¬à¤¤à¤¾à¤ à¤—à¤ à¤¸à¥à¤°à¥‹à¤¤ à¤•à¥‡ à¤²à¤¿à¤ à¤¸à¤¹à¥€ à¤¸à¤¬à¥‚à¤¤ à¤®à¤¾à¤°à¥à¤—à¤¦à¤°à¥à¤¶à¤¨ à¤šà¥à¤¨à¤¾ à¤œà¤¾à¤à¤—à¤¾।"},
+                question_type="document_availability",
+                options=_AVAILABILITY_OPTIONS,
+                related_request_ids=(cash.id,),
+                conditions=({"depends_on": "cash_deposit_source", "equals": source},),
+            ))
+
+    transactions = by_category.get("credits_debits")
+    if transactions:
+        plan.append(MinimumQuestion(
+            id="significant_transaction_explanation",
+            text={"en": "How would you explain the significant credits and debits?", "hi": "à¤®à¤¹à¤¤à¥à¤µà¤ªà¥‚à¤°à¥à¤£ à¤•à¥à¤°à¥‡à¤¡à¤¿à¤Ÿ à¤”à¤° à¤¡à¥‡à¤¬à¤¿à¤Ÿ à¤•à¤¾ à¤¸à¥à¤ªà¤·à¥à¤Ÿà¥€à¤•à¤°à¤£ à¤•à¥ˆà¤¸à¥‡ à¤¦à¥‡à¤‚à¤—à¥‡?"},
+            why={"en": "The explanation determines which transaction records may help and what needs review.", "hi": "à¤¸à¥à¤ªà¤·à¥à¤Ÿà¥€à¤•à¤°à¤£ à¤¸à¥‡ à¤¤à¤¯ à¤¹à¥‹à¤¤à¤¾ à¤¹à¥ˆ à¤•à¤¿ à¤•à¥Œà¤¨à¤¸à¥‡ à¤°à¤¿à¤•à¤¾à¤°à¥à¤¡ à¤®à¤¦à¤¦ à¤•à¤° à¤¸à¤•à¤¤à¥‡ à¤¹à¥ˆà¤‚ à¤”à¤° à¤•à¥à¤¯à¤¾ à¤œà¤¾à¤‚à¤šà¤¨à¤¾ à¤¹à¥ˆ।"},
+            question_type="free_text",
+            related_request_ids=(transactions.id,),
+        ))
+
+    other = by_category.get("other_notice_request")
+    if other:
+        plan.append(MinimumQuestion(
+            id="other_request_details",
+            text={"en": "What information can you provide for this other notice request?", "hi": "à¤‡à¤¸ à¤…à¤¨à¥à¤¯ à¤¨à¥‹à¤Ÿà¤¿à¤¸ à¤…à¤¨à¥à¤°à¥‹à¤§ à¤•à¥‡ à¤²à¤¿à¤ à¤†à¤ª à¤•à¥à¤¯à¤¾ à¤œà¤¾à¤¨à¤•à¤¾à¤°à¥€ à¤¦à¥‡ à¤¸à¤•à¤¤à¥‡ à¤¹à¥ˆà¤‚?"},
+            why={"en": "The notice does not identify a more specific evidence path, so your description is needed.", "hi": "à¤¨à¥‹à¤Ÿà¤¿à¤¸ à¤®à¥‡à¤‚ à¤‡à¤¸à¤•à¥‡ à¤²à¤¿à¤ à¤…à¤§à¤¿à¤• à¤¸à¥à¤ªà¤·à¥à¤Ÿ à¤¸à¤¬à¥‚à¤¤ à¤®à¤¾à¤°à¥à¤— à¤¨à¤¹à¥€à¤‚ à¤¹à¥ˆ, à¤‡à¤¸à¤²à¤¿à¤ à¤†à¤ªà¤•à¤¾ à¤µà¤°à¥à¤£à¤¨ à¤œà¤°à¥‚à¤°à¥€ à¤¹à¥ˆ।"},
+            question_type="free_text",
+            related_request_ids=(other.id,),
+        ))
+
+    return tuple(plan)
+
+
+def minimum_question_plan_payload(
+    questions: tuple[MinimumQuestion, ...], locale: str
+) -> list[dict]:
+    return [{
+        "question_id": item.id,
+        "question": item.text.get(locale, item.text["en"]),
+        "why_we_are_asking": item.why.get(locale, item.why["en"]),
+        "type": item.question_type,
+        "options": [{"id": option.id, "label": option.label.get(locale, option.label["en"])} for option in item.options],
+        "related_request_ids": list(item.related_request_ids),
+        "required": item.required,
+        "conditions": list(item.conditions),
+        "status": item.status,
+    } for item in questions]
+
+
 def questions_payload(questions: tuple[ScrutinyQuestion, ...], locale: str) -> list[dict]:
     return [
         {
@@ -328,8 +431,13 @@ def request_payload(requests: tuple[ScrutinyRequest, ...], citations_by_id: dict
             "classification_id": next((key for key, value in _REQUEST_LIBRARY.items() if value.get("plain") == request.plain_language_explanation), request.id),
             "original_text": request.original_text,
             "plain_language_explanation": request.plain_language_explanation,
+            "technical_term": request.response_section,
+            "plain_meaning": request.plain_language_explanation,
             "why_required": request.why_required,
+            "why_requested": request.why_required,
             "required_evidence": list(request.required_evidence),
+            "possible_evidence": list(request.required_evidence),
+            "required_user_information": list(request.clarifying_questions),
             "what_department_is_asking": request.original_text,
             "expected_evidence": list(request.required_evidence),
             "response_section": request.response_section,
@@ -341,6 +449,7 @@ def request_payload(requests: tuple[ScrutinyRequest, ...], citations_by_id: dict
             "page": request.page_number,
             "source_location": request.source_location,
             "category": request.category,
+            "source_ids": list(request.citations),
             "clarifying_questions": list(request.clarifying_questions),
             "status": request.status,
             "workflow_status": request.status,
