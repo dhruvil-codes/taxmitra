@@ -2,7 +2,7 @@ import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useI18n } from "../i18n";
 import { api, ApiError, ExtractionResult, store } from "../lib";
-import { Card, GuidedInteraction, PrimaryButton } from "../components";
+import { Card, GuidedInteraction, PrimaryButton, WorkflowLayout } from "../components";
 
 const MAX_SIZE = 10 * 1024 * 1024;
 const refusalCopy: Record<string, { en: string; hi: string }> = {
@@ -112,7 +112,8 @@ export default function Upload() {
   const reset = () => { controller.current?.abort(); setFile(null); setResult(null); setError(""); setUploading(false); };
   const refused = result && !result.supported;
 
-  return <div className="app-page upload-page">
+  return <WorkflowLayout currentStep={0}>
+    <div className="app-page upload-page">
     <GuidedInteraction step={locale === "hi" ? "समझें · चरण 1 / 6" : "Understand · Step 1 of 6"} title={locale === "hi" ? "अपना कर नोटिस अपलोड करें।" : "Upload your tax notice."} instruction={locale === "hi" ? "पहले अपना नोटिस चुनें। इसके बाद Tax Mitra उसे पढ़कर आपके सामने जाँच के लिए रखेगा।" : "Choose your notice first. Tax Mitra will extract it and show you the result to check."} />
     <ol className="upload-process" aria-label={locale === "hi" ? "दस्तावेज़ प्रक्रिया" : "Document process"}>
       <li className={!result ? "is-current" : "is-done"}><span>01</span><strong>{locale === "hi" ? "पढ़ें" : "READ"}</strong></li>
@@ -172,5 +173,6 @@ export default function Upload() {
     })()}
     {error && <p className="upload-error" role="alert">{error}</p>}
     <div className="notice-boundary"><p className="app-section-label">[ PROCESSING BOUNDARY ]</p><p className="app-body">{locale === "hi" ? "अपलोड की गई फ़ाइल, निकाला गया टेक्स्ट और पुष्टि की गई जानकारी अलग-अलग अवस्थाएं हैं। OCR से निकला टेक्स्ट भी आपकी पुष्टि से पहले विश्वसनीय नहीं माना जाता। Tax Mitra कुछ भी जमा नहीं करता।" : "Uploaded, extracted, and confirmed are separate states. OCR text is also untrusted until you confirm it against the original PDF. Tax Mitra does not submit anything."}</p></div>
-  </div>;
+    </div>
+  </WorkflowLayout>;
 }

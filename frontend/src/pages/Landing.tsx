@@ -90,7 +90,9 @@ export default function Landing() {
           </button>
         </div>
         <button className="tm-open" onClick={() => navigate("/login")}>
-          {locale === "hi" ? "सैंपल नोटिस आज़माएं" : "Try a sample notice"} <span>→</span>
+          <span className="tm-open-text-full">{locale === "hi" ? "सैंपल नोटिस आज़माएं" : "Try a sample notice"}</span>
+          <span className="tm-open-text-compact">{locale === "hi" ? "सैंपल" : "Sample"}</span>
+          <span aria-hidden="true">→</span>
         </button>
       </header>
 
@@ -98,7 +100,7 @@ export default function Landing() {
       <section className="tm-dark-hero tm-hero-reworked" id="top">
         <div className="tm-hero-copy">
           <p className="tm-eyebrow tm-eyebrow-dark">
-            {locale === "hi" ? "भारतीय करदाताओं के लिए मार्गदर्शक" : "BUILT FOR INDIAN TAXPAYERS"}
+            <span className="tm-dot">●</span> {locale === "hi" ? "भारतीय करदाताओं के लिए मार्गदर्शक" : "BUILT FOR INDIAN TAXPAYERS"}
           </p>
           <h1 className="tm-hero-title">
             {locale === "hi" ? (
@@ -109,7 +111,8 @@ export default function Landing() {
             ) : (
               <>
                 YOUR TAX NOTICE,<br />
-                MADE UNDERSTANDABLE.
+                MADE<br />
+                UNDERSTANDABLE.
               </>
             )}
           </h1>
@@ -150,7 +153,20 @@ export default function Landing() {
               : "Independent prototype · Synthetic demo data · No automatic government submission"}
           </p>
         </div>
+
+        <div className="tm-blocks" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
       </section>
+
+      {/* CORE GUIDING PRINCIPLES TICKER STRIP */}
+      <div className="tm-principles" aria-label="Core principles">
+        <span>+ AI EXPLAINS +</span>
+        <span>RULES DECIDE +</span>
+        <span>HUMANS APPROVE +</span>
+        <span>NO AUTOMATIC SUBMISSIONS</span>
+      </div>
 
       <main>
         <section className="tm-intro tm-wrap" id="india">
@@ -215,7 +231,9 @@ export default function Landing() {
         <section className="tm-process" id="how">
           <div className="tm-wrap tm-process-grid">
             <div>
-              <p className="tm-eyebrow tm-eyebrow-dark">HOW IT WORKS</p>
+              <p className="tm-eyebrow tm-eyebrow-dark">
+                {locale === "hi" ? "[ 02 / यह कैसे काम करता है ]" : "[ 02 / HOW IT WORKS ]"}
+              </p>
               <h2 dangerouslySetInnerHTML={{ __html: t("landing.howTitle") }} />
             </div>
             <div className="tm-process-list">
@@ -237,7 +255,9 @@ export default function Landing() {
 
         <section className="tm-questions tm-wrap">
           <div>
-            <p className="tm-eyebrow">PRODUCT PRINCIPLE</p>
+            <p className="tm-eyebrow">
+              {locale === "hi" ? "[ उत्पाद सिद्धांत ]" : "[ PRODUCT PRINCIPLE ]"}
+            </p>
             <h2>{t("landing.principleTitle")}</h2>
           </div>
           <div className="tm-questions-content">
@@ -264,7 +284,9 @@ export default function Landing() {
 
         <section className="tm-comparison">
           <div className="tm-wrap">
-            <p className="tm-eyebrow">FACTUAL COMPARISON</p>
+            <p className="tm-eyebrow">
+              {locale === "hi" ? "[ तथ्यात्मक तुलना ]" : "[ FACTUAL COMPARISON ]"}
+            </p>
             <h2>{t("landing.comparisonTitle")}</h2>
             <p className="tm-section-lede">{t("landing.comparisonSub")}</p>
             <div className="tm-compare-grid">
@@ -286,7 +308,9 @@ export default function Landing() {
 
         <section className="tm-trust tm-wrap" id="trust">
           <div>
-            <p className="tm-eyebrow">BUILT FOR TRUST</p>
+            <p className="tm-eyebrow">
+              {locale === "hi" ? "[ विश्वास के लिए निर्मित ]" : "[ BUILT FOR TRUST ]"}
+            </p>
             <h2>{t("landing.trustTitle")}</h2>
             <p>{t("landing.trustSub")}</p>
           </div>
@@ -316,7 +340,9 @@ export default function Landing() {
 
         <section className="tm-privacy">
           <div className="tm-wrap tm-privacy-grid">
-            <p className="tm-eyebrow tm-eyebrow-dark">PRIVACY FIRST</p>
+            <p className="tm-eyebrow tm-eyebrow-dark">
+              {locale === "hi" ? "[ गोपनीयता / 01 ]" : "[ PRIVACY / 01 ]"}
+            </p>
             <h2>{t("landing.privacyTitle")}</h2>
             <p>{t("landing.privacySub")}</p>
           </div>

@@ -92,8 +92,8 @@ export default function Notice() {
         <div className="screen-task-content space-y-4">
           {/* Plain Meaning */}
           <div className="p-5 bg-white border border-slate-200">
-            <h2 className="text-xs font-bold text-blue-600 tracking-wider uppercase mb-2">
-              {locale === "hi" ? "सरल भाषा में व्याख्या" : "PLAIN-LANGUAGE SUMMARY"}
+            <h2 className="text-xs font-bold text-blue-600 tracking-wider mb-2">
+              {locale === "hi" ? "सरल भाषा में व्याख्या" : "Plain-language summary"}
             </h2>
             <p className="text-base text-slate-900 leading-relaxed font-medium">
               {explanation?.content.plain_language ?? "Loading explanation..."}
@@ -102,8 +102,8 @@ export default function Notice() {
 
           {/* What This Does NOT Mean */}
           <div className="p-5 bg-slate-50 border border-slate-200 border-l-4 border-l-slate-700">
-            <h2 className="text-xs font-bold text-slate-700 tracking-wider uppercase mb-2">
-              {locale === "hi" ? "इसका क्या अर्थ नहीं है" : "WHAT THIS DOES NOT MEAN"}
+            <h2 className="text-xs font-bold text-slate-700 tracking-wider mb-2">
+              {locale === "hi" ? "इसका क्या अर्थ नहीं है" : "What this does not mean"}
             </h2>
             <p className="text-sm text-slate-700 leading-relaxed">
               {explanation?.content.what_this_does_not_mean ??
