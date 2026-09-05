@@ -8,8 +8,8 @@ export function DisclaimerBanner() {
   const { t } = useI18n();
   return (
     <div className="app-disclaimer">
-      <span className="disclaimer-badge">PUBLIC PROTOTYPE</span>
-      <span>{t("banner")} · {t("appDisclaimer")}</span>
+      <span className="disclaimer-badge">{t("landing.footer")}</span>
+      <span>{t("appDisclaimer")}</span>
     </div>
   );
 }
@@ -41,13 +41,13 @@ export function Header() {
         <span className="app-brand-mark">त</span>
         <div className="app-brand-text">
           <strong>{t("app.name")}</strong>
-          <small>INDEPENDENT TAXPAYER PROTOTYPE</small>
+          <small>{t("landing.footer")}</small>
         </div>
       </Link>
       <nav aria-label="Primary" className="header-nav">
-        <Link to="/notices">NOTICES</Link>
-        <Link to="/upload">UPLOAD PDF</Link>
-        <a href="/#trust">SAFETY & PRIVACY</a>
+        <Link to="/notices">{t("landing.footerLink3") === "Trust" ? "Notices" : "नोटिस"}</Link>
+        <Link to="/upload">{t("landing.uploadNotice")}</Link>
+        <a href="/#trust">{t("landing.footerLink3")}</a>
       </nav>
       <div className="header-actions">
         <LanguageSelector />
