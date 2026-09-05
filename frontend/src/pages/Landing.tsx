@@ -96,29 +96,22 @@ export default function Landing() {
         </button>
       </header>
 
-      {/* 5-SECOND CLARITY HERO */}
-      <section className="tm-dark-hero tm-hero-reworked" id="top">
+      <section className="tm-dark-hero tm-hero-reworked" id="top" aria-labelledby="hero-title">
         <div className="tm-hero-copy">
           <p className="tm-eyebrow tm-eyebrow-dark">
-            <span className="tm-dot">●</span> {locale === "hi" ? "भारतीय करदाताओं के लिए मार्गदर्शक" : "BUILT FOR INDIAN TAXPAYERS"}
+            <span className="tm-dot" aria-hidden="true" />
+            {locale === "hi" ? "भारतीय करदाताओं के लिए मार्गदर्शक" : "Built for Indian taxpayers"}
           </p>
-          <h1 className="tm-hero-title">
+          <h1 className="tm-hero-title" id="hero-title">
             {locale === "hi" ? (
-              <>
-                आपका टैक्स नोटिस,<br />
-                अब समझने में आसान।
-              </>
+              <>आपका टैक्स नोटिस,<br />अब समझना आसान।</>
             ) : (
-              <>
-                YOUR TAX NOTICE,<br />
-                MADE<br />
-                UNDERSTANDABLE.
-              </>
+              <>Your tax notice,<br />made understandable.</>
             )}
           </h1>
           <p className="tm-hero-lede">
             {locale === "hi"
-              ? "समझें कि आपके नोटिस में क्या मांगा गया है, कौन-सी जानकारी चाहिए और अगला क्या करना है।"
+              ? "समझें कि आपके नोटिस में क्या मांगा गया है, कौन-सी जानकारी चाहिए और अगला कदम क्या है।"
               : "Understand what your notice asks, what information you may need, and what to do next."}
           </p>
           <p className="tm-hero-scope">{t("landing.heroScope")}</p>
@@ -126,7 +119,7 @@ export default function Landing() {
           <div className="tm-hero-actions">
             <button className="tm-button tm-button-blue" onClick={() => navigate("/upload")}>
               <span>{locale === "hi" ? "अपना नोटिस अपलोड करें" : "Upload your notice"}</span>
-              <span aria-hidden="true">→</span>
+              <span aria-hidden="true">↗</span>
             </button>
             <button className="tm-button tm-button-outline" onClick={() => navigate("/login")}>
               <span>{locale === "hi" ? "सैंपल नोटिस आज़माएं" : "Try a sample notice"}</span>
@@ -134,18 +127,17 @@ export default function Landing() {
             </button>
           </div>
 
-          {/* VISUAL STORY: NOTICE → UNDERSTAND → PREPARE → REVIEW → ACT */}
-          <div className="tm-hero-flow" aria-label="Visual process flow">
-            <span className="tm-hero-flow-item">NOTICE</span>
-            <span className="tm-hero-flow-arrow" aria-hidden="true">→</span>
-            <span className="tm-hero-flow-item is-active">UNDERSTAND</span>
-            <span className="tm-hero-flow-arrow" aria-hidden="true">→</span>
-            <span className="tm-hero-flow-item">PREPARE</span>
-            <span className="tm-hero-flow-arrow" aria-hidden="true">→</span>
-            <span className="tm-hero-flow-item">REVIEW</span>
-            <span className="tm-hero-flow-arrow" aria-hidden="true">→</span>
-            <span className="tm-hero-flow-item">ACT</span>
-          </div>
+          <ol className="tm-hero-flow" aria-label={locale === "hi" ? "नोटिस से कार्रवाई तक" : "From notice to action"}>
+            {(locale === "hi"
+              ? ["नोटिस", "समझें", "तैयार करें", "समीक्षा", "कार्रवाई"]
+              : ["Notice", "Understand", "Prepare", "Review", "Act"]
+            ).map((label, index) => (
+              <li className={index === 1 ? "is-active" : ""} key={label}>
+                <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                {label}
+              </li>
+            ))}
+          </ol>
 
           <p className="tm-hero-boundary">
             {locale === "hi"
@@ -154,10 +146,35 @@ export default function Landing() {
           </p>
         </div>
 
-        <div className="tm-blocks" aria-hidden="true">
-          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-        </div>
+        <aside className="tm-notice-preview" aria-label={locale === "hi" ? "नोटिस विश्लेषण का उदाहरण" : "Example notice analysis"}>
+          <div className="tm-notice-preview-bar">
+            <span>{locale === "hi" ? "नोटिस विश्लेषण" : "Notice analysis"}</span>
+            <b>{locale === "hi" ? "तैयार" : "Ready"}</b>
+          </div>
+          <div className="tm-notice-sheet">
+            <div className="tm-notice-sheet-head">
+              <Mark />
+              <div>
+                <span>Income Tax Department</span>
+                <strong>Section 142(1)</strong>
+              </div>
+              <small>AY 2024–25</small>
+            </div>
+            <div className="tm-notice-lines" aria-hidden="true">
+              <i /><i /><i /><i />
+            </div>
+            <div className="tm-notice-finding">
+              <span>{locale === "hi" ? "आपसे क्या मांगा गया है" : "What they are asking for"}</span>
+              <strong>{locale === "hi" ? "आय और कटौती के सहायक दस्तावेज़" : "Supporting documents for income and deductions"}</strong>
+            </div>
+            <ul className="tm-notice-checklist">
+              <li><span aria-hidden="true" />{locale === "hi" ? "समय सीमा पहचान ली गई" : "Deadline identified"}</li>
+              <li><span aria-hidden="true" />{locale === "hi" ? "ज़रूरी दस्तावेज़ सूचीबद्ध" : "Required documents listed"}</li>
+              <li><span aria-hidden="true" />{locale === "hi" ? "अगले कदम स्पष्ट किए गए" : "Next steps explained"}</li>
+            </ul>
+          </div>
+          <p>{locale === "hi" ? "आपकी समीक्षा के बिना कुछ भी आगे नहीं बढ़ता।" : "Nothing moves forward without your review."}</p>
+        </aside>
       </section>
 
       {/* CORE GUIDING PRINCIPLES TICKER STRIP */}
