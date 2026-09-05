@@ -20,6 +20,7 @@ from app.rules.scrutiny import (
     insufficient_information_refusal,
     minimum_question_plan,
     minimum_question_plan_payload,
+    resolve_minimum_scrutiny,
     questions_payload,
     request_payload,
     resolve_scrutiny,
@@ -63,6 +64,19 @@ class QuestionPlanRequest(BaseModel):
     notice_id: str
     answers: dict[str, str] = {}
     extraction_confirmed: bool = True
+    locale: str = "en"
+
+
+class MinimumResolveRequest(BaseModel):
+    notice_id: str
+    answers: dict[str, object]
+    document_statuses: dict[str, str] = {}
+    extraction_confirmed: bool = True
+
+
+class MinimumReviewRequest(MinimumResolveRequest):
+    draft: str
+    approved: bool = False
 
 
 def _session_notice(extraction_id: str) -> dict | None:
@@ -269,8 +283,36 @@ def next_question_plan(payload: QuestionPlanRequest):
         "notice_id": payload.notice_id,
         "request_count": len(found),
         "question_count": len(plan),
-        "questions": minimum_question_plan_payload(plan, "en"),
+        "questions": minimum_question_plan_payload(plan, payload.locale),
     }
+
+
+@router.post("/resolve-minimum")
+def resolve_minimum(payload: MinimumResolveRequest):
+    notice = _scrutiny_notice(payload.notice_id)
+    requests = build_scrutiny_requests(notice, payload.extraction_confirmed)
+    if not _sources_verified(requests):
+        return insufficient_information_refusal("The request sources are not verified enough to prepare a safe response path.")
+    try:
+        return resolve_minimum_scrutiny(notice, payload.answers, payload.document_statuses, payload.extraction_confirmed)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/{notice_id}/review-minimum")
+def approve_minimum(notice_id: str, payload: MinimumReviewRequest):
+    notice = _scrutiny_notice(notice_id)
+    if not payload.approved:
+        return {"status": "blocked", "handoff_allowed": False, "message": "Explicit human approval is required before official handoff."}
+    try:
+        resolved = resolve_minimum_scrutiny(notice, payload.answers, payload.document_statuses, payload.extraction_confirmed)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    if resolved["path"]["path_id"] == "needs_review":
+        return {"status": "blocked", "handoff_allowed": False, "message": "This response needs human review because one or more answers are uncertain."}
+    if resolved["missing_evidence"]:
+        return {"status": "blocked", "handoff_allowed": False, "message": "Review the evidence checklist before official handoff.", "missing": [item["label"] for item in resolved["missing_evidence"]]}
+    return {"status": "approved", "handoff_allowed": True, "official_step": resolved["official_step"], "message": "Your response is ready to review on the official Income Tax e-Filing portal.", "boundary": "Tax Mitra does not submit anything to the government."}
 
 
 @router.post("/resolve")

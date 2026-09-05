@@ -213,6 +213,32 @@ export interface ScrutinyRequestsResult {
   official_links?: { label: Record<string, string>; url: string }[];
 }
 
+export interface MinimumQuestion {
+  question_id: string;
+  question: string;
+  why_we_are_asking: string;
+  type: "single_choice" | "multiple_choice" | "free_text" | "document_availability" | "confirmation";
+  options: { id: string; label: string }[];
+  related_request_ids: string[];
+  required: boolean;
+  conditions: Record<string, string>[];
+  status: string;
+}
+
+export interface MinimumQuestionPlanResult {
+  supported: boolean;
+  notice_id: string;
+  request_count: number;
+  question_count: number;
+  questions: MinimumQuestion[];
+  evidence?: EvidenceRecommendation[];
+  grounding?: Grounding;
+  headline?: Record<string, string>;
+  why?: Record<string, string>;
+  suggestion?: Record<string, string>;
+  official_links?: { label: Record<string, string>; url: string }[];
+}
+
 export interface ScrutinyQuestion extends Question { request_id: string }
 export interface ScrutinyChecklistItem {
   id: string;
@@ -320,12 +346,20 @@ export const api = {
     get<ScrutinyRequestsResult>(`/api/scrutiny/${id}/requests?locale=${locale}&extraction_confirmed=${extractionConfirmed}`, signal),
   scrutinyQuestions: (id: string, locale: Locale, extractionConfirmed = true, signal?: AbortSignal) =>
     get<{ supported: boolean; questions: ScrutinyQuestion[] }>(`/api/scrutiny/${id}/questions?locale=${locale}&extraction_confirmed=${extractionConfirmed}`, signal),
+  scrutinyQuestionPlan: (id: string, locale: Locale, extractionConfirmed = true, answers: Record<string, string> = {}, signal?: AbortSignal) =>
+    answers && Object.keys(answers).length > 0
+      ? post<MinimumQuestionPlanResult>("/api/scrutiny/question-plan", { notice_id: id, answers, extraction_confirmed: extractionConfirmed, locale }, signal)
+      : get<MinimumQuestionPlanResult>(`/api/scrutiny/${id}/question-plan?locale=${locale}&extraction_confirmed=${extractionConfirmed}`, signal),
   resolveScrutiny: (noticeId: string, answers: Record<string, string>, extractionConfirmed = true, signal?: AbortSignal, documentStatuses: Record<string, EvidenceStatus> = {}) =>
     post<ScrutinyResolveResult>("/api/scrutiny/resolve", { notice_id: noticeId, answers, extraction_confirmed: extractionConfirmed, document_statuses: documentStatuses }, signal),
+  resolveMinimumScrutiny: (noticeId: string, answers: Record<string, string>, extractionConfirmed = true, signal?: AbortSignal, documentStatuses: Record<string, EvidenceStatus> = {}) =>
+    post<ScrutinyResolveResult>("/api/scrutiny/resolve-minimum", { notice_id: noticeId, answers, extraction_confirmed: extractionConfirmed, document_statuses: documentStatuses }, signal),
   evidence: (noticeId: string, statuses: Record<string, EvidenceStatus> = {}, signal?: AbortSignal) =>
     post<{ evidence: EvidenceRecommendation[]; missing_evidence: EvidenceRecommendation[] }>(`/api/scrutiny/${noticeId}/evidence`, { statuses }, signal),
   approveScrutiny: (noticeId: string, answers: Record<string, string>, draft: string, approved: boolean, documentStatuses: Record<string, EvidenceStatus> = {}, signal?: AbortSignal) =>
     post<{ status: string; handoff_allowed: boolean; message?: string; boundary?: string; missing?: string[]; safety_review?: ScrutinyResolveResult["safety_review"] }>(`/api/scrutiny/${noticeId}/review`, { answers, draft, approved, document_statuses: documentStatuses, extraction_confirmed: true }, signal),
+  approveMinimumScrutiny: (noticeId: string, answers: Record<string, string>, draft: string, approved: boolean, documentStatuses: Record<string, EvidenceStatus> = {}, signal?: AbortSignal) =>
+    post<{ status: string; handoff_allowed: boolean; message?: string; boundary?: string; missing?: string[]; safety_review?: ScrutinyResolveResult["safety_review"] }>(`/api/scrutiny/${noticeId}/review-minimum`, { notice_id: noticeId, answers, draft, approved, document_statuses: documentStatuses, extraction_confirmed: true }, signal),
 };
 
 // --- journey state ---

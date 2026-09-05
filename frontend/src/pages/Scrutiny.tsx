@@ -6,9 +6,9 @@ import {
   ApiError,
   EvidenceRecommendation,
   EvidenceStatus,
+  MinimumQuestion,
   NoticeCard,
   OFFICIAL_EFILING_PORTAL_URL,
-  ScrutinyQuestion,
   ScrutinyRequestsResult,
   ScrutinyResolveResult,
   store,
@@ -71,7 +71,7 @@ export default function Scrutiny() {
   const [viewAllRequests, setViewAllRequests] = useState(false);
   const [notice, setNotice] = useState<NoticeCard | null>(null);
   const [data, setData] = useState<ScrutinyRequestsResult | null>(null);
-  const [questions, setQuestions] = useState<ScrutinyQuestion[]>([]);
+  const [questions, setQuestions] = useState<MinimumQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>(() => store.answers(id));
   const [index, setIndex] = useState(0);
   const [result, setResult] = useState<ScrutinyResolveResult | null>(null);
@@ -194,10 +194,10 @@ ${draft}
     setLoading(true);
     setError(null);
     try {
-      const response = await api.scrutinyQuestions(id, locale, true);
+      const response = await api.scrutinyQuestionPlan(id, locale, true);
       store.setExtractionConfirmed(id, true);
       setQuestions(response.questions);
-      setIndex(Math.max(0, response.questions.findIndex((q) => !answers[q.id])));
+      setIndex(Math.max(0, response.questions.findIndex((q) => !answers[q.question_id])));
       setStage("questions");
     } catch (e) {
       setError(e as Error);
@@ -220,17 +220,20 @@ ${draft}
 
   const answer = async (value: string) => {
     const q = questions[index];
-    const next = { ...answers, [q.id]: value };
+    const next = { ...answers, [q.question_id]: value };
     setAnswers(next);
     store.setAnswers(id, next);
-    if (index < questions.length - 1) {
-      setIndex(index + 1);
-      return;
-    }
     setLoading(true);
     setError(null);
     try {
-      const resolved = await api.resolveScrutiny(
+      const plan = await api.scrutinyQuestionPlan(id, locale, true, next);
+      setQuestions(plan.questions);
+      const nextIndex = plan.questions.findIndex((item) => !next[item.question_id]);
+      if (nextIndex >= 0) {
+        setIndex(nextIndex);
+        return;
+      }
+      const resolved = await api.resolveMinimumScrutiny(
         id,
         next,
         true,
@@ -250,7 +253,7 @@ ${draft}
 
   const ensureQuestions = async () => {
     if (!questions.length) {
-      const r = await api.scrutinyQuestions(id, locale, true);
+      const r = await api.scrutinyQuestionPlan(id, locale, true, answers);
       setQuestions(r.questions);
     }
     setStage("questions");
@@ -262,6 +265,30 @@ ${draft}
     setError(null);
     try {
       const outcome = await api.approveScrutiny(
+        id,
+        answers,
+        draft,
+        approval,
+        Object.fromEntries(evidence.map((item) => [item.document_id, item.status]))
+      );
+      if (outcome.handoff_allowed) {
+        setStage("final");
+      } else {
+        setError(new Error([outcome.message, ...(outcome.missing ?? [])].filter(Boolean).join(" ")));
+      }
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const approveMinimumReview = async () => {
+    if (!result) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const outcome = await api.approveMinimumScrutiny(
         id,
         answers,
         draft,
@@ -634,9 +661,9 @@ ${draft}
               ? `चरण 02 / 06 · प्रश्न ${index + 1} / ${questions.length}`
               : `Step 02 of 06 · Question ${index + 1} of ${questions.length}`
           }
-          whatDoesThisMean={q.text}
+          whatDoesThisMean={q.question}
           whatDoINeedToDo={
-            q.help ||
+            q.why_we_are_asking ||
             (locale === "hi"
               ? "अपने बैंक विवरण या बहीखातों के आधार पर उपयुक्त विकल्प चुनें।"
               : "Select the option that matches your actual financial records and books of account.")
@@ -658,18 +685,32 @@ ${draft}
           }
         >
           <div className="space-y-6">
-            {q.help && (
+            {q.why_we_are_asking && (
               <div className="upfront-why-banner">
                 <span className="upfront-why-title">
                   {locale === "hi" ? "यह प्रश्न क्यों पूछा जा रहा है?" : "WHY ARE WE ASKING THIS?"}
                 </span>
-                <p className="upfront-why-text">{q.help}</p>
+                <p className="upfront-why-text">{q.why_we_are_asking}</p>
               </div>
             )}
 
+            {q.type === "free_text" ? (
+              <div className="space-y-3">
+                <textarea
+                  value={answers[q.question_id] ?? ""}
+                  onChange={(event) => setAnswers((current) => ({ ...current, [q.question_id]: event.target.value }))}
+                  rows={5}
+                  className="w-full p-4 border border-slate-300 bg-white text-slate-900"
+                  placeholder={locale === "hi" ? "à¤…à¤ªà¤¨à¤¾ à¤‰à¤¤à¥à¤¤à¤° à¤²à¤¿à¤–à¥‡à¤‚" : "Write the information you can confirm from your records"}
+                />
+                <PrimaryButton onClick={() => answer(answers[q.question_id] ?? "")}>
+                  {locale === "hi" ? "à¤†à¤—à¥‡ à¤¬à¤¢à¤¼à¥‡à¤‚" : "Continue"} â†’
+                </PrimaryButton>
+              </div>
+            ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {q.options.map((o) => {
-                const isSelected = answers[q.id] === o.id;
+                const isSelected = answers[q.question_id] === o.id;
                 return (
                   <button
                     key={o.id}
@@ -685,6 +726,7 @@ ${draft}
                 );
               })}
             </div>
+            )}
           </div>
         </ScreenFrame>
       )}
@@ -976,7 +1018,7 @@ ${draft}
               : "Verify the 5 readiness items below and give your explicit approval before accessing the e-Filing portal instructions."
           }
           primaryAction={
-            <PrimaryButton disabled={!approval} onClick={approveReview}>
+            <PrimaryButton disabled={!approval} onClick={approveMinimumReview}>
               {t("scrutiny.continueHandoff")} →
             </PrimaryButton>
           }

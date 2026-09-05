@@ -9,6 +9,7 @@ from typing import Any
 from app.extraction.notices import ExtractedRequest, confirmed_requests, extract_notice_requests
 from app.rules.decision_trees import Option, YES_NO_UNSURE_IDS
 from app.rules.refusal import OFFICIAL_EFILING_URL, OFFICIAL_HELP_URL
+from app.evidence.mapping import DOCUMENT_STATUSES
 
 Text = dict[str, str]
 
@@ -517,6 +518,75 @@ def resolve_scrutiny(notice: dict, answers: dict[str, str], extraction_confirmed
                 "en": "Tax Mitra has not submitted your response. No documents or facts have been sent to the Income Tax Department.",
                 "hi": "Tax Mitra ने आपका उत्तर जमा नहीं किया है। कोई दस्तावेज़ या तथ्य आयकर विभाग को नहीं भेजे गए हैं।",
             },
+        },
+    }
+
+
+def resolve_minimum_scrutiny(
+    notice: dict,
+    answers: dict[str, Any],
+    document_statuses: dict[str, str] | None = None,
+    extraction_confirmed: bool = True,
+) -> dict:
+    """Resolve the v2 plan without converting known notice facts into answers."""
+    requests = build_scrutiny_requests(notice, extraction_confirmed=extraction_confirmed)
+    if not requests:
+        return insufficient_information_refusal("Extraction has not been confirmed or no annexure requests were found.")
+    plan = minimum_question_plan(requests, answers)
+    required = {item.id for item in plan if item.required}
+    missing = [item for item in required if not str(answers.get(item, "")).strip()]
+    if missing:
+        raise ValueError(f"Missing answers for: {sorted(missing)}")
+    source = answers.get("cash_deposit_source")
+    if source not in {None, "business_income", "loan", "savings", "gift", "other", "unsure"}:
+        raise ValueError(f"Invalid answer '{source}' for cash_deposit_source")
+    for key in (item.id for item in plan if item.question_type == "document_availability"):
+        if answers.get(key) not in DOCUMENT_STATUSES:
+            raise ValueError(f"Invalid document status for {key}")
+
+    statuses = {
+        request.id: (ANSWER_UNSURE if request.category == "cash_deposits" and source == "unsure" else ANSWER_YES)
+        for request in requests
+    }
+    evidence = _checklist(requests, statuses)
+    document_statuses = document_statuses or {}
+    mapped_evidence = []
+    from app.evidence.mapping import map_evidence
+    mapped_evidence = map_evidence(requests, document_statuses)
+    uncertain = source == "unsure" or any(value == "unsure" for value in answers.values())
+    path = "needs_review" if uncertain else "ready_to_respond"
+    lines = [
+        f"Response to notice under section {notice.get('section', '142(1)')} (Assessment Year {notice.get('assessment_year', '')})",
+        "",
+        "The following response sections are based on the original notice wording and the information provided by the taxpayer.",
+        "",
+    ]
+    for index, request in enumerate(requests, start=1):
+        lines.extend([f"{index}. {request.response_section}", f"Department request: {request.original_text}"])
+        if request.category == "cash_deposits" and source and source != "unsure":
+            lines.append(f"Taxpayer information provided: The stated source is {source.replace('_', ' ')}.")
+        elif request.category == "credits_debits" and answers.get("significant_transaction_explanation"):
+            lines.append(f"Taxpayer information provided: {answers['significant_transaction_explanation']}")
+        elif request.category == "other_notice_request" and answers.get("other_request_details"):
+            lines.append(f"Taxpayer information provided: {answers['other_request_details']}")
+        else:
+            lines.append("The taxpayer should attach the relevant records identified in the evidence checklist and verify this section before submission.")
+        lines.append("")
+    lines.append("Tax Mitra has not submitted anything to the Income Tax Department. The taxpayer must review and verify this draft before official filing.")
+    return {
+        "supported": True,
+        "category": "scrutiny_142_1",
+        "answers": answers,
+        "path": {"path_id": path, "headline": _headline(path), "professional_help_recommended": uncertain},
+        "checklist": evidence,
+        "draft": "\n".join(lines),
+        "evidence": mapped_evidence,
+        "missing_evidence": [item for item in mapped_evidence if item["status"] in {"need_to_find", "dont_have", "not_sure"}],
+        "deadline": {"due_date": notice.get("response_due_date"), "status": "action_required" if notice.get("response_due_date") else "no_deadline"},
+        "official_step": {
+            "label": {"en": "Upload your response and evidence on the official e-Filing portal", "hi": "à¤…à¤ªà¤¨à¤¾ à¤‰à¤¤à¥à¤¤à¤° à¤”à¤° à¤ªà¥à¤°à¤®à¤¾à¤£ à¤†à¤§à¤¿à¤•à¤¾à¤°à¤¿à¤• e-Filing à¤ªà¥‹à¤°à¥à¤Ÿà¤² à¤ªà¤° à¤…à¤ªà¤²à¥‹à¤¡ à¤•à¤°à¥‡à¤‚"},
+            "url": OFFICIAL_EFILING_URL,
+            "boundary": {"en": "Tax Mitra has not submitted your response. No documents or facts have been sent to the Income Tax Department.", "hi": "Tax Mitra à¤¨à¥‡ à¤†à¤ªà¤•à¤¾ à¤‰à¤¤à¥à¤¤à¤° à¤œà¤®à¤¾ à¤¨à¤¹à¥€à¤‚ à¤•à¤¿à¤¯à¤¾ à¤¹à¥ˆà¥¤"},
         },
     }
 

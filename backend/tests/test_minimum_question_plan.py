@@ -51,3 +51,40 @@ def test_not_sure_is_preserved_as_its_own_option():
     body = client.get("/api/scrutiny/N-2026-003/question-plan").json()
     cash = next(q for q in body["questions"] if q["question_id"] == "cash_deposit_source")
     assert next(option for option in cash["options"] if option["id"] == "unsure")["label"] == "Not sure"
+
+
+def test_minimum_resolution_requires_only_plan_answers_and_maps_evidence():
+    answers = {
+        "cash_deposit_source": "savings",
+        "significant_transaction_explanation": "Personal transfer records to verify",
+        "other_request_details": "No additional request information",
+    }
+    body = client.post("/api/scrutiny/resolve-minimum", json={"notice_id": "N-2026-003", "answers": answers}).json()
+
+    assert body["path"]["path_id"] == "ready_to_respond"
+    assert len(body["evidence"]) > 8
+    assert any(item["request_id"] == "req_balance_sheet" for item in body["evidence"])
+    assert "Balance sheet" in body["draft"]
+
+
+def test_minimum_review_blocks_uncertainty_and_allows_handoff_after_evidence_review():
+    answers = {
+        "cash_deposit_source": "unsure",
+        "significant_transaction_explanation": "Need taxpayer review",
+        "other_request_details": "Need taxpayer review",
+    }
+    resolved = client.post("/api/scrutiny/resolve-minimum", json={"notice_id": "N-2026-003", "answers": answers}).json()
+    blocked = client.post(
+        "/api/scrutiny/N-2026-003/review-minimum",
+        json={"notice_id": "N-2026-003", "answers": answers, "draft": resolved["draft"], "approved": True},
+    ).json()
+    assert blocked["handoff_allowed"] is False
+
+    ready_answers = {**answers, "cash_deposit_source": "savings"}
+    ready = client.post("/api/scrutiny/resolve-minimum", json={"notice_id": "N-2026-003", "answers": ready_answers}).json()
+    statuses = {item["document_id"]: "have" for item in ready["evidence"]}
+    approved = client.post(
+        "/api/scrutiny/N-2026-003/review-minimum",
+        json={"notice_id": "N-2026-003", "answers": ready_answers, "draft": ready["draft"], "approved": True, "document_statuses": statuses},
+    ).json()
+    assert approved["handoff_allowed"] is True
