@@ -177,79 +177,40 @@ export default function Landing() {
         </aside>
       </section>
 
-      {/* CORE GUIDING PRINCIPLES TICKER STRIP */}
-      <div className="tm-principles" aria-label="Core principles">
-        <span>+ AI EXPLAINS +</span>
-        <span>RULES DECIDE +</span>
-        <span>HUMANS APPROVE +</span>
-        <span>NO AUTOMATIC SUBMISSIONS</span>
-      </div>
-
       <main>
         <section className="tm-intro tm-wrap" id="india">
-          <div>
-            <p className="tm-eyebrow">
-              {locale === "hi" ? "[ TM / गाइड / 01 ]" : "[ TM / GUIDE / 01 ]"}
-            </p>
-            {locale === "hi" ? (
-              <h2>
-                अपनी टैक्स नोटिस<br />
-                <em>[ बिना किसी भ्रम ]</em><br />
-                के समझें।
-              </h2>
-            ) : (
-              <h2>
-                Understand your<br />
-                <em>[&nbsp;tax notice&nbsp;]</em><br />
-                without the<br />
-                confusion.
-              </h2>
-            )}
+          <div className="tm-intro-heading">
+            <p className="tm-eyebrow">{locale === "hi" ? "स्पष्टता, शुरू से अंत तक" : "Clarity, from start to finish"}</p>
+            <h2>
+              {locale === "hi" ? "एक कठिन नोटिस को स्पष्ट अगले कदमों में बदलें।" : "Turn a difficult notice into clear next steps."}
+            </h2>
           </div>
-          <aside className="tm-intro-aside" aria-label="Start using Tax Mitra">
-            <p className="tm-start-label">
-              <Mark /> {locale === "hi" ? <span lang="hi">यहाँ से शुरू करें</span> : "START HERE"}
-            </p>
-            <div className="tm-intro-actions">
-              <ArrowLink onClick={() => navigate("/login")}>
-                {locale === "hi" ? "सैंपल नोटिस आज़माएं" : "Try a sample notice"}
-              </ArrowLink>
-              <a href="/upload" className="tm-upload-action">
-                <span>{locale === "hi" ? "अपना नोटिस अपलोड करें" : "Upload your notice"}</span>
-                <small lang={locale === "hi" ? "hi" : "en"}>
-                  {locale === "hi" ? "PDF फ़ाइल चुनें" : "Choose your notice PDF"}
-                </small>
-                <b aria-hidden="true">→</b>
-              </a>
-            </div>
-            <a href="#how" className="tm-watch">
-              {locale === "hi" ? "देखें यह कैसे काम करता है" : "See how it works"} <span aria-hidden="true">↓</span>
-            </a>
-            <small className="tm-start-note">
-              {locale === "hi"
-                ? "आप पूर्ण नियंत्रण में रहते हैं। कुछ भी स्वचालित रूप से जमा नहीं होता है।"
-                : "You stay in control. Nothing is submitted automatically."}
-            </small>
-          </aside>
-        </section>
-
-        <section className="tm-promises tm-wrap" aria-label="Core promises">
-          {promises.map(([number, title, copy]) => (
-            <article key={number}>
-              <p>
-                <b>{number}</b> {t(`landing.promise${number}`)}
-              </p>
-              <span>{t(`landing.promise${number}Desc`)}</span>
-            </article>
-          ))}
-          <div className="tm-promise-rule">{t("landing.promiseRule")}</div>
+          <p className="tm-intro-lede">
+            {locale === "hi"
+              ? "Tax Mitra विभाग की भाषा को समझने योग्य बनाता है, ज़रूरी रिकॉर्ड पहचानता है और आपकी समीक्षा के लिए एक सीमित, सुरक्षित रास्ता तैयार करता है।"
+              : "Tax Mitra translates departmental language, identifies the records that matter, and gives you a bounded path to review before you act."}
+          </p>
+          <div className="tm-promises" aria-label={locale === "hi" ? "मुख्य विशेषताएँ" : "Core features"}>
+            {promises.map(([number]) => (
+              <article key={number}>
+                <span>{number}</span>
+                <div>
+                  <h3>{t(`landing.promise${number}`)}</h3>
+                  <p>{t(`landing.promise${number}Desc`)}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          <p className="tm-intro-principle">
+            {locale === "hi" ? "AI समझाता है। नियम तय करते हैं। आप मंज़ूरी देते हैं।" : "AI explains. Rules decide. You approve."}
+          </p>
         </section>
 
         <section className="tm-process" id="how">
           <div className="tm-wrap tm-process-grid">
             <div>
               <p className="tm-eyebrow tm-eyebrow-dark">
-                {locale === "hi" ? "[ 02 / यह कैसे काम करता है ]" : "[ 02 / HOW IT WORKS ]"}
+                {locale === "hi" ? "यह कैसे काम करता है" : "How it works"}
               </p>
               <h2 dangerouslySetInnerHTML={{ __html: t("landing.howTitle") }} />
             </div>
@@ -273,7 +234,7 @@ export default function Landing() {
         <section className="tm-questions tm-wrap">
           <div>
             <p className="tm-eyebrow">
-              {locale === "hi" ? "[ उत्पाद सिद्धांत ]" : "[ PRODUCT PRINCIPLE ]"}
+              {locale === "hi" ? "उत्पाद सिद्धांत" : "Product principle"}
             </p>
             <h2>{t("landing.principleTitle")}</h2>
           </div>
@@ -302,7 +263,7 @@ export default function Landing() {
         <section className="tm-comparison">
           <div className="tm-wrap">
             <p className="tm-eyebrow">
-              {locale === "hi" ? "[ तथ्यात्मक तुलना ]" : "[ FACTUAL COMPARISON ]"}
+              {locale === "hi" ? "तथ्यात्मक तुलना" : "Factual comparison"}
             </p>
             <h2>{t("landing.comparisonTitle")}</h2>
             <p className="tm-section-lede">{t("landing.comparisonSub")}</p>
@@ -326,29 +287,29 @@ export default function Landing() {
         <section className="tm-trust tm-wrap" id="trust">
           <div>
             <p className="tm-eyebrow">
-              {locale === "hi" ? "[ विश्वास के लिए निर्मित ]" : "[ BUILT FOR TRUST ]"}
+              {locale === "hi" ? "विश्वास के लिए निर्मित" : "Built for trust"}
             </p>
             <h2>{t("landing.trustTitle")}</h2>
             <p>{t("landing.trustSub")}</p>
           </div>
           <div className="tm-trust-grid">
             <article>
-              <i>□</i>
+              <i>01</i>
               <h3>{t("landing.trust01")}</h3>
               <p>{t("landing.trust01Desc")}</p>
             </article>
             <article>
-              <i>文</i>
+              <i>02</i>
               <h3>{t("landing.trust02")}</h3>
               <p>{t("landing.trust02Desc")}</p>
             </article>
             <article>
-              <i>◉</i>
+              <i>03</i>
               <h3>{t("landing.trust03")}</h3>
               <p>{t("landing.trust03Desc")}</p>
             </article>
             <article>
-              <i>◇</i>
+              <i>04</i>
               <h3>{t("landing.trust04")}</h3>
               <p>{t("landing.trust04Desc")}</p>
             </article>
@@ -358,7 +319,7 @@ export default function Landing() {
         <section className="tm-privacy">
           <div className="tm-wrap tm-privacy-grid">
             <p className="tm-eyebrow tm-eyebrow-dark">
-              {locale === "hi" ? "[ गोपनीयता / 01 ]" : "[ PRIVACY / 01 ]"}
+              {locale === "hi" ? "गोपनीयता" : "Privacy"}
             </p>
             <h2>{t("landing.privacyTitle")}</h2>
             <p>{t("landing.privacySub")}</p>
@@ -376,26 +337,23 @@ export default function Landing() {
       </main>
 
       <footer className="tm-footer tm-wrap">
-        <a className="tm-brand" href="#top">
-          <Mark />
-          <strong>Tax Mitra</strong>
-        </a>
-        <p>{t("landing.footer")}</p>
-        <nav>
-          <a href="#how">{t("landing.footerLink1")}</a>
-          <a href="#india">{t("landing.footerLink2")}</a>
-          <a href="#trust">{t("landing.footerLink3")}</a>
-          <button onClick={() => navigate("/login")}>
-            {locale === "hi" ? "सैंपल नोटिस आज़माएं" : "Try a sample notice"}
-          </button>
-        </nav>
-        <div className="tm-footer-credit">
-          <span>{t("landing.builtBy")}</span>
-          <a href="https://x.com/bydhruvil" target="_blank" rel="noopener noreferrer">
-            @bydhruvil
+        <div className="tm-footer-primary">
+          <a className="tm-brand" href="#top">
+            <Mark />
+            <strong>Tax Mitra</strong>
           </a>
+          <nav aria-label={locale === "hi" ? "फुटर नेविगेशन" : "Footer navigation"}>
+            <a href="#how">{t("landing.footerLink1")}</a>
+            <a href="#trust">{t("landing.footerLink3")}</a>
+            <a href="/upload">{locale === "hi" ? "नोटिस अपलोड करें" : "Upload notice"}</a>
+          </nav>
         </div>
-        <p className="tm-footer-disclaimer">{t("landing.disclaimer")}</p>
+        <div className="tm-footer-meta">
+          <p>{t("landing.disclaimer")}</p>
+          <p className="tm-footer-credit">
+            {t("landing.builtBy")} <a href="https://x.com/bydhruvil" target="_blank" rel="noopener noreferrer">@bydhruvil</a>
+          </p>
+        </div>
       </footer>
     </div>
   );
