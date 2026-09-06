@@ -7,7 +7,7 @@ export const OFFICIAL_EFILING_PORTAL_URL = "https://www.incometax.gov.in/iec/fop
 export function verifiedIncomeTaxUrl(url: string): string {
   try {
     const candidate = new URL(url);
-    if (candidate.hostname === "www.incometax.gov.in" && candidate.pathname.startsWith("/iec/forservices")) {
+    if (candidate.hostname === "www.incometax.gov.in" && (candidate.pathname.startsWith("/iec/foportal") || candidate.pathname.startsWith("/iec/foservices") || candidate.pathname.startsWith("/iec/forservices"))) {
       return OFFICIAL_EFILING_PORTAL_URL;
     }
   } catch {
@@ -109,6 +109,10 @@ export interface BackendWorkflowContract {
   evidence: EvidenceRecommendation[];
   safe_stop: { reason: string; facts: Record<string, string | number | null | undefined> };
   official_portal: { url: string; submission_boundary: string };
+  grounding?: { method: string; confidence: number; below_floor: boolean; ambiguous?: boolean; reason?: string; sources?: Citation[] };
+  action?: string;
+  next_steps?: string[];
+  response_plan?: Record<string, unknown>;
 }
 
 export interface UniversalExtractionResult {
@@ -217,14 +221,14 @@ export class ApiError extends Error {
   constructor(url: string, status: number, detail: unknown) {
     let message: string;
     if (typeof detail === "string") {
-      message = detail;
+      message = "We could not complete that step safely. Please try again.";
     } else if (detail && typeof detail === "object") {
       if ("detail" in detail) {
-        message = String((detail as { detail: unknown }).detail);
+        message = "We could not complete that step safely. Please try again.";
       } else if ("error" in detail) {
-        message = String((detail as { error: unknown }).error);
+        message = "We could not complete that step safely. Please try again.";
       } else if ("message" in detail) {
-        message = String((detail as { message: unknown }).message);
+        message = "We could not complete that step safely. Please try again.";
       } else {
         message = `${url} -> ${status}`;
       }
@@ -428,24 +432,15 @@ async function post<T>(url: string, body: unknown, signal?: AbortSignal): Promis
   });
 }
 
-async function loadWorkflowData(id: string, locale: Locale, workflowId: string): Promise<{ requests: ScrutinyRequest[]; evidence: EvidenceRecommendation[]; questions: Question[] }> {
-  if (workflowId === "scrutiny_142_1") {
-    const [requestData, questionData] = await Promise.all([
-      get<ScrutinyRequestsResult>(`/api/scrutiny/${id}/requests?locale=${locale}&extraction_confirmed=true`),
-      get<MinimumQuestionPlanResult>(`/api/scrutiny/${id}/question-plan?locale=${locale}&extraction_confirmed=true`),
-    ]);
-    return { requests: requestData.requests ?? [], evidence: requestData.evidence ?? questionData.evidence ?? [], questions: (questionData.questions ?? []).map((q) => ({ id: q.question_id, text: q.question, help: q.why_we_are_asking, options: q.options, question_type: q.type, required: q.required, conditions: q.conditions, related_request_ids: q.related_request_ids })) };
-  }
+async function loadWorkflowData(id: string, locale: Locale, _workflowId: string): Promise<{ requests: ScrutinyRequest[]; evidence: EvidenceRecommendation[]; questions: Question[] }> {
   const questionData = await get<{ questions: Question[]; requests?: ScrutinyRequest[]; evidence?: EvidenceRecommendation[] }>(`/api/workflow/questions/${id}?locale=${locale}`);
   return { requests: questionData.requests ?? [], evidence: questionData.evidence ?? [], questions: questionData.questions ?? [] };
 }
 
-export type QuestionAnswer = string | string[] | { choice: string; other: string };
+export type QuestionAnswer = string | number | string[] | { choice: string; other: string };
 
-function resolveWorkflowContract(id: string, workflowId: string, answers: Record<string, QuestionAnswer>): Promise<ResolveResult | ScrutinyResolveResult> {
-  return workflowId === "scrutiny_142_1"
-    ? post<ScrutinyResolveResult>("/api/scrutiny/resolve-minimum", { notice_id: id, answers, extraction_confirmed: true, document_statuses: {} })
-    : post<ResolveResult>("/api/workflow/resolve", { notice_id: id, answers });
+function resolveWorkflowContract(id: string, _workflowId: string, answers: Record<string, QuestionAnswer>): Promise<ResolveResult | ScrutinyResolveResult> {
+  return post<ResolveResult>("/api/workflow/resolve", { notice_id: id, answers });
 }
 
 export const api = {

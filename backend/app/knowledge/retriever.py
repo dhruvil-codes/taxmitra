@@ -59,7 +59,8 @@ class Retriever:
         index = {c.id: c for c in load_corpus(os.path.join(settings.kb_dir, "corpus"))}
         # A stale vector index must not hide newly verified corpus records.
         # Fall back to the existing lexical path until vectors are rebuilt.
-        if any(chunk_id not in {entry.get("id") for entry in payload} for chunk_id in index):
+        vector_ids = {entry.get("id") for entry in payload}
+        if vector_ids != set(index) or any(not isinstance(entry.get("vector"), list) for entry in payload):
             return None
         chunks = [index[entry["id"]] for entry in payload if entry["id"] in index]
         vectors = np.array([entry["vector"] for entry in payload if entry["id"] in index], dtype=float)

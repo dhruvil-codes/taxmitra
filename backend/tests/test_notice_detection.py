@@ -45,7 +45,7 @@ def test_real_notice_shape_routes_when_section_reference_is_missing(monkeypatch)
     assert body["classification"]["category"] == "scrutiny_142_1"
     assert body["classification"]["evidence"]
     assert body["workflow"]["workflow_id"] == "scrutiny_142_1"
-    assert body["workflow"]["frontend_entry"] == "scrutiny"
+    assert body["workflow"]["frontend_entry"] == "journey"
     assert len(body["requests"]) == 21
 
 

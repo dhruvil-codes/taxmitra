@@ -31,6 +31,11 @@ def _clean(value: str) -> str:
 
 def _date(value: str) -> str | None:
     try:
+        textual = re.fullmatch(r"\s*(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})\s*", value)
+        if textual:
+            month = {name.lower(): index for index, name in enumerate(("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"), 1)}.get(textual.group(2).lower())
+            if month:
+                return date(int(textual.group(3)), month, int(textual.group(1))).isoformat()
         day, month, year = (int(part) for part in re.split(r"[/\-]", value))
         return date(year + (2000 if year < 100 else 0), month, day).isoformat()
     except (ValueError, TypeError):
@@ -40,8 +45,8 @@ def _date(value: str) -> str | None:
 def _metadata(text: str) -> dict:
     ref = re.search(r"\b(?:DIN|reference|ref(?:erence)?\s*(?:no|number)?)[\s:#-]*([A-Z0-9][A-Z0-9./_-]{5,})", text, re.I)
     ay = re.search(r"(?:assessment\s+year|AY)\s*[:\-]?\s*((?:20)\d{2}\s*[-–]\s*\d{2})", text, re.I)
-    deadline = re.search(r"(?:on or before|due date|respond by|deadline)\D{0,35}(\d{1,2}[/-]\d{1,2}[/-](?:20)?\d{2})", text, re.I)
-    issue = re.search(r"(?:date of issue|issued on|notice date)\D{0,20}(\d{1,2}[/-]\d{1,2}[/-](?:20)?\d{2})", text, re.I)
+    deadline = re.search(r"(?:on or before|due date|respond by|deadline)\D{0,35}(\d{1,2}(?:[/-]\d{1,2}[/-](?:20)?\d{2}|\s+[A-Za-z]+\s+\d{4}))", text, re.I)
+    issue = re.search(r"(?:date of issue|issued on|notice date)\D{0,20}(\d{1,2}(?:[/-]\d{1,2}[/-](?:20)?\d{2}|\s+[A-Za-z]+\s+\d{4}))", text, re.I)
     authority = re.search(r"(?:office of the|issued by|from)\s+([^\n]{3,100})", text, re.I)
     return {
         "notice_reference": ref.group(1) if ref else None,
@@ -127,7 +132,7 @@ def ingest_pdf(content: bytes, filename: str | None, content_type: str | None, o
     weak_pages = tuple(
         page["page_number"]
         for page in pages
-        if len(page["text"].strip()) < 20 or (page["page_number"] in image_pages and len(page["text"].strip()) < 120)
+        if len(page["text"].strip()) < 20 or page["page_number"] in image_pages
     )
     method = "text"
     warnings: list[str] = []
@@ -138,7 +143,11 @@ def ingest_pdf(content: bytes, filename: str | None, content_type: str | None, o
         merged = []
         for page in pages:
             if page["page_number"] in weak_pages and page["page_number"] in ocr_by_page and ocr_by_page[page["page_number"]].get("text", "").strip():
-                merged.append({**ocr_by_page[page["page_number"]], "confidence": ocr_by_page[page["page_number"]].get("confidence", 0.58)})
+                ocr_page = ocr_by_page[page["page_number"]]
+                native_text = page["text"].strip()
+                ocr_text = ocr_page.get("text", "").strip()
+                combined = "\n".join(value for value in (native_text, ocr_text) if value)
+                merged.append({**page, "text": combined, "source": "ocr" if len(native_text) < 20 else "mixed", "confidence": min(page.get("confidence", 0.88), ocr_page.get("confidence", 0.58))})
             else:
                 merged.append(page)
         pages = tuple(merged)

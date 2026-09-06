@@ -150,7 +150,9 @@ def test_scrutiny_validation_and_routing_errors():
     unexpected["stale_answer"] = "no"
     assert client.post("/api/scrutiny/resolve", json={"notice_id": "N-2026-003", "answers": unexpected}).status_code == 422
     assert client.get("/api/scrutiny/N-2026-001/requests").status_code == 400
-    assert client.get("/api/workflow/questions/N-2026-003").status_code == 400
+    universal_questions = client.get("/api/workflow/questions/N-2026-003")
+    assert universal_questions.status_code == 200
+    assert universal_questions.json()["questions"]
     assert client.get("/api/ai/explanation/N-2026-003").status_code == 400
 
 

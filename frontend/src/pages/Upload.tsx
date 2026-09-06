@@ -5,9 +5,9 @@ import { api, ApiError, UniversalExtractionResult, store } from "../lib";
 import { Card, GuidedInteraction, PrimaryButton, WorkflowLayout } from "../components";
 
 const MAX_SIZE = 10 * 1024 * 1024;
-export function uploadRoute(classification: { frontend_entry?: string; supported: boolean; status: string; capability?: string }): "journey" | "scrutiny" | "safe-stop" {
-  if (classification.status === "safe_stop" || classification.capability === "SAFE_STOP" || classification.capability === "EXPLANATION_ONLY" || classification.frontend_entry === "unsupported") return "safe-stop";
-  return classification.frontend_entry === "scrutiny" ? "scrutiny" : "journey";
+export function uploadRoute(classification: { frontend_entry?: string; supported: boolean; status: string; capability?: string }): "journey" | "safe-stop" {
+  if (classification.status === "safe_stop" || classification.capability === "SAFE_STOP" || classification.frontend_entry === "unsupported") return "safe-stop";
+  return "journey";
 }
 const refusalCopy: Record<string, { en: string; hi: string }> = {
   empty_pdf: { en: "This PDF is empty. Choose the complete notice PDF.", hi: "यह PDF खाली है। पूरा नोटिस PDF चुनें।" },
@@ -108,10 +108,7 @@ export default function Upload() {
       if (!response.supported || !response.notice_id) { setResult(null); setFile(null); setError(locale === "hi" ? "पुष्टि नहीं की गई। सही PDF चुनकर फिर शुरू करें।" : "The extraction was not confirmed. Choose the correct PDF and start again."); return; }
       store.setUploadedNoticeId(response.notice_id); store.setExtractionConfirmed(response.notice_id, true);
       const route = uploadRoute({ ...response, status: response.status, capability: response.capability });
-      if (route === "scrutiny") {
-        store.setScrutinyStage(response.notice_id, "requests");
-        navigate(`/notices/${response.notice_id}/scrutiny`, { state: { uploaded: true } });
-      } else if (route === "journey") {
+      if (route === "journey") {
         navigate(`/notices/${response.notice_id}/journey`, { state: { uploaded: true } });
       } else {
         navigate(`/notices/${response.notice_id}/unsupported`, { state: { uploaded: true } });
@@ -163,9 +160,9 @@ export default function Upload() {
 
     {refused && (() => {
       const info = getUnsupportedNoticeInfo(result.metadata.section);
-      return <section className="app-empty" role="alert">
+      return <section className="app-empty upload-refusal" role="alert">
         <p className="app-section-label">[ SAFE STOP / {result.extraction.refusal_reason ?? "UNCLASSIFIED"} ]</p>
-        <h2 className="question-title">{pick(info.title, locale)}</h2>
+        <h2 className="question-title">{refusalCopy[result.extraction.refusal_reason ?? ""]?.[locale] ?? pick(info.title, locale)}</h2>
         <p className="app-lead">{pick(info.proceeding, locale)}</p>
         <p className="app-body">{pick(info.context, locale)}</p>
         <div className="notice-boundary">

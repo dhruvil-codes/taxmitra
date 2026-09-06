@@ -90,4 +90,9 @@ describe("universal workflow contract renderer", () => {
     expect(screen.getByText("The classification is not safe for automated response preparation.")).toBeInTheDocument();
     expect(screen.getByText("Consult a qualified professional")).toBeInTheDocument();
   });
+
+  it("does not expose internal grounding or classifier diagnostics", () => {
+    renderWithRouter(<ContractRequests requests={[request("r-debug", "Provide the notice records")]} locale="en" />);
+    expect(screen.queryByText(/REQUEST CONFIDENCE|DETERMINISTIC RULE|classification_id|NOT_PROVIDED|SAFE_STOP/)).not.toBeInTheDocument();
+  });
 });

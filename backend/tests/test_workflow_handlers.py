@@ -23,7 +23,8 @@ def test_generic_questions_dispatches_through_resolved_handler(monkeypatch):
 
     monkeypatch.setattr(workflow_router, "get_workflow_handler", lambda category: SpyHandler())
     response = workflow_router.questions("N-2026-001", "hi")
-    assert response == {"questions": [{"id": "from-handler"}]}
+    assert response["questions"] == [{"id": "from-handler"}]
+    assert "grounding" in response
     assert calls == [("N-2026-001", "hi")]
 
 

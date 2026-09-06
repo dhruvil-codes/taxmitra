@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     #   OPENAI_EMBEDDING_MODEL=text-embedding-3-small (default)
     openai_chat_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-small"
+    openai_timeout_seconds: float = 30.0
 
     # --- Runtime modes ---
     # DEMO_MODE=true  -> AI routes serve ONLY pre-generated/static content.

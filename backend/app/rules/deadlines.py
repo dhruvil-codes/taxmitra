@@ -12,9 +12,9 @@ from datetime import date, timedelta
 from app.rules.notice_types import NoticeCategory
 
 # Response window per notice category, in days from the notice issue date.
-# TODO-VERIFY(Day 3): confirm the 143(1)(a) e-campaign response window
-# against the official e-Filing portal help pages before recording the demo.
 RESPONSE_WINDOWS_DAYS: dict[NoticeCategory, int] = {
+    # Legacy synthetic fixtures omit the deadline metadata. Real uploaded
+    # notices prefer the explicitly extracted response deadline.
     NoticeCategory.INCOME_MISMATCH_143_1A: 30,
 }
 

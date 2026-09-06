@@ -76,7 +76,7 @@ const canonicalQuestionType = (type: Question["question_type"]): NonNullable<Que
 
 export function ContractQuestion({ question, locale, value, onChange, onContinue }: ContractQuestionProps) {
   const type = canonicalQuestionType(question.question_type);
-  const selected = Array.isArray(value) ? value : value && typeof value === "object" ? [value.choice] : value ? [value] : [];
+  const selected: string[] = Array.isArray(value) ? value.map(String) : value && typeof value === "object" ? [value.choice] : value !== undefined && value !== "" ? [String(value)] : [];
   const otherSelected = selected.some((item) => /(^|[_-])(other|something_else)([_-]|$)/i.test(item));
   const textValue = value && typeof value === "object" && !Array.isArray(value) ? value.other : "";
   const setSingle = (option: string) => {
@@ -96,7 +96,7 @@ export function ContractRequests({ requests, locale }: { requests: ScrutinyReque
 
 export function ContractEvidence({ evidence, locale }: { evidence: EvidenceRecommendation[]; locale: string }) {
   if (!evidence.length) return null;
-  return <section className="universal-section" aria-labelledby="evidence-heading"><p className="contract-kicker">{locale === "hi" ? "तैयारी" : "Preparation"}</p><h2 id="evidence-heading" className="question-title">{locale === "hi" ? "क्या तैयार रखना है" : "What you may need"}</h2><div className="universal-evidence-list">{evidence.map((item) => <article className="universal-evidence" key={item.document_id}><div><h3>{pick(item.document_name, locale)}</h3><p>{pick(item.reason, locale)}</p><small>{item.requirement_level === "required" ? (locale === "hi" ? "नोटिस में आवश्यक" : "Required by the notice") : (locale === "hi" ? "संभवतः प्रासंगिक" : "Possibly relevant")} · {item.status.replace(/_/g, " ")}</small></div></article>)}</div></section>;
+  return <section className="universal-section" aria-labelledby="evidence-heading"><p className="contract-kicker">{locale === "hi" ? "तैयारी" : "Preparation"}</p><h2 id="evidence-heading" className="question-title">{locale === "hi" ? "क्या तैयार रखना है" : "What you may need"}</h2><div className="universal-evidence-list">{evidence.map((item) => <article className="universal-evidence" key={item.document_id}><div><h3>{pick(item.document_name, locale)}</h3><p>{pick(item.reason, locale)}</p><small>{item.requirement_level === "required" ? (locale === "hi" ? "नोटिस में आवश्यक" : "Required by the notice") : (locale === "hi" ? "संभवतः प्रासंगिक" : "Possibly relevant")}</small></div></article>)}</div></section>;
 }
 
 export function CapabilityBoundary({ capability, reason, nextSteps, locale }: { capability: WorkflowCapability; reason: string; nextSteps: string[]; locale: string }) {

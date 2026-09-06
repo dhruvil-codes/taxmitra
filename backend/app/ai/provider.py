@@ -19,7 +19,7 @@ class ChatProvider:
         if not self._settings.openai_api_key:
             raise AIUnavailableError("OPENAI_API_KEY is not configured")
         if self._client is None:
-            self._client = OpenAI(api_key=self._settings.openai_api_key)
+            self._client = OpenAI(api_key=self._settings.openai_api_key, timeout=self._settings.openai_timeout_seconds)
         return self._client
 
     def chat_json(self, system: str, user: str) -> dict:

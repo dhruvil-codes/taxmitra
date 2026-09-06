@@ -13,7 +13,8 @@ from app.rules.notice_types import NoticeCategory, classify_notice, is_supported
 from app.rules.refusal import build_refusal
 from app.workflows.registry import WorkflowCapability, classify_extracted_notice, get_workflow, list_workflows
 from app.workflows.registry import classify_ai_proposal
-from app.workflows.handlers import get_workflow_handler
+from app.workflows.handlers import get_workflow_handler, grounding_payload
+from app.workflows.official import official_portal_payload
 from app.extraction.pdf import MAX_PDF_BYTES
 from app.extraction.pdf import extract_pdf
 from app.ingestion.pipeline import ingest_pdf
@@ -45,7 +46,9 @@ def _session_notice(notice_id: str) -> dict | None:
     if not session or not session.get("confirmed"):
         return None
     metadata = session.get("metadata", {})
+    stored = dict(session.get("notice") or {})
     return {
+        **stored,
         "id": notice_id,
         "section": metadata.get("section"),
         "assessment_year": metadata.get("assessment_year") or "unknown",
@@ -56,7 +59,7 @@ def _session_notice(notice_id: str) -> dict | None:
         "income_source": "Uploaded notice",
         "official_text": "\n".join(page.get("text", "") for page in session.get("pages", [])),
         "citizen_id": "uploaded",
-        "synthetic_extraction": {"source_type": "pdf", "requires_human_confirmation": True, "requests": session.get("requests", [])},
+        "synthetic_extraction": {**(stored.get("synthetic_extraction") or {}), "source_type": "pdf", "requires_human_confirmation": True, "requests": session.get("requests", [])},
     }
 
 
@@ -182,10 +185,6 @@ async def extract_workflow(file: UploadFile = File(...)):
         metadata["section"] = ai_proposal["section"].strip()
     safe_stop = bool(result.refusal_reason) or classification.status == "safe_stop"
     extracted_requests = list(result.requests)
-    if not safe_stop and classification.category == "scrutiny_142_1":
-        # Reuse the established scrutiny request classifier; this is only the
-        # universal boundary's normalized representation, not new business logic.
-        extracted_requests = list(extract_pdf(content, lambda _query: None, allow_unidentified=True, ingestion_result=result).requests)
     payload = {
         "supported": not safe_stop,
         "status": "safe_stop" if safe_stop else "needs_confirmation",
@@ -208,6 +207,7 @@ async def extract_workflow(file: UploadFile = File(...)):
     if not safe_stop:
         extraction_id, fingerprint = create_session({
             **payload,
+            "notice": notice,
             "requests": extracted_requests,
             "workflow_id": classification.workflow_id,
             "original_pdf_sha256": result.original_pdf_sha256,
@@ -243,7 +243,8 @@ def notice_workflow(notice_id: str):
     notice = get_notice(notice_id)
     if notice is None:
         raise HTTPException(status_code=404, detail="Notice not found")
-    classification = classify_extracted_notice(notice)
+    preliminary = classify_extracted_notice(notice)
+    classification = classify_extracted_notice(notice, grounding_payload(notice, preliminary.category))
     workflow = get_workflow(classification.category)
     contract = {
         "identity": {"workflow_id": classification.workflow_id, "category": classification.category, "title": workflow.title if workflow else {}},
@@ -256,27 +257,23 @@ def notice_workflow(notice_id: str):
         "questions": [],
         "evidence": [],
         "safe_stop": {"reason": classification.reason, "facts": {"section": notice.get("section"), "deadline": notice.get("response_due_date")}},
-        "official_portal": {"url": "https://www.incometax.gov.in/iec/foportal/", "submission_boundary": "Tax Mitra never submits on the taxpayer's behalf."},
+        "official_portal": official_portal_payload(),
+        "grounding": grounding_payload(notice, classification.category),
     }
-    if workflow and workflow.capability not in {WorkflowCapability.SAFE_STOP, WorkflowCapability.EXPLANATION_ONLY}:
+    if workflow:
         handler = get_workflow_handler(classification.category)
         question_payload = handler.get_questions(notice, "en")
         contract["questions"] = question_payload.get("questions", [])
         contract["requests"] = question_payload.get("requests", contract["requests"])
         contract["evidence"] = handler.get_evidence(notice)
+        contract["notice_facts"].update(question_payload.get("facts") or {})
+        contract["next_steps"] = [workflow.official_next_step]
     payload = {
         "notice_id": notice_id,
         "classification": classification.payload(),
         "workflow": workflow.payload() if workflow else None,
         "contract": contract,
     }
-    # Keep the original endpoint's unsupported category for legacy clients;
-    # the universal classify endpoint retains the precise reassessment/demand
-    # category and evidence.
-    if classification.category in {"reassessment_148", "reassessment_148a", "penalty_proceedings"}:
-        payload["classification"]["detected_category"] = classification.category
-        payload["classification"]["category"] = "unsupported"
-        payload["workflow"] = None
     return payload
 
 

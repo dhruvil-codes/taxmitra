@@ -64,18 +64,21 @@ async function uploadRefusal(page: Page, reason: string, method: "ocr" | "none")
 
 test.describe("universal Tax Mitra browser journey", () => {
   test("142(1) completes requests, Not sure, evidence, review and portal handoff", async ({ page }) => {
-    const s: Scenario = { id: "e2e-142", workflowId: "scrutiny_142_1", title: "Section 142(1) information request", category: "scrutiny", capability: "SUPPORTED", section: "142(1)", frontendEntry: "scrutiny", reason: "Grounded scrutiny requests were identified.", withEvidence: true };
+    const s: Scenario = { id: "e2e-142", workflowId: "scrutiny_142_1", title: "Section 142(1) information request", category: "scrutiny", capability: "SUPPORTED", section: "142(1)", frontendEntry: "journey", reason: "Grounded scrutiny requests were identified.", withEvidence: true };
     await mockScenario(page, s, { upload: true });
     const governmentRequests: string[] = [];
     page.on("request", (request) => { if (request.url().includes("incometax.gov.in")) governmentRequests.push(request.url()); });
     await uploadSynthetic(page);
-    await expect(page.getByRole("heading", { name: /What the Department is asking/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /What the Department wants/i })).toBeVisible();
+    const visibleText = await page.locator("body").innerText();
+    expect(visibleText).not.toMatch(/REQUEST CONFIDENCE|DETERMINISTIC RULE|NOT_PROVIDED|classification_id|à¤/i);
     await assertAccessible(page);
-    await page.getByRole("article").first().getByText("Original wording and source").click();
-    await expect(page.getByText("Page 1 · numbered request").first()).toBeVisible();
+    await page.getByText("View original notice wording").first().click();
+    await expect(page.getByText(/Page 1/).first()).toBeVisible();
     await page.getByRole("button", { name: /Continue/i }).click();
     await expect(page.getByText(/Why we are asking/i)).toBeVisible();
-    await page.getByRole("button", { name: "Not sure" }).click();
+    await page.getByRole("radio", { name: "Not sure" }).check();
+    await page.getByRole("button", { name: /Continue/i }).click();
     await expect(page.getByRole("heading", { name: "What you may need" })).toBeVisible();
     await expect(page.getByText("Bank statement")).toBeVisible();
     await page.getByRole("button", { name: /Continue to review/i }).click();
@@ -93,10 +96,11 @@ test.describe("universal Tax Mitra browser journey", () => {
     const s: Scenario = { id: "e2e-143a", workflowId: "income_mismatch_143_1a", title: "Section 143(1)(a) proposed adjustment", category: "processing", capability: "SUPPORTED", section: "143(1)(a)", reason: "A proposed processing adjustment was identified." };
     await mockScenario(page, s, { upload: true }); await uploadSynthetic(page);
     await expect(page).toHaveURL(/\/notices\/e2e-143a\/journey$/);
-    await expect(page.getByText("Section 143(1)(a) proposed adjustment")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Section 143(1)(a) proposed adjustment" })).toBeVisible();
     await expect(page.getByText(/scrutiny requests/i)).toHaveCount(0);
     await page.getByRole("button", { name: /Continue/i }).click();
-    await page.getByRole("button", { name: "Not sure" }).click();
+    await page.getByRole("radio", { name: "Not sure" }).check();
+    await page.getByRole("button", { name: /Continue/i }).click();
     await expect(page.getByText("HUMAN REVIEW REQUIRED")).toBeVisible();
   });
 
@@ -109,10 +113,19 @@ test.describe("universal Tax Mitra browser journey", () => {
   });
 
   test("133(6) explanation-only shows meaning, boundary and next step", async ({ page }) => {
-    const s: Scenario = { id: "e2e-1336", workflowId: "scrutiny_information_133_6", title: "Section 133(6) information communication", category: "scrutiny", capability: "EXPLANATION_ONLY", section: "133(6)", reason: "Tax Mitra can explain this information communication but cannot safely prepare a response." };
+    const s: Scenario = { id: "e2e-1336", workflowId: "scrutiny_information_133_6", title: "Section 133(6) information communication", category: "scrutiny", capability: "SUPPORTED", section: "133(6)", reason: "Tax Mitra extracted the information requests and prepared them for review." };
+    await mockScenario(page, s); await page.goto(`/notices/${s.id}/journey`);
+    await expect(page.getByText("What this notice means")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "What the Department wants" })).toBeVisible();
+    await expect(page.getByText("What Tax Mitra can help with", { exact: true })).toBeVisible();
+  });
+
+  test("131 authority communication uses the explanation boundary", async ({ page }) => {
+    const s: Scenario = { id: "e2e-131", workflowId: "authority_131", title: "Section 131 authority communication", category: "authority", capability: "EXPLANATION_ONLY", section: "131", reason: "This authority communication requires professional review before a substantive response." };
     await mockScenario(page, s); await page.goto(`/notices/${s.id}/journey`);
     await expect(page.getByText("Explanation and next steps")).toBeVisible();
-    await expect(page.getByText("What this means for you")).toBeVisible(); await expect(page.getByText("What we found", { exact: true })).toBeVisible(); await expect(page.getByText("What Tax Mitra can help with", { exact: true })).toBeVisible(); await expect(page.getByText("What Tax Mitra cannot safely do", { exact: true })).toBeVisible(); await expect(page.getByText("Next step", { exact: true })).toBeVisible();
+    await expect(page.getByText("What this means for you")).toBeVisible();
+    await expect(page.getByText("What Tax Mitra cannot safely do", { exact: true })).toBeVisible();
     await expect(page.getByText(/prepared response/i)).toHaveCount(0);
   });
 
@@ -129,8 +142,10 @@ test.describe("universal Tax Mitra browser journey", () => {
     const s: Scenario = { id: "e2e-hi", workflowId: "scrutiny_142_1", title: "Section 142(1) information request", category: "scrutiny", capability: "SAFE_STOP", section: "142(1)", reason: "यह संचार सुरक्षित रूप से समझाया नहीं जा सका।", hindi: true };
     await mockScenario(page, s); await page.goto(`/notices/${s.id}/journey`);
     await page.getByRole("combobox", { name: "Language" }).selectOption("hi");
-    await expect(page.getByText("सुरक्षित रोक", { exact: true })).toBeVisible(); await expect(page.getByRole("heading", { name: /धारा 142\(1\)/ })).toBeVisible(); await expect(page.getByText("Tax Mitra ने क्या पाया", { exact: true })).toBeVisible();
-  });
+await expect(page.getByText("सुरक्षित रोक", { exact: true })).toBeVisible(); await expect(page.getByRole("heading", { name: /धारा 142\(1\)/ })).toBeVisible(); await expect(page.getByText("Tax Mitra ने क्या पाया", { exact: true })).toBeVisible();
+const visibleText = await page.locator("body").innerText();
+expect(visibleText).not.toContain("à¤");
+});
 
   test("mobile smoke keeps upload and safe boundary usable", async ({ page }) => {
     const s: Scenario = { id: "e2e-mobile", workflowId: "unknown_income_tax_communication", title: "Income Tax communication", category: "safe_stop", capability: "SAFE_STOP", section: "Unknown", reason: "The communication could not be classified confidently." };
@@ -139,20 +154,18 @@ test.describe("universal Tax Mitra browser journey", () => {
 
   test("malformed PDF stops at the upload boundary", async ({ page }) => {
     await uploadRefusal(page, "malformed_pdf", "none");
-    await expect(page.getByText(/SAFE STOP \/ malformed_pdf/i)).toBeVisible();
-    await expect(page.getByText(/WHAT YOU CAN DO NEXT/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /could not be read as a valid PDF/i })).toBeVisible();
   });
 
   test("low-confidence OCR stops without opening a workflow", async ({ page }) => {
     await uploadRefusal(page, "low_extraction_confidence", "ocr");
-    await expect(page.getByText(/SAFE STOP \/ low_extraction_confidence/i)).toBeVisible();
-    await expect(page.getByText(/WHAT YOU CAN DO NEXT/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /could not be extracted with enough confidence/i })).toBeVisible();
     await expect(page.getByText(/PREPARED RESPONSE/i)).toHaveCount(0);
   });
 
   test("exercises the seeded local frontend/backend integration boundary", async ({ page }) => {
     await page.goto("/notices/N-2026-003/journey");
     await expect(page.getByRole("heading", { name: /142\(1\)/ })).toBeVisible();
-    await expect(page.getByText(/What the Department is asking/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /What the Department wants/i })).toBeVisible();
   });
 });

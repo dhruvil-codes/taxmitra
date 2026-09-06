@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from app.rules.notice_types import NoticeCategory
 
-OFFICIAL_EFILING_URL = "https://www.incometax.gov.in/iec/foservices/"
+OFFICIAL_EFILING_URL = "https://www.incometax.gov.in/iec/foportal/"
 OFFICIAL_HELP_URL = "https://www.incometax.gov.in/iec/helpcenter"
 
 _REFUSAL_TEXT = {

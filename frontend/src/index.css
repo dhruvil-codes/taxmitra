@@ -1402,6 +1402,13 @@ small, .app-brand small, .upload-file small, .tm-start-note,
 }
 
 /* Why Drawer */
+.request-grounding { display: none !important; }
+.extraction-status .app-section-label,
+.upload-receipt > .upload-file > div > .app-section-label,
+.human-check .app-section-label { display: none !important; }
+.upload-page .scrutiny-meta span:nth-child(3) { display: none !important; }
+.upload-refusal > .app-section-label,
+.upload-refusal .notice-boundary > .app-section-label { display: none !important; }
 .why-drawer {
   border: 1px solid var(--tm-line);
   background: #fbfbfc;

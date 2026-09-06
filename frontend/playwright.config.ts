@@ -13,8 +13,8 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   webServer: [
-    { command: "npm.cmd run dev -- --host 127.0.0.1 --port 4173", cwd: ".", url: "http://127.0.0.1:4173", reuseExistingServer: true, timeout: 120_000 },
-    { command: "python -m uvicorn app.main:app --host 127.0.0.1 --port 8000", cwd: "../backend", url: "http://127.0.0.1:8000/api/health", reuseExistingServer: true, timeout: 120_000 },
+    { command: "npm.cmd run dev -- --host 127.0.0.1 --port 4173", cwd: ".", url: "http://127.0.0.1:4173", reuseExistingServer: true, timeout: 120_000, gracefulShutdown: { signal: "SIGINT", timeout: 1_000 } },
+    { command: "python -m uvicorn app.main:app --host 127.0.0.1 --port 8000", cwd: "../backend", url: "http://127.0.0.1:8000/api/health", reuseExistingServer: true, timeout: 120_000, gracefulShutdown: { signal: "SIGINT", timeout: 1_000 } },
   ],
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },

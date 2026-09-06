@@ -10,8 +10,73 @@ import re
 from typing import Any
 
 
+def _grounding_for(notice: dict[str, Any], category: str):
+    from app.config import get_settings
+    from app.knowledge.grounding import ground
+
+    text = "\n".join(str(notice.get(key) or "") for key in ("section", "official_text", "department_terminology"))
+    for request in (notice.get("synthetic_extraction") or {}).get("requests") or []:
+        text += "\n" + " ".join(str(request.get(key) or "") for key in ("original_text", "response_section", "category"))
+    return ground(
+        get_settings(),
+        f"{category} {text}",
+        assessment_year=notice.get("assessment_year"),
+        tax_year=notice.get("tax_year"),
+        act_version=notice.get("act_version"),
+        workflow_context=category,
+    )
+
+
+def grounding_payload(notice: dict[str, Any], category: str) -> dict[str, Any]:
+    result = _grounding_for(notice, category)
+    return {
+        "method": result.method,
+        "confidence": result.confidence,
+        "below_floor": result.below_floor,
+        "ambiguous": result.ambiguous,
+        "reason": result.reason,
+        "sources": [{
+            "id": chunk.id,
+            "title": chunk.title,
+            "section": chunk.section,
+            "official_url": chunk.official_url,
+            "source": chunk.source_name,
+            "status": chunk.status,
+            "verification_status": chunk.verification_status,
+            "assessment_year": chunk.assessment_year,
+            "tax_year": chunk.tax_year,
+            "act_version": chunk.act_version,
+        } for chunk in result.chunks if chunk.official_url.startswith("https://www.incometax.gov.in/")],
+    }
+
+
 class WorkflowHandler(ABC):
     category: str
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        for method_name in ("get_questions", "resolve"):
+            original = cls.__dict__.get(method_name)
+            if original is None or getattr(original, "_grounded", False):
+                continue
+            if method_name == "get_questions":
+                def get_questions(self, notice, locale="en", answers=None, _original=original):
+                    result = _original(self, notice, locale, answers)
+                    if isinstance(result, dict):
+                        result = dict(result)
+                        result.setdefault("grounding", grounding_payload(notice, self.category))
+                    return result
+                get_questions._grounded = True
+                setattr(cls, method_name, get_questions)
+            else:
+                def resolve(self, notice, answers, _original=original, **kwargs):
+                    result = _original(self, notice, answers, **kwargs)
+                    if isinstance(result, dict):
+                        result = dict(result)
+                        result.setdefault("grounding", grounding_payload(notice, self.category))
+                    return result
+                resolve._grounded = True
+                setattr(cls, method_name, resolve)
 
     @abstractmethod
     def get_questions(self, notice: dict[str, Any], locale: str = "en", answers: dict[str, Any] | None = None) -> dict[str, Any]: ...
@@ -774,6 +839,57 @@ class GuidedPartialHandler(SafeStopHandler):
         return {"status": "approved" if kwargs.get("approved") else "blocked", "handoff_allowed": False, "message": "Professional/taxpayer review is required; Tax Mitra does not submit this communication."}
 
 
+class StructuredExplanationHandler(WorkflowHandler):
+    """Useful explanation/preparation boundary for sensitive communications."""
+
+    def __init__(self, category: str, capability: str = "EXPLANATION_ONLY"):
+        self.category = category
+        self.capability = capability
+
+    def _facts(self, notice):
+        extraction = notice.get("synthetic_extraction") or {}
+        return {
+            "section": notice.get("section"),
+            "act_version": notice.get("act_version"),
+            "assessment_year": notice.get("assessment_year"),
+            "tax_year": notice.get("tax_year"),
+            "deadline": notice.get("response_due_date") or notice.get("deadline") or notice.get("response_deadline"),
+            "requests": extraction.get("requests") or [],
+            "official_reference": notice.get("official_reference"),
+        }
+
+    def get_questions(self, notice, locale="en", answers=None):
+        if self.category == "compliance_ais":
+            return {"questions": [{
+                "id": "compliance_issue_confirmed", "question_type": "single_choice",
+                "text": "What would you like to do with the reported information?",
+                "help": "This selects an explanation and review path; Tax Mitra will not submit feedback.",
+                "options": [
+                    {"id": "appears_correct", "label": "It appears correct"},
+                    {"id": "need_feedback", "label": "I need to provide feedback"},
+                    {"id": "not_mine", "label": "It does not belong to me"},
+                    {"id": "unsure", "label": "Not sure"},
+                ], "required": True,
+            }], "facts": self._facts(notice)}
+        return {"questions": [], "facts": self._facts(notice)}
+
+    def resolve(self, notice, answers, **kwargs):
+        facts = self._facts(notice)
+        if self.category == "compliance_ais":
+            choice = answers.get("compliance_issue_confirmed")
+            if choice in {None, "unsure"}:
+                return {"supported": False, "status": "safe_stop", "capability": "SAFE_STOP", "workflow_id": self.category, "reason": "The reported information needs taxpayer confirmation before a feedback path can be prepared.", "facts": facts, "handoff_allowed": False}
+            action = "Review the AIS/e-Verification record and prepare feedback for taxpayer approval; Tax Mitra will not submit it." if choice != "appears_correct" else "Retain the AIS/compliance record and use the official portal only if a later action is required."
+            return {"supported": False, "status": "partial_support", "capability": self.capability, "workflow_id": self.category, "action": action, "facts": facts, "handoff_allowed": False, "next_step": "Review the displayed record and use the official AIS or Compliance service after human approval."}
+        return {"supported": False, "status": "safe_stop", "capability": self.capability, "workflow_id": self.category, "facts": facts, "requests": facts["requests"], "reason": "Tax Mitra can organize the extracted facts, but a qualified person should review the substantive response before any official action.", "next_step": "Review the communication, deadline and requested records with a qualified professional, then use the official portal.", "handoff_allowed": False}
+
+    def get_evidence(self, notice, statuses=None):
+        return [{"request_id": str(index), "document_id": f"{self.category}-{index}", "document_name": {"en": "Record or document mentioned in the communication", "hi": "संचार में उल्लिखित रिकॉर्ड या दस्तावेज़"}, "reason": {"en": "Use only evidence expressly connected to the extracted request.", "hi": "केवल निकाले गए अनुरोध से सीधे जुड़े प्रमाण का उपयोग करें।"}, "requirement_level": "possibly_relevant", "status": (statuses or {}).get(f"{self.category}-{index}", "not_sure")} for index, _ in enumerate(self._facts(notice)["requests"])]
+
+    def generate_response(self, notice, answers, **kwargs): return self.resolve(notice, answers, **kwargs)
+    def review(self, notice, answers, **kwargs): return {"status": "blocked", "handoff_allowed": False, "message": "Human or professional review is required before any official action."}
+
+
 def get_workflow_handler(category: str | None) -> WorkflowHandler:
     handlers = {
         "income_mismatch_143_1a": IncomeMismatch143Handler(),
@@ -788,5 +904,11 @@ def get_workflow_handler(category: str | None) -> WorkflowHandler:
         "scrutiny_information_133_6": InformationRequest1336Handler(),
         "authority_information_request": AuthorityInformationRequestHandler(),
         "ao_notice_clarification": ClarificationHandler(),
+        "authority_131": StructuredExplanationHandler("authority_131"),
+        "compliance_ais": StructuredExplanationHandler("compliance_ais", "PARTIAL_SUPPORT"),
+        "refund_communication": StructuredExplanationHandler("refund_communication"),
+        "reassessment_148": StructuredExplanationHandler("reassessment_148"),
+        "reassessment_148a": StructuredExplanationHandler("reassessment_148a"),
+        "penalty_proceedings": StructuredExplanationHandler("penalty_proceedings"),
     }
     return handlers.get(category, SafeStopHandler())

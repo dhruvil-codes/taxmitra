@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useI18n } from "../i18n";
-import { api, EvidenceRecommendation, NoticeCard, Question, QuestionAnswer, ScrutinyRequest, UniversalWorkflowContract, WorkflowCapability } from "../lib";
+import { api, EvidenceRecommendation, NoticeCard, Question, QuestionAnswer, ScrutinyRequest, UniversalWorkflowContract, WorkflowCapability, verifiedIncomeTaxUrl, OFFICIAL_EFILING_PORTAL_URL } from "../lib";
 import { CapabilityBadge, CapabilityBoundary, ContractEvidence, ContractExplanation, ContractQuestion } from "../components/UniversalWorkflow";
 import { NoticeFactsCard, PrimaryButton, ScreenFrame, WorkflowLayout } from "../components";
 
@@ -41,11 +41,10 @@ export default function Journey() {
     if (!id) return;
     Promise.all([api.notice(id), api.noticeWorkflow(id)]).then(async ([notice, routed]) => {
       const capability = userCapability(routed.workflow?.capability ?? routed.classification.capability);
-      const base: UniversalWorkflowContract = { workflowId: routed.classification.workflow_id, category: routed.classification.category, title: routed.workflow?.title ?? notice.title, capability, confidence: routed.classification.confidence, groundingStatus: routed.classification.grounding_status, reason: routed.classification.reason, notice, requests: [], questions: [], evidence: [], nextSteps: ["Review the original communication and its deadline.", "Use the official Income Tax e-Filing portal for any required action."], officialPortalUrl: "https://www.incometax.gov.in/iec/foportal/" };
+      const backend = routed.contract;
+      const base: UniversalWorkflowContract = { workflowId: routed.classification.workflow_id, category: routed.classification.category, title: routed.workflow?.title ?? notice.title, capability, confidence: routed.classification.confidence, groundingStatus: routed.classification.grounding_status, reason: routed.classification.reason, notice, requests: backend?.requests ?? [], questions: (backend?.questions ?? []).map(normalizeQuestion), evidence: backend?.evidence ?? [], action: backend?.action, nextSteps: backend?.next_steps ?? ["Review the original communication and its deadline.", "Use the official Income Tax e-Filing portal for any required action."], officialPortalUrl: verifiedIncomeTaxUrl(backend?.official_portal.url ?? OFFICIAL_EFILING_PORTAL_URL) };
       setContract(base);
-      if (routed.contract) {
-        setRequests(routed.contract.requests ?? []); setEvidence(routed.contract.evidence ?? []); setQuestions((routed.contract.questions ?? []).map(normalizeQuestion));
-      }
+      if (routed.contract) { setRequests(routed.contract.requests ?? []); setEvidence(routed.contract.evidence ?? []); setQuestions((routed.contract.questions ?? []).map(normalizeQuestion)); }
       if (capability === "SAFE_STOP" || capability === "EXPLANATION_ONLY") return;
       if (routed.contract?.questions?.length || routed.contract?.requests?.length) return;
       const workflowData = await api.workflowData(id, locale, base.workflowId);

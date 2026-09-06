@@ -3,7 +3,7 @@ id: kb-ecampaign-response
 section: "e-Filing portal procedure"
 title: "Responding to a mismatch intimation through Pending Actions"
 source_name: "Income Tax Department e-Filing portal"
-official_url: https://www.incometax.gov.in/iec/foservices/
+official_url: https://www.incometax.gov.in/iec/foportal/
 accessed_date: 2026-08-24
 verification: pending
 tags: e-campaign, pending actions, response, procedure

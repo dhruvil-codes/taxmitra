@@ -61,8 +61,8 @@ def test_generic_workflow_api_is_additive_and_notice_metadata_is_generic():
     routed = client.get("/api/notices/N-2026-002/workflow")
     assert routed.status_code == 200
     assert routed.json()["classification"]["status"] == "safe_stop"
-    assert routed.json()["classification"]["category"] == "unsupported"
-    assert routed.json()["workflow"] is None
+    assert routed.json()["classification"]["category"] == "reassessment_148"
+    assert routed.json()["workflow"]["workflow_id"] == "reassessment_148"
 
 
 def test_classified_frontend_entries_route_supported_and_safe_stop_workflows():
