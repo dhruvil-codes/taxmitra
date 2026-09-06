@@ -3,7 +3,8 @@
 Frontmatter keys include source_id, document_title, document_type,
 official_organization, source_url, section, page_location, excerpt, summary,
 applicability, effective_period, rule, form, assessment_year, tax_year,
-effective_from, effective_to, verified_date, status, verification_status, and tags.
+effective_from, effective_to, publication_date, update_date, act_version,
+workflow_context, verified_date, status, verification_status, and tags.
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ import os
 from dataclasses import dataclass, field
 from functools import lru_cache
 
-_TEXT_KEYS = {"section", "title", "source_name", "official_url", "accessed_date", "verification", "source_id", "document_title", "document_type", "official_organization", "source_url", "page_location", "excerpt", "summary", "applicability", "effective_period", "rule", "form", "assessment_year", "tax_year", "effective_from", "effective_to", "verified_date", "status", "verification_status"}
+_TEXT_KEYS = {"section", "title", "source_name", "official_url", "accessed_date", "verification", "source_id", "document_title", "document_type", "official_organization", "source_url", "page_location", "excerpt", "summary", "applicability", "effective_period", "rule", "form", "assessment_year", "tax_year", "effective_from", "effective_to", "publication_date", "update_date", "act_version", "workflow_context", "verified_date", "status", "verification_status"}
 
 
 @dataclass(frozen=True)
@@ -43,6 +44,10 @@ class Chunk:
     tax_year: str = ""
     effective_from: str = ""
     effective_to: str = ""
+    publication_date: str = ""
+    update_date: str = ""
+    act_version: str = ""
+    workflow_context: tuple[str, ...] = field(default_factory=tuple)
     status: str = "CURRENT"
     verification_status: str = "NEEDS_REVIEW"
 
@@ -68,6 +73,8 @@ def parse_chunk(raw: str) -> Chunk:
                 key, value = parsed
                 if key == "tags":
                     tags = tuple(t.strip() for t in value.split(",") if t.strip())
+                elif key == "workflow_context":
+                    meta[key] = value
                 elif key == "id":
                     meta["id"] = value
                 elif key in _TEXT_KEYS:
@@ -95,6 +102,9 @@ def parse_chunk(raw: str) -> Chunk:
         rule=meta.get("rule", ""), form=meta.get("form", ""),
         assessment_year=meta.get("assessment_year", ""), tax_year=meta.get("tax_year", ""),
         effective_from=meta.get("effective_from", ""), effective_to=meta.get("effective_to", ""),
+        publication_date=meta.get("publication_date", ""), update_date=meta.get("update_date", ""),
+        act_version=meta.get("act_version", ""),
+        workflow_context=tuple(t.strip() for t in meta.get("workflow_context", "").split(",") if t.strip()),
         status=meta.get("status", "CURRENT"),
         verification_status={"verified": "VERIFIED_OFFICIAL", "VERIFIED_OFFICIAL": "VERIFIED_OFFICIAL", "pending": "PENDING_VERIFICATION", "not_applicable": "NOT_APPLICABLE", "unknown": "UNKNOWN"}.get(meta.get("verification_status", meta.get("verification", "unknown")), "UNKNOWN"),
         page_location=meta.get("page_location", ""), excerpt=meta.get("excerpt", ""),
@@ -156,6 +166,10 @@ def citations_for(chunk_ids: tuple[str, ...], corpus_dir: str) -> list[dict]:
                 "tax_year": chunk.tax_year,
                 "effective_from": chunk.effective_from,
                 "effective_to": chunk.effective_to,
+                "publication_date": chunk.publication_date,
+                "update_date": chunk.update_date,
+                "act_version": chunk.act_version,
+                "workflow_context": list(chunk.workflow_context),
                 "status": chunk.status,
                 "verification_status": chunk.verification_status,
                 "verification_state": {"VERIFIED_OFFICIAL": "Verified", "PENDING_VERIFICATION": "Pending verification", "NOT_APPLICABLE": "Not applicable", "UNKNOWN": "Unknown"}.get(chunk.verification_status, "Unknown"),

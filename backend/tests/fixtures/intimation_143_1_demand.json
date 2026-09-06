@@ -1,0 +1,25 @@
+{
+  "section": "143(1)",
+  "assessment_year": "2025-26",
+  "issue_date": "2026-08-28",
+  "official_reference": "ITD-DEMO-1431-DEMAND-001",
+  "official_text": "Income Tax Department. Intimation under section 143(1) for Assessment Year 2025-26. Tax computed after processing. Demand payable Rs. 12,000 due to a difference in tax calculation.",
+  "intimation_facts": {
+    "outcome": "demand",
+    "returned_total_income": 900000,
+    "processed_total_income": 900000,
+    "tax_on_return": 108000,
+    "tax_on_processed": 120000,
+    "refund_amount": 0,
+    "demand_amount": 12000,
+    "discrepancies": [
+      {
+        "type": "tax_calculation",
+        "title": "Tax calculation difference",
+        "description": "Tax in the processed computation is higher than tax shown in the filed return.",
+        "amount": 12000,
+        "page": 1
+      }
+    ]
+  }
+}

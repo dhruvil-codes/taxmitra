@@ -1,0 +1,25 @@
+{
+  "section": "143(1)",
+  "assessment_year": "2024-25",
+  "issue_date": "2026-08-28",
+  "official_reference": "ITD-DEMO-1431-CALC-001",
+  "official_text": "Income Tax Department. Intimation under section 143(1) for Assessment Year 2024-25. The tax and interest computed in processing differ from the return.",
+  "intimation_facts": {
+    "outcome": "tax_difference",
+    "returned_total_income": 780000,
+    "processed_total_income": 780000,
+    "tax_on_return": 93600,
+    "tax_on_processed": 100000,
+    "refund_amount": 0,
+    "demand_amount": 6400,
+    "discrepancies": [
+      {
+        "type": "tax_calculation",
+        "title": "Tax and interest calculation difference",
+        "description": "The processed tax and interest figure differs from the amount in the filed return.",
+        "amount": 6400,
+        "page": 2
+      }
+    ]
+  }
+}

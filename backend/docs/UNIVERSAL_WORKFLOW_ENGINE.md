@@ -7,8 +7,11 @@ Tax Mitra routes every extracted Income Tax communication through
 Current capability map:
 
 - `income_mismatch_143_1a` and `scrutiny_142_1`: fully guided, backward-compatible workflows.
-- `defective_return_139_9` and general `income_intimation_143_1`: partial guided workflows with confirmed requests and no unsafe legal drafting.
-- 133(6), 154, TDS mismatch, 245, outstanding demand/refund, and AO clarification: explanation-only.
+- `defective_return_139_9`: partial guided workflow with confirmed defects and no unsafe legal drafting.
+- `income_intimation_143_1`: guided final-processing workflow that explains refund, demand, tax-calculation, tax-credit and no-action outcomes and routes only to verified taxpayer-controlled portal actions.
+- `rectification_154` and `tax_credit_tds_mismatch`: guided rectification and credit-mismatch workflows with record-based eligibility, evidence, taxpayer/deductor routing, and safe-stop boundaries.
+- `demand_adjustment_245` and `outstanding_tax_demand`: guided demand-response workflow covering correct, paid, fully disputed, and partially disputed demand states; payment and submission remain on the official portal.
+- 133(6), refund communications, and AO clarification: explanation-only. Section 245 and outstanding demand are guided demand-response workflows; refund reissue remains explanation-only.
 - Reassessment, penalty, ambiguous, and unknown communications: useful safe-stop.
 
 The backend owns classification and workflow decisions. Classification returns

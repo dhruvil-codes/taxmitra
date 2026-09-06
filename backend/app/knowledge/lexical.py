@@ -18,6 +18,7 @@ from functools import lru_cache
 from app.config import Settings
 from app.knowledge.corpus_loader import Chunk, load_corpus
 from app.knowledge.retriever import RetrievalResult
+from app.knowledge.versioning import Applicability, chunk_matches_context, resolve_applicability
 
 _SECTION_RE = re.compile(r"\d+\([0-9a-zA-Z]+\)(?:\([0-9a-zA-Z]+\))*")
 _SECTION_REF_RE = re.compile(r"\b(?:section|u/s)\s*(\d+(?:\([0-9a-zA-Z]+\))*)", re.I)
@@ -63,9 +64,13 @@ class LexicalRetriever:
         confidence_floor: float | None = None,
         assessment_year: str | None = None,
         tax_year: str | None = None,
+        applicability: Applicability | None = None,
+        workflow_context: str | None = None,
     ) -> RetrievalResult:
         k = top_k or self._default_k
         floor = confidence_floor if confidence_floor is not None else self._default_floor
+        if applicability is None and (assessment_year or tax_year):
+            applicability = resolve_applicability(assessment_year, tax_year)
         query_tokens = tokenize(query)
         total_weight = sum(self._idf.get(t, math.log(1 + len(self._chunks))) for t in query_tokens)
         if total_weight <= 0:
@@ -73,12 +78,16 @@ class LexicalRetriever:
 
         scored: list[tuple[float, int]] = []
         for i, bag in enumerate(self._tokens):
+            chunk = self._chunks[i]
+            if chunk.status in {"SUPERSEDED", "HISTORICAL"}:
+                continue
+            if applicability and not chunk_matches_context(chunk, applicability, workflow_context):
+                continue
             matched = sum(self._idf[t] for t in query_tokens if t in bag)
             score = matched / total_weight
             if matched <= 0:
                 scored.append((0.0, i))
                 continue
-            chunk = self._chunks[i]
             # Legal references and verified/current official sources outrank
             # merely similar prose.
             section_tokens = {t for t in query_tokens if _SECTION_RE.fullmatch(t)}
@@ -102,6 +111,10 @@ class LexicalRetriever:
                     score += 0.16
                 elif chunk.tax_year and "onward" not in chunk.tax_year.lower():
                     score -= 0.20
+            if applicability and applicability.act_version and chunk.act_version:
+                score += 0.18
+            if workflow_context and workflow_context.lower() in " ".join(chunk.workflow_context).lower():
+                score += 0.12
             scored.append((score, i))
         scored.sort(key=lambda pair: (-pair[0], pair[1]))
 

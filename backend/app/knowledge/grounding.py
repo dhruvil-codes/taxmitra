@@ -17,6 +17,7 @@ from app.config import Settings
 from app.knowledge.embedder import AIUnavailableError, Embedder
 from app.knowledge.lexical import build_lexical_retriever
 from app.knowledge.retriever import Retriever, RetrievalResult
+from app.knowledge.versioning import resolve_applicability
 
 
 def available_method(settings: Settings) -> str:
@@ -34,15 +35,25 @@ def ground(
     top_k: int | None = None,
     assessment_year: str | None = None,
     tax_year: str | None = None,
+    act_version: str | None = None,
+    workflow_context: str | None = None,
 ) -> RetrievalResult:
+    applicability = resolve_applicability(assessment_year, tax_year, act_version)
+    if applicability.ambiguous:
+        return RetrievalResult(
+            chunks=(), scores=(), confidence=0.0, below_floor=True,
+            method=available_method(settings), ambiguous=True,
+            reason="Assessment Year, Tax Year and Act version point to conflicting applicability.",
+        )
     if available_method(settings) == "embedding":
         try:
             retriever = Retriever.load(settings)
             assert retriever is not None  # available_method() checked
             vector = Embedder(settings).embed_texts([query])[0]
-            return retriever.retrieve(vector, top_k=top_k, assessment_year=assessment_year, tax_year=tax_year)
+            return retriever.retrieve(vector, top_k=top_k, assessment_year=assessment_year, tax_year=tax_year, applicability=applicability, workflow_context=workflow_context)
         except AIUnavailableError:
             pass  # fall through to lexical — grounding degrades, never dies
     return build_lexical_retriever(settings).retrieve(
-        query, top_k=top_k, assessment_year=assessment_year, tax_year=tax_year
+        query, top_k=top_k, assessment_year=assessment_year, tax_year=tax_year,
+        applicability=applicability, workflow_context=workflow_context,
     )

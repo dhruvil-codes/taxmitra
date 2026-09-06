@@ -67,6 +67,11 @@ def _due_date_for_notice(notice: dict, category: NoticeCategory) -> date | None:
 
 
 def _title_for_category(category: NoticeCategory) -> dict[str, str]:
+    if category == NoticeCategory.DEFECTIVE_RETURN_139_9:
+        return {
+            "en": "139(9) defective return notice",
+            "hi": "धारा 139(9) दोषपूर्ण रिटर्न नोटिस",
+        }
     if category == NoticeCategory.INCOME_MISMATCH_143_1A:
         return {
             "en": "Income mismatch - adjustment proposed",

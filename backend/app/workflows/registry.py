@@ -40,7 +40,12 @@ class WorkflowDefinition:
             data[key] = list(data[key])
         data["capability"] = self.capability.value
         data["supported"] = self.supported
-        data["status"] = "supported" if self.supported else "safe_stop"
+        data["status"] = {
+            WorkflowCapability.SUPPORTED: "supported",
+            WorkflowCapability.PARTIAL_SUPPORT: "partial_support",
+            WorkflowCapability.EXPLANATION_ONLY: "explanation_only",
+            WorkflowCapability.SAFE_STOP: "safe_stop",
+        }[self.capability]
         data["legacy_supported"] = self.supported
         return data
 
@@ -73,15 +78,15 @@ def _w(workflow_id: str, category: str, title: dict[str, str], capability: Workf
 
 _WORKFLOWS: tuple[WorkflowDefinition, ...] = (
     _w("defective_return_139_9", "defective_return_139_9", {"en": "139(9) defective return", "hi": "धारा 139(9) दोषपूर्ण रिटर्न"}, WorkflowCapability.PARTIAL_SUPPORT, ("139(9)", "defective return", "defect notice", "remove the defects"), ("notice section", "defect description", "correction deadline"), "journey", question_plan="universal defective-return plan", response="defect explanation, correction checklist, and taxpayer-controlled portal action"),
-    _w("income_intimation_143_1", "income_intimation_143_1", {"en": "143(1) processing intimation", "hi": "धारा 143(1) प्रसंस्करण सूचना"}, WorkflowCapability.PARTIAL_SUPPORT, ("143(1)", "intimation under section 143", "processed return", "refund", "tax payable"), ("notice section", "assessment year", "tax/refund figures", "response or follow-up action"), "journey", question_plan="universal intimation plan", response="explain figures and route to verified follow-up action"),
+    _w("income_intimation_143_1", "income_intimation_143_1", {"en": "143(1) processing intimation", "hi": "धारा 143(1) प्रसंस्करण सूचना"}, WorkflowCapability.SUPPORTED, ("143(1)", "intimation under section 143", "processed return", "refund", "tax payable"), ("notice section", "assessment year", "tax/refund figures", "response or follow-up action"), "journey", question_plan="minimum intimation action plan", response="explain the processed figures and prepare a taxpayer-controlled follow-up action"),
     _w("income_mismatch_143_1a", "income_mismatch_143_1a", {"en": "143(1)(a) income mismatch", "hi": "धारा 143(1)(a) आय बेमेल"}, WorkflowCapability.SUPPORTED, ("143(1)(a)", "income mismatch", "adjustment proposed", "proposed adjustment"), ("notice section", "assessment year", "proposed adjustment", "taxpayer position"), "journey", "app.routers.workflow", "existing /api/workflow/questions", "existing 143(1)(a) checklist", "existing response path and human approval"),
     _w("scrutiny_142_1", "scrutiny_142_1", {"en": "142(1) scrutiny information request", "hi": "धारा 142(1) जांच सूचना अनुरोध"}, WorkflowCapability.SUPPORTED, ("142(1)", "annexure", "information and documents", "furnish the information"), ("notice section", "assessment year", "original requests", "response deadline"), "scrutiny", "app.routers.scrutiny", "existing scrutiny minimum-question plan", "existing scrutiny evidence mapping", "existing response and human approval"),
     _w("scrutiny_information_133_6", "scrutiny_information_133_6", {"en": "133(6) information request", "hi": "धारा 133(6) सूचना अनुरोध"}, WorkflowCapability.EXPLANATION_ONLY, ("133(6)", "section 133(6)", "information under section 133"), ("notice section", "requested information", "deadline")),
-    _w("rectification_154", "rectification_154", {"en": "Section 154 rectification", "hi": "धारा 154 सुधार"}, WorkflowCapability.EXPLANATION_ONLY, ("154", "section 154", "rectification"), ("notice section", "error or adjustment", "assessment year")),
-    _w("rectification_tax_credit_mismatch", "rectification_tax_credit_mismatch", {"en": "Rectification or tax credit mismatch", "hi": "सुधार या कर क्रेडिट बेमेल"}, WorkflowCapability.EXPLANATION_ONLY, ("rectification", "tax credit mismatch", "tds credit mismatch", "credit mismatch"), ("notice section", "mismatch or error", "assessment year", "supporting records")),
-    _w("tax_credit_tds_mismatch", "tax_credit_tds_mismatch", {"en": "Tax credit / TDS mismatch", "hi": "कर क्रेडिट / TDS बेमेल"}, WorkflowCapability.EXPLANATION_ONLY, ("tds mismatch", "tax credit mismatch", "form 26as", "ais mismatch"), ("assessment year", "credit mismatch", "supporting records")),
-    _w("demand_adjustment_245", "demand_adjustment_245", {"en": "Section 245 demand adjustment", "hi": "धारा 245 मांग समायोजन"}, WorkflowCapability.EXPLANATION_ONLY, ("245", "section 245", "adjustment against demand", "refund adjusted"), ("notice section", "outstanding demand", "refund", "deadline")),
-    _w("outstanding_tax_demand", "outstanding_tax_demand", {"en": "Outstanding tax demand", "hi": "बकाया कर मांग"}, WorkflowCapability.EXPLANATION_ONLY, ("outstanding demand", "tax demand", "demand notice"), ("demand amount", "assessment year", "payment or dispute status")),
+    _w("rectification_154", "rectification_154", {"en": "Section 154 rectification", "hi": "धारा 154 सुधार"}, WorkflowCapability.SUPPORTED, ("154", "section 154", "rectification"), ("notice section", "error or adjustment", "assessment year", "rectification type"), "journey", question_plan="minimum rectification eligibility plan", response="prepare a taxpayer-reviewed rectification route"),
+    _w("rectification_tax_credit_mismatch", "rectification_tax_credit_mismatch", {"en": "Rectification or tax credit mismatch", "hi": "सुधार या कर क्रेडिट बेमेल"}, WorkflowCapability.SUPPORTED, ("rectification", "tax credit mismatch", "tds credit mismatch", "credit mismatch"), ("notice section", "mismatch or error", "assessment year", "supporting records"), "journey", question_plan="minimum tax-credit correction plan", response="prepare a taxpayer-reviewed tax-credit correction route"),
+    _w("tax_credit_tds_mismatch", "tax_credit_tds_mismatch", {"en": "Tax credit / TDS mismatch", "hi": "कर क्रेडिट / TDS बेमेल"}, WorkflowCapability.SUPPORTED, ("tds mismatch", "tax credit mismatch", "form 26as", "ais mismatch"), ("assessment year", "credit mismatch", "supporting records", "credit type"), "journey", question_plan="minimum tax-credit correction plan", response="prepare a taxpayer-reviewed tax-credit correction or deductor follow-up"),
+    _w("demand_adjustment_245", "demand_adjustment_245", {"en": "Section 245 demand adjustment", "hi": "धारा 245 मांग समायोजन"}, WorkflowCapability.SUPPORTED, ("245", "section 245", "adjustment against demand", "refund adjusted"), ("notice section", "outstanding demand", "refund", "deadline", "demand status"), "journey", question_plan="minimum demand response plan", response="prepare a taxpayer-reviewed demand response and payment/evidence route"),
+    _w("outstanding_tax_demand", "outstanding_tax_demand", {"en": "Outstanding tax demand", "hi": "बकाया कर मांग"}, WorkflowCapability.SUPPORTED, ("outstanding demand", "tax demand", "demand notice"), ("demand amount", "assessment year", "payment or dispute status"), "journey", question_plan="minimum demand response plan", response="prepare a taxpayer-reviewed demand response and payment/evidence route"),
     _w("refund_communication", "refund_communication", {"en": "Refund communication", "hi": "रिफंड सूचना"}, WorkflowCapability.EXPLANATION_ONLY, ("refund communication", "refund status", "refund issued"), ("assessment year", "refund amount", "bank details")),
     _w("reassessment_148", "reassessment_148", {"en": "Section 148 reassessment", "hi": "धारा 148 पुनर्मूल्यांकन"}, WorkflowCapability.SAFE_STOP, ("148", "section 148", "reassessment"), ("notice section", "issue date", "response deadline")),
     _w("reassessment_148a", "reassessment_148a", {"en": "Section 148A proceedings", "hi": "धारा 148A कार्यवाही"}, WorkflowCapability.SAFE_STOP, ("148a", "section 148a", "show cause notice"), ("notice section", "issue date", "response deadline")),
@@ -124,8 +129,9 @@ def _section_candidate(text: str) -> WorkflowDefinition | None:
     if "148a" in normalized or "148(a)" in normalized: return _BY_CATEGORY["reassessment_148a"]
     if re.search(r"(?:section|u/s|under)148\b", normalized) or normalized.startswith("148"): return _BY_CATEGORY["reassessment_148"]
     if "133(6)" in normalized: return _BY_CATEGORY["scrutiny_information_133_6"]
+    if ("tds" in normalized or "tcs" in normalized or "26as" in normalized or "taxcredit" in normalized) and ("mismatch" in normalized or "credit" in normalized): return _BY_CATEGORY["tax_credit_tds_mismatch"]
     if "154" in normalized and ("rectif" in normalized or normalized.startswith("section154")): return _BY_CATEGORY["rectification_154"]
-    if re.search(r"(?:section|u/s|under)245\b", normalized) or normalized.startswith("245") or "adjustment against demand" in normalized: return _BY_CATEGORY["demand_adjustment_245"]
+    if "section245" in normalized or "u/s245" in normalized or "under245" in normalized or normalized.startswith("245") or "adjustment against demand" in normalized: return _BY_CATEGORY["demand_adjustment_245"]
     if "143(1)" in normalized: return _BY_CATEGORY["income_intimation_143_1"]
     return None
 

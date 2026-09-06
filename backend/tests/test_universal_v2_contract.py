@@ -1,4 +1,4 @@
-from app.workflows.handlers import GuidedPartialHandler, get_workflow_handler
+from app.workflows.handlers import DefectiveReturn1399Handler, get_workflow_handler
 from app.workflows.registry import WorkflowCapability, classify_extracted_notice, get_workflow, list_workflows
 
 
@@ -29,9 +29,9 @@ def test_high_risk_and_ambiguous_content_safe_stop_without_response():
 def test_p0_partial_handler_requires_confirmation_and_preserves_requests():
     notice = {"synthetic_extraction": {"requests": [{"id": "r1", "original_text": "Remove the defect shown in the return.", "response_section": "139(9)", "page_number": 2}]}}
     handler = get_workflow_handler("defective_return_139_9")
-    assert isinstance(handler, GuidedPartialHandler)
+    assert isinstance(handler, DefectiveReturn1399Handler)
     assert handler.get_questions(notice)["request_count"] == 1
     assert handler.resolve(notice, {"notice_extraction_confirmed": "unsure"})["status"] == "safe_stop"
-    result = handler.resolve(notice, {"notice_extraction_confirmed": "yes"})
+    result = handler.resolve(notice, {"defect_extraction_confirmed": "yes", "defect_position": "agree", "correction_route": "online_correction"})
     assert result["status"] == "partial_support"
-    assert result["requests"][0]["original_text"].startswith("Remove")
+    assert "defect" in result["draft"]

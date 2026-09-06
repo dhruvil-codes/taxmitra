@@ -21,7 +21,7 @@ def test_registry_contains_initial_workflow_implementations_and_safe_stops():
     } <= workflows.keys()
     assert workflows["income_mismatch_143_1a"]["supported"] is True
     assert workflows["scrutiny_142_1"]["supported"] is True
-    assert workflows["defective_return_139_9"]["status"] == "safe_stop"
+    assert workflows["defective_return_139_9"]["status"] == "partial_support"
 
 
 def test_extracted_content_routes_without_structured_section_and_stops_low_confidence():
@@ -68,9 +68,9 @@ def test_generic_workflow_api_is_additive_and_notice_metadata_is_generic():
 def test_classified_frontend_entries_route_supported_and_safe_stop_workflows():
     assert classify_extracted_notice({"section": "143(1)(a)"}).payload()["status"] == "supported"
     assert classify_extracted_notice({"section": "142(1)"}).payload()["status"] == "supported"
+    assert classify_extracted_notice({"official_text": "rectification under section 154 with a mistake apparent from record"}).status == "supported"
     for notice in (
         {"section": "139(9)"},
-        {"official_text": "rectification under section 154"},
         {"official_text": "Assessing Officer clarification notice"},
     ):
         result = classify_extracted_notice(notice)

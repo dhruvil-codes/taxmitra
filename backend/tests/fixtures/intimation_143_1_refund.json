@@ -1,0 +1,17 @@
+{
+  "section": "143(1)",
+  "assessment_year": "2025-26",
+  "issue_date": "2026-08-28",
+  "official_reference": "ITD-DEMO-1431-REFUND-001",
+  "official_text": "Income Tax Department. Intimation under section 143(1) for Assessment Year 2025-26. Return processed. Refund determined at Rs. 18,000.",
+  "intimation_facts": {
+    "outcome": "refund",
+    "returned_total_income": 850000,
+    "processed_total_income": 850000,
+    "tax_on_return": 102000,
+    "tax_on_processed": 102000,
+    "refund_amount": 18000,
+    "demand_amount": 0,
+    "discrepancies": []
+  }
+}

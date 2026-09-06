@@ -18,6 +18,23 @@ workflow documents into 116 chunks and retains the existing 15 demo chunks.
 | NOTIFICATION-6-2021 | CBDT Faceless Assessment notification | VERIFIED_OFFICIAL / HISTORICAL | Yes, penalized |
 | 1399-FAQ | Section 139(9) official FAQ | VERIFIED_OFFICIAL / CURRENT | Yes |
 
+The V2 authoritative overlay reuses the same loader and retrieval path and
+adds these directly verified portal records (each chunk carries publication,
+update, AY/TY, Act-version, effective-period, workflow-context, status and
+provenance metadata):
+
+| Source ID | Authority/material | Status | Default |
+|---|---|---|---|
+| ITD-EPROCEEDINGS-2026 | Current e-Proceedings manual/response routes | VERIFIED_OFFICIAL / CURRENT | Yes |
+| ITD-143-1-INTIMATION-2026 | Final 143(1) CPC intimation and rectification route | VERIFIED_OFFICIAL / CURRENT | Yes |
+| ITD-RECTIFICATION-2026 | CPC rectification request types and boundaries | VERIFIED_OFFICIAL / CURRENT | Yes |
+| ITD-EPROCEEDINGS-ACT2025-2026 | 1961/2025 Act transition FAQ | VERIFIED_OFFICIAL / CURRENT | Yes |
+| ITD-TAX-CREDIT-MISMATCH-2026 | Tax Credit Mismatch and rectification manuals | VERIFIED_OFFICIAL / CURRENT | Yes |
+| ITD-DEMAND-REFUND-2026 | Outstanding demand and refund reissue manuals | VERIFIED_OFFICIAL / CURRENT | Yes |
+| ITD-REASSESSMENT-2026 | Reassessment transition FAQ | VERIFIED_OFFICIAL / CURRENT | Yes, explanation/safe-stop only |
+| ITD-COMPLIANCE-AIS-2026 | AIS, e-Campaign, e-Verification and Compliance Portal | VERIFIED_OFFICIAL / CURRENT | Yes |
+| ITD-PENALTY-PROCEEDINGS-2026 | e-Proceedings penalty boundary guidance | VERIFIED_OFFICIAL / CURRENT | Yes, safe-stop only |
+
 The pack also contains current 2025 Act/2026 Rules/form material, Finance Act
 and Finance Bill material, validation PDFs, taxpayer guidance, and lower-
 priority FAQs. Run the ingestion script with `--all` only after reviewing those

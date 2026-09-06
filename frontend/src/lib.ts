@@ -172,8 +172,17 @@ export interface Question {
   options: { id: string; label: string }[];
   question_type?: QuestionType;
   required?: boolean;
-  conditions?: Record<string, string>[];
+  conditions?: QuestionCondition[];
   related_request_ids?: string[];
+}
+
+export interface QuestionCondition {
+  depends_on?: string;
+  question_id?: string;
+  equals?: string;
+  value?: string;
+  one_of?: string[];
+  values?: string[];
 }
 
 export type QuestionType = "single_choice" | "multi_choice" | "choice_with_other" | "text" | "yes_no" | "number" | "date" | "multiple_choice" | "free_text" | "document_availability" | "confirmation";

@@ -29,7 +29,13 @@ def test_classification(section, expected):
 def test_release_candidate_support_scope():
     assert SUPPORTED_CATEGORIES == {
         NoticeCategory.INCOME_MISMATCH_143_1A,
+        NoticeCategory.INCOME_INTIMATION_143_1,
         NoticeCategory.SCRUTINY_142_1,
+        NoticeCategory.RECTIFICATION_154,
+        NoticeCategory.RECTIFICATION_TAX_CREDIT_MISMATCH,
+        NoticeCategory.TAX_CREDIT_TDS_MISMATCH,
+        NoticeCategory.DEMAND_ADJUSTMENT_245,
+        NoticeCategory.OUTSTANDING_TAX_DEMAND,
     }
     assert is_supported(NoticeCategory.INCOME_MISMATCH_143_1A)
     assert is_supported(NoticeCategory.SCRUTINY_142_1)

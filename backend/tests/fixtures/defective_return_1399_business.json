@@ -1,0 +1,12 @@
+{
+  "section": "139(9)",
+  "issue_date": "2026-08-20",
+  "assessment_year": "2025-26",
+  "official_text": "Defective Return Notice under section 139(9). The return reports business income but the Balance Sheet and Profit and Loss Account schedules are incomplete.",
+  "synthetic_extraction": {
+    "requires_human_confirmation": true,
+    "requests": [
+      {"id": "defect-business-schedules", "original_text": "The return reports business income but the Balance Sheet and Profit and Loss Account schedules are incomplete.", "page_number": 2}
+    ]
+  }
+}

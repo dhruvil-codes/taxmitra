@@ -1,0 +1,13 @@
+{
+  "section": "139(9)",
+  "issue_date": "2026-08-20",
+  "assessment_year": "2025-26",
+  "official_text": "Defective Return Notice under section 139(9). Defect 1: TDS credit claimed but corresponding receipts were not offered. Defect 2: Name in the ITR does not match the PAN database.",
+  "synthetic_extraction": {
+    "requires_human_confirmation": true,
+    "requests": [
+      {"id": "defect-tds", "original_text": "TDS credit claimed but corresponding receipts were not offered.", "page_number": 1},
+      {"id": "defect-pan", "original_text": "Name in the ITR does not match the PAN database.", "page_number": 1}
+    ]
+  }
+}

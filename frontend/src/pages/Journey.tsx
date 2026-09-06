@@ -18,7 +18,8 @@ function questionIsVisible(question: Question, answers: Record<string, QuestionA
     const dependency = condition.depends_on ?? condition.question_id;
     const expected = condition.equals ?? condition.value;
     const answer = dependency ? answers[dependency] : undefined;
-    return !dependency || expected === undefined || (typeof answer === "string" && answer === expected);
+    const allowed = condition.one_of ?? condition.values;
+    return !dependency || (Array.isArray(allowed) ? allowed.includes(String(answer)) : expected === undefined || (typeof answer === "string" && answer === expected));
   });
 }
 

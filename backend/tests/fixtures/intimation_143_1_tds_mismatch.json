@@ -1,0 +1,25 @@
+{
+  "section": "143(1)",
+  "assessment_year": "2025-26",
+  "issue_date": "2026-08-28",
+  "official_reference": "ITD-DEMO-1431-TDS-001",
+  "official_text": "Income Tax Department. Intimation under section 143(1) for Assessment Year 2025-26. Tax credit differs from the credit claimed in the return. TDS credit allowed Rs. 35,000; TDS credit claimed Rs. 50,000.",
+  "intimation_facts": {
+    "outcome": "tax_credit_mismatch",
+    "returned_total_income": 700000,
+    "processed_total_income": 700000,
+    "tax_on_return": 84000,
+    "tax_on_processed": 99000,
+    "refund_amount": 0,
+    "demand_amount": 15000,
+    "discrepancies": [
+      {
+        "type": "tds_mismatch",
+        "title": "TDS credit mismatch",
+        "description": "The tax credit allowed in processing is lower than the TDS credit claimed in the return.",
+        "amount": 15000,
+        "page": 1
+      }
+    ]
+  }
+}

@@ -82,7 +82,12 @@ def _frontmatter(record: dict, chunk_id: str) -> str:
         "verification_status": record.get("verification_status", "NEEDS_REVIEW"), "rule": record.get("rule", ""),
         "form": record.get("form", ""), "assessment_year": record.get("assessment_year", ""),
         "tax_year": record.get("tax_year", ""), "effective_from": record.get("effective_from", ""),
-        "effective_to": record.get("effective_to", ""), "status": record.get("status", "UNKNOWN"),
+        "effective_to": record.get("effective_to", ""),
+        "publication_date": record.get("publication_date", record.get("published_on", "")),
+        "update_date": record.get("update_date", record.get("last_updated", "")),
+        "act_version": record.get("act_version", ""),
+        "workflow_context": record.get("workflow_context", ""),
+        "status": record.get("status", "UNKNOWN"),
         "tags": ", ".join(filter(None, [record.get("topic", ""), record.get("act_section", "")])),
     }
     lines = ["---"] + [f'{key}: "{str(value).replace(chr(34), chr(39))}"' for key, value in values.items()] + ["---"]

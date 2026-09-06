@@ -1,0 +1,17 @@
+{
+  "section": "143(1)",
+  "assessment_year": "2025-26",
+  "issue_date": "2026-08-28",
+  "official_reference": "ITD-DEMO-1431-ACCEPTED-001",
+  "official_text": "Income Tax Department. Intimation under section 143(1) for Assessment Year 2025-26. Return processed. Returned and processed income and tax agree. No demand and no refund.",
+  "intimation_facts": {
+    "outcome": "no_action",
+    "returned_total_income": 600000,
+    "processed_total_income": 600000,
+    "tax_on_return": 72000,
+    "tax_on_processed": 72000,
+    "refund_amount": 0,
+    "demand_amount": 0,
+    "discrepancies": []
+  }
+}

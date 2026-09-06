@@ -4,7 +4,8 @@ The runtime corpus is `app/knowledge/corpus/`. Each Markdown chunk uses
 frontmatter that preserves both the legacy citation fields and source-pack
 provenance: `source_id`, `document_title`, `document_type`,
 `official_organization`, `source_url`, `section`, `rule`, `form`,
-`assessment_year`, `tax_year`, `effective_from`, `effective_to`, `status`,
+`assessment_year`, `tax_year`, `effective_from`, `effective_to`,
+`publication_date`, `update_date`, `act_version`, `workflow_context`, `status`,
 and `verification_status`.
 
 ## Ingestion
@@ -23,17 +24,19 @@ the chunks and prints document/chunk counts.
 
 Only `VERIFIED_OFFICIAL` material should be used for consequential guidance.
 `NEEDS_REVIEW`, `UNKNOWN`, `SUPERSEDED`, and `HISTORICAL` metadata remain
-visible to retrieval and are not silently promoted.
+auditable, but superseded and historical items are excluded from normal
+retrieval so they cannot override current guidance.
 
 ## Retrieval and legal versions
 
 Lexical retrieval remains the offline/`DEMO_MODE` path. Exact section
 references receive priority, followed by verified/current authority. Historical
-or superseded material is penalized. A query must carry its assessment year or
-tax year when the legal regime matters; the retriever must not combine the
-Income-tax Act, 1961 with the Income-tax Act, 2025 without an applicability
-decision. Embedding retrieval remains optional and uses the same enriched
-chunks and confidence floor.
+or superseded material is excluded from normal retrieval. A query must carry
+its assessment year or tax year when the legal regime matters; the retriever
+must not combine the Income-tax Act, 1961 with the Income-tax Act, 2025 without
+an applicability decision. Conflicting AY/TY/Act signals produce an ambiguity
+refusal. Embedding retrieval remains optional and uses the same enriched chunks
+and confidence floor.
 
 ## Citations and refusal
 

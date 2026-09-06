@@ -8,7 +8,7 @@ The engine follows:
 
 `PDF validation -> page-aware text/OCR extraction -> grounded classification -> workflow registry -> minimum questions -> evidence mapping -> response draft -> human review -> official portal`
 
-The registry is extensible and covers return/filing, processing, scrutiny/information, rectification, demand/refund, reassessment, penalty and unknown communications. `143(1)(a)` and `142(1)` are fully guided; `139(9)` and general `143(1)` have grounded partial guidance that stops before unsupported legal drafting. Section 133(6), rectification/TDS mismatch, Section 245, outstanding demand/refund, and AO clarification are explanation-only. Reassessment, penalty, ambiguous classification, weak extraction, weak grounding, unsupported notices, missing information and uncertain answers safe-stop with useful facts and official next steps.
+The registry is extensible and covers return/filing, processing, scrutiny/information, rectification, demand/refund, reassessment, penalty and unknown communications. `143(1)(a)`, `143(1)`, `142(1)`, Section 154, tax-credit mismatch, and Section 245/outstanding-demand responses are guided workflows; `139(9)` remains partial support and stops before unsupported legal drafting. Section 133(6), outstanding demand/refund communications outside the supported demand paths, and AO clarification are explanation-only. Reassessment, penalty, ambiguous classification, weak extraction, weak grounding, unsupported notices, missing information and uncertain answers safe-stop with useful facts and official next steps.
 
 AI explains and drafts, deterministic rules decide, and a human approves. Official portal handoff is guidance only.
 
