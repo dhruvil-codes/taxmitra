@@ -104,17 +104,31 @@ def _numbered_requests(pages: tuple[dict, ...]) -> list[dict]:
     return found
 
 
+def _has_embedded_image(page: object) -> bool:
+    """Detect image-backed pages without requiring a text layer."""
+    try:
+        return bool(getattr(page, "images"))
+    except (AttributeError, TypeError, ValueError):
+        return False
+
+
 def ingest_pdf(content: bytes, filename: str | None, content_type: str | None, ocr_provider: OcrProvider | None = None) -> IngestionResult:
     fingerprint = hashlib.sha256(content).hexdigest()
     validation = validate_pdf(content, filename, content_type)
     if not validation.ok:
         return IngestionResult({}, (), (), "uploaded", False, 0.0, (validation.message or "The PDF could not be processed.",), validation.code, 0, fingerprint, "none")
 
-    pages = tuple({"page_number": i + 1, "text": (page.extract_text() or ""), "source": "text", "confidence": 0.88} for i, page in enumerate(validation.reader.pages))
+    source_pages = tuple(validation.reader.pages)
+    pages = tuple({"page_number": i + 1, "text": (page.extract_text() or ""), "source": "text", "confidence": 0.88} for i, page in enumerate(source_pages))
     # Short pages can still be perfectly usable (for example a one-line
     # continuation or a numbered annexure item). Only OCR genuinely sparse
     # pages; this is the mixed-PDF fast path.
-    weak_pages = tuple(page["page_number"] for page in pages if len(page["text"].strip()) < 20)
+    image_pages = {i + 1 for i, page in enumerate(source_pages) if _has_embedded_image(page)}
+    weak_pages = tuple(
+        page["page_number"]
+        for page in pages
+        if len(page["text"].strip()) < 20 or (page["page_number"] in image_pages and len(page["text"].strip()) < 120)
+    )
     method = "text"
     warnings: list[str] = []
     if weak_pages:
@@ -136,8 +150,11 @@ def ingest_pdf(content: bytes, filename: str | None, content_type: str | None, o
             warnings.append("One or more pages remain unreadable after OCR. Review the original PDF before continuing.")
     full_text = "\n".join(page["text"] for page in pages)
     metadata = _metadata(full_text)
+    meaningful_characters = len(re.sub(r"\W", "", full_text, flags=re.UNICODE))
+    if meaningful_characters < 20:
+        return IngestionResult(metadata, (), pages, "needs_confirmation", False, 0.0, tuple(warnings) + ("The extracted pages do not contain enough readable text for classification.",), "low_extraction_confidence", len(pages), fingerprint, method)
     if not metadata["section"]:
-        return IngestionResult(metadata, (), pages, "unsupported", False, 0.0, tuple(warnings) + ("No registered Income Tax notice section was found in the extracted text.",), "unsupported_notice", len(pages), fingerprint, method)
+        warnings.append("No section reference was confidently extracted; communication classification will use the full notice language and structure.")
     requests = _numbered_requests(pages)
     if not requests:
         # 143(1)(a) is a mismatch/intimation workflow; it does not have the
@@ -147,7 +164,8 @@ def ingest_pdf(content: bytes, filename: str | None, content_type: str | None, o
         if metadata["section"] == "143(1)(a)":
             confidence = round(sum(page.get("confidence", 0.88) for page in pages) / len(pages), 3) if pages else 0.0
             return IngestionResult(metadata, (), pages, "needs_confirmation", True, confidence, tuple(warnings), None, len(pages), fingerprint, method)
-        return IngestionResult(metadata, (), pages, "needs_confirmation", False, 0.0, tuple(warnings) + ("No clearly numbered annexure or questionnaire requests were found.",), "missing_critical_information", len(pages), fingerprint, method)
+        confidence = round(sum(page.get("confidence", 0.88) for page in pages) / len(pages), 3) if pages else 0.0
+        return IngestionResult(metadata, (), pages, "needs_confirmation", True, confidence, tuple(warnings) + ("No clearly numbered annexure or questionnaire requests were found; classification will use the communication as a whole.",), None, len(pages), fingerprint, method)
     confidence = round(sum(page.get("confidence", 0.88) for page in pages) / len(pages), 3) if pages else 0.0
     if method in {"ocr", "mixed"}:
         warnings.append("OCR text is not authoritative. Compare the original wording, dates, identifiers, and page numbers before confirming.")

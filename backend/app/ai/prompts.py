@@ -8,6 +8,19 @@ import json
 from app.knowledge.corpus_loader import Chunk
 from app.rules.terminology import TERMINOLOGY_GUIDANCE
 
+
+NOTICE_CLASSIFICATION_SYSTEM = (
+    "You classify extracted Indian tax communications for a routing engine. "
+    "Use only the supplied extracted PDF text and page evidence. Do not invent "
+    "sections, deadlines, facts, or obligations. First decide whether the document "
+    "is an Indian Income Tax Department communication. If it is not, return false. "
+    "If it is, select exactly one category from the supplied registry. A missing or "
+    "poorly OCR'd section number must not prevent classification when department "
+    "language, headings, requests, dates, sender, and structure support a category. "
+    "If the evidence is insufficient, use unknown_income_tax_communication with low "
+    "confidence. Reply with one JSON object only."
+)
+
 EXPLAIN_SYSTEM = (
     "You explain Indian income tax notices to ordinary citizens in plain language. "
     "You answer ONLY from the provided context. If the context does not support an "
@@ -69,3 +82,37 @@ def build_translate_prompt(fields: dict, locale: str) -> tuple[str, str]:
         ensure_ascii=False,
     )
     return TRANSLATE_SYSTEM, user
+
+
+def build_notice_classification_prompt(notice: dict, workflows: list[dict]) -> tuple[str, str]:
+    """Build a grounded classifier prompt from the complete extracted notice."""
+    pages = notice.get("pages") or ()
+    page_text = "\n\n".join(
+        f"--- PAGE {page.get('page_number', '?')} ({page.get('source', 'unknown')}, confidence {page.get('confidence', 'unknown')}) ---\n"
+        f"{page.get('text', '')}"
+        for page in pages
+    )
+    if not page_text:
+        page_text = str(notice.get("official_text") or "")
+    registry = [
+        {"category": item["category"], "title": item["title"], "capability": item["capability"], "signals": item["classification_signals"]}
+        for item in workflows
+    ]
+    user = json.dumps(
+        {
+            "task": "Classify this complete extracted PDF for safe workflow routing.",
+            "required_json_fields": {
+                "is_income_tax_communication": "boolean",
+                "category": "one registry category or unknown_income_tax_communication",
+                "section": "section/proceeding as evidenced, or null",
+                "confidence": "number from 0 to 1",
+                "reason": "short evidence-grounded explanation",
+                "evidence": "array of objects with kind, value, page_number when known",
+            },
+            "registry": registry,
+            "extracted_metadata": {key: value for key, value in notice.items() if key not in {"pages", "official_text"}},
+            "complete_extracted_text": page_text,
+        },
+        ensure_ascii=False,
+    )
+    return NOTICE_CLASSIFICATION_SYSTEM, user

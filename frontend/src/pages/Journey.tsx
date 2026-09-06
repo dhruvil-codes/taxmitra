@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useI18n } from "../i18n";
-import { api, EvidenceRecommendation, NoticeCard, Question, ScrutinyRequest, UniversalWorkflowContract, WorkflowCapability } from "../lib";
-import { CapabilityBadge, CapabilityBoundary, ContractEvidence, ContractRequests } from "../components/UniversalWorkflow";
+import { api, EvidenceRecommendation, NoticeCard, Question, QuestionAnswer, ScrutinyRequest, UniversalWorkflowContract, WorkflowCapability } from "../lib";
+import { CapabilityBadge, CapabilityBoundary, ContractEvidence, ContractExplanation, ContractQuestion } from "../components/UniversalWorkflow";
 import { NoticeFactsCard, PrimaryButton, ScreenFrame, WorkflowLayout } from "../components";
 
 function userCapability(value: string | undefined): WorkflowCapability {
@@ -13,11 +13,12 @@ function questionText(question: Question): string { return question.text || "Ple
 function normalizeQuestion(question: Question & { question_id?: string; question?: string; why_we_are_asking?: string; type?: Question["question_type"] }): Question {
   return { id: question.id || question.question_id || "", text: question.text || question.question || "", help: question.help || question.why_we_are_asking || "", options: question.options || [], question_type: question.question_type || question.type, required: question.required, conditions: question.conditions, related_request_ids: question.related_request_ids };
 }
-function questionIsVisible(question: Question, answers: Record<string, string>): boolean {
+function questionIsVisible(question: Question, answers: Record<string, QuestionAnswer>): boolean {
   return (question.conditions ?? []).every((condition) => {
     const dependency = condition.depends_on ?? condition.question_id;
     const expected = condition.equals ?? condition.value;
-    return !dependency || expected === undefined || answers[dependency] === expected;
+    const answer = dependency ? answers[dependency] : undefined;
+    return !dependency || expected === undefined || (typeof answer === "string" && answer === expected);
   });
 }
 
@@ -28,7 +29,7 @@ export default function Journey() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [requests, setRequests] = useState<ScrutinyRequest[]>([]);
   const [evidence, setEvidence] = useState<EvidenceRecommendation[]>([]);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Record<string, QuestionAnswer>>({});
   const [questionIndex, setQuestionIndex] = useState(0);
   const [phase, setPhase] = useState<"understand" | "questions" | "evidence" | "review">("understand");
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
@@ -59,7 +60,7 @@ export default function Journey() {
   const title = contract?.title[locale] ?? contract?.title.en ?? "Income Tax communication";
   const responseDraft = typeof result?.draft === "string" ? result.draft : "";
   const checklist = Array.isArray(result?.checklist) ? result.checklist as { title?: Record<string, string>; why_needed?: Record<string, string> }[] : [];
-  const questionAnswer = (value: string) => {
+  const questionAnswer = (value: QuestionAnswer) => {
     if (!visibleQuestion) return;
     const next = { ...answers, [visibleQuestion.id]: value }; setAnswers(next);
     if (questionIndex + 1 < visibleQuestions.length) setQuestionIndex(questionIndex + 1);
@@ -75,10 +76,9 @@ export default function Journey() {
     <NoticeFactsCard notice={contract.notice} />
     <ScreenFrame whereAmI={`Step ${phase === "understand" ? "01" : phase === "questions" ? "03" : phase === "evidence" ? "04" : "06"} · ${phase}`} whatDoesThisMean={title} whatDoINeedToDo={capability === "SUPPORTED" ? "Review the communication, answer only the questions that change the action path, and approve the result before using the official portal." : "Review the extracted facts and follow only the next steps supported by this communication."} statusBadge={<CapabilityBadge capability={capability} locale={locale} />} secondaryAction={<Link to="/notices" className="app-back-link">← All notices</Link>}>
       <div className="space-y-6">
-        <div className="workflow-contract-meta"><span>{Math.round(contract.confidence * 100)}% confidence</span><span>{contract.groundingStatus}</span><span>{contract.category}</span></div>
-        {(capability === "SAFE_STOP" || capability === "EXPLANATION_ONLY") && <><div className="universal-section"><p className="app-section-label">[ WHAT WE FOUND ]</p><p className="app-lead">{contract.notice.official_text || contract.reason}</p></div><ContractRequests requests={requests} locale={locale} /><ContractEvidence evidence={evidence} locale={locale} /><CapabilityBoundary capability={capability} reason={contract.reason} nextSteps={contract.nextSteps} locale={locale} /></>}
-        {(capability === "SUPPORTED" || capability === "PARTIAL_SUPPORT") && phase === "understand" && <><ContractRequests requests={requests} locale={locale} />{!requests.length && <div className="universal-section"><p className="app-lead">This communication does not contain a separate request schedule. Review its figures and dates before continuing.</p></div>}<PrimaryButton onClick={() => setPhase(hasQuestions ? "questions" : "evidence")}>Continue →</PrimaryButton></>}
-        {(capability === "SUPPORTED" || capability === "PARTIAL_SUPPORT") && phase === "questions" && visibleQuestion && <div className="universal-section"><p className="app-section-label">[ QUESTION {questionIndex + 1} / {visibleQuestions.length} ]</p><h2 className="question-title">{questionText(visibleQuestion)}</h2><p className="app-body">{visibleQuestion.help}</p>{visibleQuestion.question_type === "free_text" ? <div className="mt-6"><textarea aria-label={visibleQuestion.text} className="w-full border border-slate-300 p-4" rows={5} value={answers[visibleQuestion.id] ?? ""} onChange={(event) => setAnswers({ ...answers, [visibleQuestion.id]: event.target.value })} /><PrimaryButton onClick={() => questionAnswer(answers[visibleQuestion.id] ?? "")}>Continue →</PrimaryButton></div> : <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">{visibleQuestion.options.map((option) => <button key={option.id} type="button" className="p-4 border bg-white font-semibold hover:border-blue-600" onClick={() => questionAnswer(option.id)}>{option.label}</button>)}</div>}</div>}
+        {(capability === "SAFE_STOP" || capability === "EXPLANATION_ONLY") && <><ContractExplanation capability={capability} title={title} reason={contract.reason} notice={contract.notice} requests={requests} nextSteps={contract.nextSteps} originalText={contract.notice.official_text} locale={locale} /><ContractEvidence evidence={evidence} locale={locale} /><CapabilityBoundary capability={capability} reason={contract.reason} nextSteps={contract.nextSteps} locale={locale} /></>}
+        {(capability === "SUPPORTED" || capability === "PARTIAL_SUPPORT") && phase === "understand" && <><ContractExplanation capability={capability} title={title} reason={contract.reason} notice={contract.notice} requests={requests} nextSteps={contract.nextSteps} originalText={contract.notice.official_text} locale={locale} />{!requests.length && <div className="universal-section"><p className="app-lead">This communication does not contain a separate request schedule. Review its figures and dates before continuing.</p></div>}<PrimaryButton onClick={() => setPhase(hasQuestions ? "questions" : "evidence")}>Continue →</PrimaryButton></>}
+        {(capability === "SUPPORTED" || capability === "PARTIAL_SUPPORT") && phase === "questions" && visibleQuestion && <div className="universal-section"><p className="app-section-label">Question {questionIndex + 1} of {visibleQuestions.length}</p><h2 className="question-title">{questionText(visibleQuestion)}</h2><p className="app-body">{visibleQuestion.help}</p><ContractQuestion question={visibleQuestion} locale={locale} value={answers[visibleQuestion.id]} onChange={(value) => setAnswers({ ...answers, [visibleQuestion.id]: value })} onContinue={() => questionAnswer(answers[visibleQuestion.id] ?? "")} /></div>}
         {(capability === "SUPPORTED" || capability === "PARTIAL_SUPPORT") && phase === "evidence" && <><ContractEvidence evidence={evidence} locale={locale} /><PrimaryButton onClick={() => setPhase("review")}>Continue to review →</PrimaryButton></>}
         {(capability === "SUPPORTED" || capability === "PARTIAL_SUPPORT") && phase === "review" && <div className="universal-section"><p className="app-section-label">[ HUMAN REVIEW REQUIRED ]</p><h2 className="question-title">Review before any official action</h2><p className="app-body">Tax Mitra has not submitted anything. Check the original wording, answers, missing evidence, and prepared action before continuing on the official portal.</p>{responseDraft && <div className="original-source"><p className="app-section-label">PREPARED RESPONSE / ACTION</p><pre className="whitespace-pre-wrap">{responseDraft}</pre></div>}{checklist.length > 0 && <div className="mt-5"><p className="app-section-label">EVIDENCE CHECKLIST</p><ul className="list-disc pl-5">{checklist.map((item, index) => <li key={index}>{item.title?.[locale] ?? item.title?.en ?? "Required record"}{item.why_needed?.[locale] || item.why_needed?.en ? ` — ${item.why_needed?.[locale] ?? item.why_needed?.en}` : ""}</li>)}</ul></div>}<label className="flex gap-3 items-start mt-6 text-sm"><input type="checkbox" checked={reviewApproved} onChange={(event) => setReviewApproved(event.target.checked)} /><span>I have reviewed the original notice, information used, and prepared action. Official submission remains my responsibility.</span></label><a className={`app-primary inline-block mt-5 ${!reviewApproved ? "pointer-events-none opacity-50" : ""}`} aria-disabled={!reviewApproved} href={reviewApproved ? contract.officialPortalUrl : undefined} target={reviewApproved ? "_blank" : undefined} rel="noreferrer">Open official portal ↗</a></div>}
       </div>

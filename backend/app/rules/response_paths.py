@@ -208,6 +208,8 @@ def questions_payload(questions: tuple[Question, ...], notice: dict, locale: str
                 "id": q.id,
                 "text": render_text(q.text.get(locale, q.text["en"]), notice, locale),
                 "help": render_text(q.help.get(locale, q.help.get("en", "")), notice, locale),
+                "question_type": q.question_type,
+                "type": q.question_type,
                 "options": [
                     {"id": o.id, "label": o.label.get(locale, o.label["en"])}
                     for o in q.options

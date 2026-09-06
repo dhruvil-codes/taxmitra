@@ -165,3 +165,38 @@ def classify_extracted_notice(notice: dict[str, Any], grounding: Any = None) -> 
     if selected.category == "defective_return_139_9" and not (notice.get("synthetic_extraction") or {}).get("requests"):
         return ClassificationResult(selected.workflow_id, selected.category, confidence, grounding_status, False, "safe_stop", "notice facts require confirmation before partial guidance can begin", tuple(evidence), selected.capability.value)
     return ClassificationResult(selected.workflow_id, selected.category, confidence, grounding_status, selected.supported, "supported" if selected.supported else "partial_support", reason, tuple(evidence), selected.capability.value)
+
+
+def classify_ai_proposal(notice: dict[str, Any], proposal: dict[str, Any], grounding: Any = None) -> ClassificationResult:
+    """Validate an AI identification proposal through the canonical registry."""
+    grounding_status = _grounding_status(grounding)
+    evidence = tuple(item for item in proposal.get("evidence", ()) if isinstance(item, dict))
+    is_income_tax = proposal.get("is_income_tax_communication")
+    if is_income_tax is False:
+        return ClassificationResult(
+            "unknown_income_tax_communication", "unknown_income_tax_communication", 1.0,
+            grounding_status, False, "safe_stop", "the uploaded document was not identified as an Indian Income Tax Department communication",
+            evidence, WorkflowCapability.SAFE_STOP.value,
+        )
+    category = str(proposal.get("category") or "unknown_income_tax_communication")
+    selected = get_workflow(category)
+    try:
+        confidence = max(0.0, min(1.0, float(proposal.get("confidence", 0.0))))
+    except (TypeError, ValueError):
+        confidence = 0.0
+    if selected is None:
+        selected = _BY_CATEGORY["unknown_income_tax_communication"]
+        category = selected.category
+        confidence = min(confidence, 0.45)
+    reason = str(proposal.get("reason") or "classification based on extracted communication evidence")
+    if proposal.get("section") and not any(item.get("kind") == "section_reference" for item in evidence):
+        evidence += ({"kind": "section_reference", "value": proposal["section"], "source": "openai_extracted_text"},)
+    if grounding_status == "below_floor" or confidence < 0.7:
+        return ClassificationResult(selected.workflow_id, category, confidence, grounding_status, False, "safe_stop", "classification confidence or extraction grounding is too low to route safely", evidence, selected.capability.value)
+    if selected.capability is WorkflowCapability.SAFE_STOP:
+        return ClassificationResult(selected.workflow_id, category, confidence, grounding_status, False, "safe_stop", selected.refusal_conditions[0], evidence, selected.capability.value)
+    if selected.capability is WorkflowCapability.EXPLANATION_ONLY:
+        return ClassificationResult(selected.workflow_id, category, confidence, grounding_status, False, "explanation_only", reason, evidence, selected.capability.value)
+    if selected.capability is WorkflowCapability.PARTIAL_SUPPORT:
+        return ClassificationResult(selected.workflow_id, category, confidence, grounding_status, False, "partial_support", reason, evidence, selected.capability.value)
+    return ClassificationResult(selected.workflow_id, category, confidence, grounding_status, True, "supported", reason, evidence, selected.capability.value)

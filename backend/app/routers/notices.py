@@ -12,11 +12,14 @@ from app.rules.deadlines import compute_due_date, days_remaining, deadline_statu
 from app.rules.notice_types import NoticeCategory, classify_notice, is_supported
 from app.rules.refusal import build_refusal
 from app.workflows.registry import WorkflowCapability, classify_extracted_notice, get_workflow, list_workflows
+from app.workflows.registry import classify_ai_proposal
 from app.workflows.handlers import get_workflow_handler
 from app.extraction.pdf import MAX_PDF_BYTES
 from app.extraction.pdf import extract_pdf
 from app.ingestion.pipeline import ingest_pdf
 from app.extraction.sessions import confirm_session, create_session, get_session
+from app.ai.notice_classifier import classify_notice_with_ai
+from app.config import get_settings
 
 router = APIRouter(prefix="/api", tags=["notices"])
 
@@ -154,28 +157,38 @@ async def extract_workflow(file: UploadFile = File(...)):
     content = await file.read(MAX_PDF_BYTES + 1)
     result = ingest_pdf(content, file.filename, file.content_type)
     text = "\n".join(page.get("text", "") for page in result.pages).strip()
-    notice = {"section": result.metadata.get("section"), "official_text": text}
+    notice = {
+        **result.metadata,
+        "section": result.metadata.get("section"),
+        "official_text": text,
+        "pages": list(result.pages),
+        "synthetic_extraction": {"requests": list(result.requests)},
+    }
     grounding = {
         "confidence": result.confidence,
         "below_floor": result.confidence < 0.7,
         "verified": False,
     }
-    classification = classify_extracted_notice(notice, grounding)
+    ai_proposal, ai_warning = classify_notice_with_ai(notice, get_settings())
+    classification = classify_ai_proposal(notice, ai_proposal, grounding) if ai_proposal else classify_extracted_notice(notice, grounding)
     workflow = get_workflow(classification.category)
+    metadata = dict(result.metadata)
+    if not metadata.get("section") and ai_proposal and isinstance(ai_proposal.get("section"), str) and ai_proposal["section"].strip():
+        metadata["section"] = ai_proposal["section"].strip()
     safe_stop = bool(result.refusal_reason) or classification.status == "safe_stop"
     extracted_requests = list(result.requests)
     if not safe_stop and classification.category == "scrutiny_142_1":
         # Reuse the established scrutiny request classifier; this is only the
         # universal boundary's normalized representation, not new business logic.
-        extracted_requests = list(extract_pdf(content, lambda _query: None).requests)
+        extracted_requests = list(extract_pdf(content, lambda _query: None, allow_unidentified=True, ingestion_result=result).requests)
     payload = {
         "supported": not safe_stop,
         "status": "safe_stop" if safe_stop else "needs_confirmation",
-        "metadata": result.metadata,
+        "metadata": metadata,
         "extraction": {
             "status": result.status,
             "confidence": result.confidence,
-            "warnings": list(result.warnings),
+            "warnings": list(result.warnings) + ([ai_warning] if ai_warning else []),
             "refusal_reason": result.refusal_reason,
             "method": result.extraction_method,
             "page_count": result.page_count,

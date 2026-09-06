@@ -130,8 +130,13 @@ def _is_heading(item: str) -> bool:
     value = item.lower()
     return "following accounts or documents or information" in value or ("142(1)" in value and "furnish" not in value)
 
-def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
-    result = ingest_pdf(content, "notice.pdf", "application/pdf")
+def extract_pdf(content: bytes, ground_query, *, allow_unidentified: bool = False, ingestion_result=None) -> PdfExtraction:
+    """Extract legacy request records from an already-ingested PDF.
+
+    Universal routing may pass an AI-identified section after regex extraction
+    missed it. The legacy scrutiny endpoint remains section-gated by default.
+    """
+    result = ingestion_result or ingest_pdf(content, "notice.pdf", "application/pdf")
     text = "\n".join(page.get("text", "") for page in result.pages).strip()
     # Keep legacy refusal identifiers stable for existing clients while the
     # explicit error_code/status fields expose the new deterministic states.
@@ -146,7 +151,7 @@ def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
         return PdfExtraction(result.metadata, (), text, 0, 0, "not_run", True, result.warnings, "unsupported_notice", "unsupported", result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256, result.refusal_reason)
     # The legacy scrutiny endpoint remains scoped to 142(1). Universal routing
     # is exposed separately through /api/workflows/extract.
-    if result.metadata.get("section") != "142(1)":
+    if result.metadata.get("section") != "142(1)" and not allow_unidentified:
         return PdfExtraction(result.metadata, (), text, 0, 0, "not_run", True, result.warnings, "unsupported_notice", "unsupported", result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256, "unsupported_notice")
     metadata = result.metadata
     items = list(result.requests)

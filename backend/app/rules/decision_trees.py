@@ -32,6 +32,7 @@ class Question:
         Option("no", {"en": "No", "hi": "नहीं"}),
         Option("unsure", {"en": "I'm not sure", "hi": "मुझे पक्का नहीं है"}),
     )
+    question_type: str = "single_choice"
 
 
 _Q_INCOME_MISMATCH: tuple[Question, ...] = (

@@ -170,11 +170,13 @@ export interface Question {
   text: string;
   help: string;
   options: { id: string; label: string }[];
-  question_type?: "single_choice" | "multiple_choice" | "free_text" | "document_availability" | "confirmation";
+  question_type?: QuestionType;
   required?: boolean;
   conditions?: Record<string, string>[];
   related_request_ids?: string[];
 }
+
+export type QuestionType = "single_choice" | "multi_choice" | "choice_with_other" | "text" | "yes_no" | "number" | "date" | "multiple_choice" | "free_text" | "document_availability" | "confirmation";
 
 export interface ResolveResult {
   supported: boolean;
@@ -311,7 +313,7 @@ export interface MinimumQuestion {
   question_id: string;
   question: string;
   why_we_are_asking: string;
-  type: "single_choice" | "multiple_choice" | "free_text" | "document_availability" | "confirmation";
+  type: QuestionType;
   options: { id: string; label: string }[];
   related_request_ids: string[];
   required: boolean;
@@ -429,7 +431,9 @@ async function loadWorkflowData(id: string, locale: Locale, workflowId: string):
   return { requests: questionData.requests ?? [], evidence: questionData.evidence ?? [], questions: questionData.questions ?? [] };
 }
 
-function resolveWorkflowContract(id: string, workflowId: string, answers: Record<string, string>): Promise<ResolveResult | ScrutinyResolveResult> {
+export type QuestionAnswer = string | string[] | { choice: string; other: string };
+
+function resolveWorkflowContract(id: string, workflowId: string, answers: Record<string, QuestionAnswer>): Promise<ResolveResult | ScrutinyResolveResult> {
   return workflowId === "scrutiny_142_1"
     ? post<ScrutinyResolveResult>("/api/scrutiny/resolve-minimum", { notice_id: id, answers, extraction_confirmed: true, document_statuses: {} })
     : post<ResolveResult>("/api/workflow/resolve", { notice_id: id, answers });
@@ -454,7 +458,7 @@ export const api = {
     get<{ questions: Question[] }>(`/api/workflow/questions/${id}?locale=${locale}`),
   workflowData: loadWorkflowData,
   resolveWorkflow: resolveWorkflowContract,
-  resolve: (noticeId: string, answers: Record<string, string>) =>
+  resolve: (noticeId: string, answers: Record<string, QuestionAnswer>) =>
     post<ResolveResult>("/api/workflow/resolve", { notice_id: noticeId, answers }),
   refusal: (id: string) => get<ResolveResult>(`/api/notices/${id}/refusal`),
   extractScrutiny: (file: File, signal?: AbortSignal) => {
