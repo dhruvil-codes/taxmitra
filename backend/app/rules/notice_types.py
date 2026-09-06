@@ -1,30 +1,38 @@
-"""Notice classification — deterministic, based on structured notice metadata.
-
-In this prototype, notices are synthetic and already carry structured fields
-(section, issue_code). Classification is therefore a pure mapping. In a
-production system this is where an extraction layer would feed structured
-data in; the decision itself would remain rule-based, not model-based.
-"""
+"""Compatibility facade for the universal notice workflow registry."""
 
 from __future__ import annotations
 
 from enum import Enum
+
+from app.workflows.registry import WorkflowCapability, classify_extracted_notice, list_workflows
 
 
 class NoticeCategory(str, Enum):
     INCOME_MISMATCH_143_1A = "income_mismatch_143_1a"
     SCRUTINY_142_1 = "scrutiny_142_1"
     DEFECTIVE_RETURN_139_9 = "defective_return_139_9"
+    RECTIFICATION_TAX_CREDIT_MISMATCH = "rectification_tax_credit_mismatch"
+    AO_NOTICE_CLARIFICATION = "ao_notice_clarification"
+    INCOME_INTIMATION_143_1 = "income_intimation_143_1"
+    SCRUTINY_INFORMATION_133_6 = "scrutiny_information_133_6"
+    RECTIFICATION_154 = "rectification_154"
+    TAX_CREDIT_TDS_MISMATCH = "tax_credit_tds_mismatch"
+    DEMAND_ADJUSTMENT_245 = "demand_adjustment_245"
+    OUTSTANDING_TAX_DEMAND = "outstanding_tax_demand"
+    REFUND_COMMUNICATION = "refund_communication"
+    REASSESSMENT_148 = "reassessment_148"
+    REASSESSMENT_148A = "reassessment_148a"
+    PENALTY_PROCEEDINGS = "penalty_proceedings"
+    UNKNOWN_INCOME_TAX_COMMUNICATION = "unknown_income_tax_communication"
     UNSUPPORTED = "unsupported"
 
 
 # The categories the guided workflow can safely carry a citizen through.
 # Scope is deliberate and small: if we cannot safely guide, we refuse.
 SUPPORTED_CATEGORIES: frozenset[NoticeCategory] = frozenset(
-    {
-        NoticeCategory.INCOME_MISMATCH_143_1A,
-        NoticeCategory.SCRUTINY_142_1,
-    }
+    NoticeCategory(item["category"])
+    for item in list_workflows()
+    if item["supported"]
 )
 
 
@@ -33,15 +41,23 @@ def _normalize(section: str | None) -> str:
 
 
 def classify_notice(notice: dict) -> NoticeCategory:
-    """Map a notice's structured metadata to a category. Pure and total."""
-    section = _normalize(notice.get("section"))
-    if section.startswith("143(1)"):
+    """Map extracted notice content to a category through the registry.
+
+    This remains a total compatibility API for existing callers. Callers that
+    need confidence and safe-stop metadata should use
+    :func:`classify_extracted_notice` directly.
+    """
+    # Preserve the legacy section-only interpretation used by v0 callers;
+    # universal callers use classify_extracted_notice and distinguish 143(1).
+    if notice.get("section") == "143(1)" and not notice.get("official_text"):
         return NoticeCategory.INCOME_MISMATCH_143_1A
-    if section.startswith("142(1)"):
-        return NoticeCategory.SCRUTINY_142_1
-    if section.startswith("139(9)"):
-        return NoticeCategory.DEFECTIVE_RETURN_139_9
-    return NoticeCategory.UNSUPPORTED
+    result = classify_extracted_notice(notice)
+    if result.category in {"reassessment_148", "demand_adjustment_245", "unknown_income_tax_communication"}:
+        return NoticeCategory.UNSUPPORTED
+    try:
+        return NoticeCategory(result.category)
+    except ValueError:
+        return NoticeCategory.UNSUPPORTED
 
 
 def is_supported(category: NoticeCategory) -> bool:

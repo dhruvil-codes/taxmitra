@@ -41,6 +41,96 @@ export interface NoticeCard {
   income_source?: string;
   official_reference?: string;
   citizen_id?: string;
+  workflow_id?: string;
+  workflow_status?: "supported" | "partial_support" | "safe_stop";
+  capability?: "SUPPORTED" | "PARTIAL_SUPPORT" | "EXPLANATION_ONLY" | "SAFE_STOP";
+  classification_confidence?: number;
+  classification_grounding_status?: string;
+  frontend_entry?: "journey" | "scrutiny" | "unsupported";
+}
+
+export interface WorkflowDefinition {
+  workflow_id: string;
+  category: string;
+  title: Record<string, string>;
+  classification_signals: string[];
+  required_facts: string[];
+  question_plan: string;
+  evidence: string;
+  response_action: string;
+  refusal_conditions: string[];
+  supported: boolean;
+  implementation: string;
+  frontend_entry: "journey" | "scrutiny" | "unsupported";
+  capability: "SUPPORTED" | "PARTIAL_SUPPORT" | "EXPLANATION_ONLY" | "SAFE_STOP";
+  status: "supported" | "partial_support" | "safe_stop";
+}
+
+export interface WorkflowClassification {
+  workflow_id: string;
+  category: string;
+  confidence: number;
+  grounding_status: string;
+  supported: boolean;
+  status: "supported" | "partial_support" | "safe_stop";
+  capability?: "SUPPORTED" | "PARTIAL_SUPPORT" | "EXPLANATION_ONLY" | "SAFE_STOP";
+  reason: string;
+}
+
+export type WorkflowCapability = "SUPPORTED" | "PARTIAL_SUPPORT" | "EXPLANATION_ONLY" | "SAFE_STOP";
+
+export interface UniversalWorkflowContract {
+  workflowId: string;
+  category: string;
+  title: Record<string, string>;
+  capability: WorkflowCapability;
+  confidence: number;
+  groundingStatus: string;
+  reason: string;
+  notice: NoticeCard;
+  requests: ScrutinyRequest[];
+  questions: Question[];
+  evidence: EvidenceRecommendation[];
+  action?: string;
+  safeStopReason?: string;
+  nextSteps: string[];
+  officialPortalUrl: string;
+}
+
+export interface BackendWorkflowContract {
+  identity: { workflow_id: string; category: string; title: Record<string, string> };
+  capability: WorkflowCapability;
+  confidence: number;
+  grounding_status: string;
+  reason: string;
+  notice_facts: Record<string, string | number | null | undefined>;
+  requests: ScrutinyRequest[];
+  questions: (Question & { question_id?: string; question?: string; why_we_are_asking?: string; type?: Question["question_type"] })[];
+  evidence: EvidenceRecommendation[];
+  safe_stop: { reason: string; facts: Record<string, string | number | null | undefined> };
+  official_portal: { url: string; submission_boundary: string };
+}
+
+export interface UniversalExtractionResult {
+  supported: boolean;
+  status: "safe_stop" | "needs_confirmation";
+  metadata: Record<string, string | null>;
+  extraction: {
+    status: string;
+    confidence: number;
+    warnings: string[];
+    refusal_reason: string | null;
+    method: "text" | "ocr" | "mixed" | "none";
+    page_count: number;
+  };
+  classification: WorkflowClassification;
+  workflow: WorkflowDefinition | null;
+  pages: { page_number: number; text: string; source: string }[];
+  extraction_id?: string;
+  fingerprint?: string;
+  requires_human_confirmation?: boolean;
+  requests?: ScrutinyRequest[];
+  document?: { status: string; page_count: number; sha256: string; pages: { page_number: number; text: string; source: string }[] };
 }
 
 export interface Citation {
@@ -80,6 +170,10 @@ export interface Question {
   text: string;
   help: string;
   options: { id: string; label: string }[];
+  question_type?: "single_choice" | "multiple_choice" | "free_text" | "document_availability" | "confirmation";
+  required?: boolean;
+  conditions?: Record<string, string>[];
+  related_request_ids?: string[];
 }
 
 export interface ResolveResult {
@@ -181,7 +275,7 @@ export interface ExtractionResult {
     warnings: string[];
     refusal_reason: string | null;
     error_code?: string | null;
-    method?: "text" | "ocr" | "none";
+    method?: "text" | "ocr" | "mixed" | "none";
     page_count?: number;
   };
   grounding?: Grounding;
@@ -323,14 +417,43 @@ async function post<T>(url: string, body: unknown, signal?: AbortSignal): Promis
   });
 }
 
+async function loadWorkflowData(id: string, locale: Locale, workflowId: string): Promise<{ requests: ScrutinyRequest[]; evidence: EvidenceRecommendation[]; questions: Question[] }> {
+  if (workflowId === "scrutiny_142_1") {
+    const [requestData, questionData] = await Promise.all([
+      get<ScrutinyRequestsResult>(`/api/scrutiny/${id}/requests?locale=${locale}&extraction_confirmed=true`),
+      get<MinimumQuestionPlanResult>(`/api/scrutiny/${id}/question-plan?locale=${locale}&extraction_confirmed=true`),
+    ]);
+    return { requests: requestData.requests ?? [], evidence: requestData.evidence ?? questionData.evidence ?? [], questions: (questionData.questions ?? []).map((q) => ({ id: q.question_id, text: q.question, help: q.why_we_are_asking, options: q.options, question_type: q.type, required: q.required, conditions: q.conditions, related_request_ids: q.related_request_ids })) };
+  }
+  const questionData = await get<{ questions: Question[]; requests?: ScrutinyRequest[]; evidence?: EvidenceRecommendation[] }>(`/api/workflow/questions/${id}?locale=${locale}`);
+  return { requests: questionData.requests ?? [], evidence: questionData.evidence ?? [], questions: questionData.questions ?? [] };
+}
+
+function resolveWorkflowContract(id: string, workflowId: string, answers: Record<string, string>): Promise<ResolveResult | ScrutinyResolveResult> {
+  return workflowId === "scrutiny_142_1"
+    ? post<ScrutinyResolveResult>("/api/scrutiny/resolve-minimum", { notice_id: id, answers, extraction_confirmed: true, document_statuses: {} })
+    : post<ResolveResult>("/api/workflow/resolve", { notice_id: id, answers });
+}
+
 export const api = {
   citizens: () => get<Citizen[]>("/api/citizens"),
   notices: (citizenId: string) => get<NoticeCard[]>(`/api/notices?citizen_id=${citizenId}`),
   notice: (id: string) => get<NoticeCard>(`/api/notices/${id}`),
+  workflows: () => get<{ workflows: WorkflowDefinition[] }>("/api/workflows"),
+  noticeWorkflow: (id: string) => get<{ notice_id: string; classification: WorkflowClassification; workflow: WorkflowDefinition | null; contract?: BackendWorkflowContract }>(`/api/notices/${id}/workflow`),
+  extractWorkflow: (file: File, signal?: AbortSignal) => {
+    const body = new FormData();
+    body.append("file", file);
+    return request<UniversalExtractionResult>("/api/workflows/extract", { method: "POST", body, signal });
+  },
+  confirmWorkflowExtraction: (extractionId: string, fingerprint: string, confirmed: boolean, corrections: Record<string, string> = {}, signal?: AbortSignal) =>
+    post<{ supported: boolean; status: string; notice_id?: string; frontend_entry?: "journey" | "scrutiny" | "unsupported"; capability?: string }>("/api/workflows/confirm", { extraction_id: extractionId, fingerprint, confirmed, corrections }, signal),
   explanation: (id: string, locale: Locale) =>
     get<Explanation>(`/api/ai/explanation/${id}?locale=${locale}`),
   questions: (id: string, locale: Locale) =>
     get<{ questions: Question[] }>(`/api/workflow/questions/${id}?locale=${locale}`),
+  workflowData: loadWorkflowData,
+  resolveWorkflow: resolveWorkflowContract,
   resolve: (noticeId: string, answers: Record<string, string>) =>
     post<ResolveResult>("/api/workflow/resolve", { notice_id: noticeId, answers }),
   refusal: (id: string) => get<ResolveResult>(`/api/notices/${id}/refusal`),

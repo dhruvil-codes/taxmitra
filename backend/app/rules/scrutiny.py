@@ -321,12 +321,12 @@ def scrutiny_questions(requests: tuple[ScrutinyRequest, ...]) -> tuple[ScrutinyQ
 
 
 _SOURCE_OPTIONS = (
-    Option("business_income", {"en": "Business income", "hi": "à¤µà¥à¤¯à¤µà¤¸à¤¾à¤¯ à¤†à¤¯"}),
-    Option("loan", {"en": "Loan or borrowing", "hi": "à¤‹à¤£ à¤¯à¤¾ à¤‰à¤§à¤¾à¤°"}),
-    Option("savings", {"en": "Personal savings", "hi": "à¤µà¥à¤¯à¤•à¥à¤¤à¤¿à¤—à¤¤ à¤¬à¤šà¤¤"}),
-    Option("gift", {"en": "Gift or transfer", "hi": "à¤‰à¤ªà¤¹à¤¾à¤° à¤¯à¤¾ à¤¹à¤¸à¥à¤¤à¤¾à¤‚à¤¤à¤°à¤£"}),
-    Option("other", {"en": "Another source", "hi": "à¤•à¥‹à¤ˆ à¤…à¤¨à¥à¤¯ à¤¸à¥à¤°à¥‹à¤¤"}),
-    Option("unsure", {"en": "Not sure", "hi": "à¤ªà¤•à¥à¤•à¤¾ à¤¨à¤¹à¥€à¤‚"}),
+    Option("business_income", {"en": "Business income", "hi": "व्यवसाय आय"}),
+    Option("loan", {"en": "Loan or borrowing", "hi": "ऋण या उधार"}),
+    Option("savings", {"en": "Personal savings", "hi": "व्यक्तिगत बचत"}),
+    Option("gift", {"en": "Gift or transfer", "hi": "उपहार या हस्तांतरण"}),
+    Option("other", {"en": "Another source", "hi": "कोई अन्य स्रोत"}),
+    Option("unsure", {"en": "Not sure", "hi": "पक्का नहीं"}),
 )
 
 _AVAILABILITY_OPTIONS = _OPTIONS
@@ -350,8 +350,8 @@ def minimum_question_plan(
     if cash:
         plan.append(MinimumQuestion(
             id="cash_deposit_source",
-            text={"en": "What was the source of the cash deposits?", "hi": "à¤¨à¤•à¤¦ à¤œà¤®à¤¾ à¤•à¤°à¤¨à¥‡ à¤•à¤¾ à¤¸à¥à¤°à¥‹à¤¤ à¤•à¥à¤¯à¤¾ à¤¥à¤¾?"},
-            why={"en": "Your answer changes which explanation and supporting records may help.", "hi": "à¤†à¤ªà¤•à¤¾ à¤‰à¤¤à¥à¤¤à¤° à¤¬à¤¦à¤² à¤¸à¤•à¤¤à¤¾ à¤¹à¥ˆ à¤•à¤¿ à¤•à¥Œà¤¨à¤¸à¤¾ à¤¸à¥à¤ªà¤·à¥à¤Ÿà¥€à¤•à¤°à¤£ à¤”à¤° à¤°à¤¿à¤•à¤¾à¤°à¥à¤¡ à¤®à¤¦à¤¦à¤—à¤¾à¤° à¤¹à¥‹à¤‚à¤—à¥‡।"},
+            text={"en": "What was the source of the cash deposits?", "hi": "नकद जमा करने का स्रोत क्या था?"},
+            why={"en": "Your answer changes which explanation and supporting records may help.", "hi": "आपका उत्तर बदल सकता है कि कौनसा स्पष्टीकरण और रिकार्ड मददगार होंगे।"},
             question_type="single_choice",
             options=_SOURCE_OPTIONS,
             related_request_ids=(cash.id,),
@@ -361,8 +361,8 @@ def minimum_question_plan(
         if source in {"business_income", "loan"}:
             plan.append(MinimumQuestion(
                 id=f"cash_{source}_records",
-                text={"en": "Which records can support this source?", "hi": "à¤‡à¤¸ à¤¸à¥à¤°à¥‹à¤¤ à¤•à¥‡ à¤¸à¤®à¤°à¥à¤¥à¤¨ à¤®à¥‡à¤‚ à¤•à¥Œà¤¨à¤¸à¥‡ à¤°à¤¿à¤•à¤¾à¤°à¥à¤¡ à¤¹à¥ˆà¤‚?"},
-                why={"en": "This selects the relevant evidence guidance for your stated source.", "hi": "à¤‡à¤¸à¤¸à¥‡ à¤†à¤ªà¤•à¥‡ à¤¬à¤¤à¤¾à¤ à¤—à¤ à¤¸à¥à¤°à¥‹à¤¤ à¤•à¥‡ à¤²à¤¿à¤ à¤¸à¤¹à¥€ à¤¸à¤¬à¥‚à¤¤ à¤®à¤¾à¤°à¥à¤—à¤¦à¤°à¥à¤¶à¤¨ à¤šà¥à¤¨à¤¾ à¤œà¤¾à¤à¤—à¤¾।"},
+                text={"en": "Which records can support this source?", "hi": "इस स्रोत के समर्थन में कौनसे रिकार्ड हैं?"},
+                why={"en": "This selects the relevant evidence guidance for your stated source.", "hi": "इससे आपके बताए गए स्रोत के लिए सही सबूत मार्गदर्शन चुना जाएगा।"},
                 question_type="document_availability",
                 options=_AVAILABILITY_OPTIONS,
                 related_request_ids=(cash.id,),
@@ -373,8 +373,8 @@ def minimum_question_plan(
     if transactions:
         plan.append(MinimumQuestion(
             id="significant_transaction_explanation",
-            text={"en": "How would you explain the significant credits and debits?", "hi": "à¤®à¤¹à¤¤à¥à¤µà¤ªà¥‚à¤°à¥à¤£ à¤•à¥à¤°à¥‡à¤¡à¤¿à¤Ÿ à¤”à¤° à¤¡à¥‡à¤¬à¤¿à¤Ÿ à¤•à¤¾ à¤¸à¥à¤ªà¤·à¥à¤Ÿà¥€à¤•à¤°à¤£ à¤•à¥ˆà¤¸à¥‡ à¤¦à¥‡à¤‚à¤—à¥‡?"},
-            why={"en": "The explanation determines which transaction records may help and what needs review.", "hi": "à¤¸à¥à¤ªà¤·à¥à¤Ÿà¥€à¤•à¤°à¤£ à¤¸à¥‡ à¤¤à¤¯ à¤¹à¥‹à¤¤à¤¾ à¤¹à¥ˆ à¤•à¤¿ à¤•à¥Œà¤¨à¤¸à¥‡ à¤°à¤¿à¤•à¤¾à¤°à¥à¤¡ à¤®à¤¦à¤¦ à¤•à¤° à¤¸à¤•à¤¤à¥‡ à¤¹à¥ˆà¤‚ à¤”à¤° à¤•à¥à¤¯à¤¾ à¤œà¤¾à¤‚à¤šà¤¨à¤¾ à¤¹à¥ˆ।"},
+            text={"en": "How would you explain the significant credits and debits?", "hi": "महत्वपूर्ण क्रेडिट और डेबिट का स्पष्टीकरण कैसे देंगे?"},
+            why={"en": "The explanation determines which transaction records may help and what needs review.", "hi": "स्पष्टीकरण से तय होता है कि कौनसे रिकार्ड मदद कर सकते हैं और क्या जांचना है।"},
             question_type="free_text",
             related_request_ids=(transactions.id,),
         ))
@@ -383,8 +383,8 @@ def minimum_question_plan(
     if other:
         plan.append(MinimumQuestion(
             id="other_request_details",
-            text={"en": "What information can you provide for this other notice request?", "hi": "à¤‡à¤¸ à¤…à¤¨à¥à¤¯ à¤¨à¥‹à¤Ÿà¤¿à¤¸ à¤…à¤¨à¥à¤°à¥‹à¤§ à¤•à¥‡ à¤²à¤¿à¤ à¤†à¤ª à¤•à¥à¤¯à¤¾ à¤œà¤¾à¤¨à¤•à¤¾à¤°à¥€ à¤¦à¥‡ à¤¸à¤•à¤¤à¥‡ à¤¹à¥ˆà¤‚?"},
-            why={"en": "The notice does not identify a more specific evidence path, so your description is needed.", "hi": "à¤¨à¥‹à¤Ÿà¤¿à¤¸ à¤®à¥‡à¤‚ à¤‡à¤¸à¤•à¥‡ à¤²à¤¿à¤ à¤…à¤§à¤¿à¤• à¤¸à¥à¤ªà¤·à¥à¤Ÿ à¤¸à¤¬à¥‚à¤¤ à¤®à¤¾à¤°à¥à¤— à¤¨à¤¹à¥€à¤‚ à¤¹à¥ˆ, à¤‡à¤¸à¤²à¤¿à¤ à¤†à¤ªà¤•à¤¾ à¤µà¤°à¥à¤£à¤¨ à¤œà¤°à¥‚à¤°à¥€ à¤¹à¥ˆ।"},
+            text={"en": "What information can you provide for this other notice request?", "hi": "इस अन्य नोटिस अनुरोध के लिए आप क्या जानकारी दे सकते हैं?"},
+            why={"en": "The notice does not identify a more specific evidence path, so your description is needed.", "hi": "नोटिस में इसके लिए अधिक स्पष्ट सबूत मार्ग नहीं है, इसलिए आपका वर्णन जरूरी है।"},
             question_type="free_text",
             related_request_ids=(other.id,),
         ))
@@ -584,9 +584,9 @@ def resolve_minimum_scrutiny(
         "missing_evidence": [item for item in mapped_evidence if item["status"] in {"need_to_find", "dont_have", "not_sure"}],
         "deadline": {"due_date": notice.get("response_due_date"), "status": "action_required" if notice.get("response_due_date") else "no_deadline"},
         "official_step": {
-            "label": {"en": "Upload your response and evidence on the official e-Filing portal", "hi": "à¤…à¤ªà¤¨à¤¾ à¤‰à¤¤à¥à¤¤à¤° à¤”à¤° à¤ªà¥à¤°à¤®à¤¾à¤£ à¤†à¤§à¤¿à¤•à¤¾à¤°à¤¿à¤• e-Filing à¤ªà¥‹à¤°à¥à¤Ÿà¤² à¤ªà¤° à¤…à¤ªà¤²à¥‹à¤¡ à¤•à¤°à¥‡à¤‚"},
+            "label": {"en": "Upload your response and evidence on the official e-Filing portal", "hi": "अपना उत्तर और प्रमाण आधिकारिक e-Filing पोर्टल पर अपलोड करें"},
             "url": OFFICIAL_EFILING_URL,
-            "boundary": {"en": "Tax Mitra has not submitted your response. No documents or facts have been sent to the Income Tax Department.", "hi": "Tax Mitra à¤¨à¥‡ à¤†à¤ªà¤•à¤¾ à¤‰à¤¤à¥à¤¤à¤° à¤œà¤®à¤¾ à¤¨à¤¹à¥€à¤‚ à¤•à¤¿à¤¯à¤¾ à¤¹à¥ˆà¥¤"},
+            "boundary": {"en": "Tax Mitra has not submitted your response. No documents or facts have been sent to the Income Tax Department.", "hi": "Tax Mitra ने आपका उत्तर जमा नहीं किया है।"},
         },
     }
 

@@ -4,24 +4,63 @@ from __future__ import annotations
 
 from datetime import date
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile
+from pydantic import BaseModel
 
 from app.data_store import get_notice, load_citizens, load_notices
 from app.rules.deadlines import compute_due_date, days_remaining, deadline_status
 from app.rules.notice_types import NoticeCategory, classify_notice, is_supported
 from app.rules.refusal import build_refusal
+from app.workflows.registry import WorkflowCapability, classify_extracted_notice, get_workflow, list_workflows
+from app.workflows.handlers import get_workflow_handler
+from app.extraction.pdf import MAX_PDF_BYTES
+from app.extraction.pdf import extract_pdf
+from app.ingestion.pipeline import ingest_pdf
+from app.extraction.sessions import confirm_session, create_session, get_session
 
 router = APIRouter(prefix="/api", tags=["notices"])
+
+
+class WorkflowClassificationRequest(BaseModel):
+    notice: dict[str, object]
+    grounding: dict[str, object] | None = None
+
+
+class WorkflowExtractionConfirmation(BaseModel):
+    extraction_id: str
+    fingerprint: str
+    confirmed: bool
+    corrections: dict[str, str] = {}
 
 
 def _parse_date(value: str) -> date:
     return date.fromisoformat(value)
 
 
+def _session_notice(notice_id: str) -> dict | None:
+    session = get_session(notice_id)
+    if not session or not session.get("confirmed"):
+        return None
+    metadata = session.get("metadata", {})
+    return {
+        "id": notice_id,
+        "section": metadata.get("section"),
+        "assessment_year": metadata.get("assessment_year") or "unknown",
+        "response_due_date": metadata.get("response_deadline"),
+        "issue_date": metadata.get("issue_date"),
+        "official_reference": metadata.get("notice_reference"),
+        "amount_in_question": 0,
+        "income_source": "Uploaded notice",
+        "official_text": "\n".join(page.get("text", "") for page in session.get("pages", [])),
+        "citizen_id": "uploaded",
+        "synthetic_extraction": {"source_type": "pdf", "requires_human_confirmation": True, "requests": session.get("requests", [])},
+    }
+
+
 def _due_date_for_notice(notice: dict, category: NoticeCategory) -> date | None:
     if notice.get("response_due_date"):
         return _parse_date(notice["response_due_date"])
-    return compute_due_date(_parse_date(notice["issue_date"]), category)
+    return compute_due_date(_parse_date(notice["issue_date"]), category) if notice.get("issue_date") else None
 
 
 def _title_for_category(category: NoticeCategory) -> dict[str, str]:
@@ -43,6 +82,8 @@ def _title_for_category(category: NoticeCategory) -> dict[str, str]:
 
 def notice_card(notice: dict) -> dict:
     category = classify_notice(notice)
+    classification = classify_extracted_notice(notice)
+    workflow = get_workflow(category.value)
     due = _due_date_for_notice(notice, category)
     remaining = days_remaining(due)
     return {
@@ -50,6 +91,11 @@ def notice_card(notice: dict) -> dict:
         "section": notice["section"],
         "category": category.value,
         "supported": is_supported(category),
+        "workflow_id": workflow.workflow_id if workflow else "unsupported",
+        "workflow_status": classification.status,
+        "classification_confidence": classification.confidence,
+        "classification_grounding_status": classification.grounding_status,
+        "frontend_entry": workflow.frontend_entry if workflow else "unsupported",
         "title": _title_for_category(category),
         "amount_in_question": notice["amount_in_question"],
         "issue_date": notice["issue_date"],
@@ -77,6 +123,8 @@ def notices(citizen_id: str | None = Query(default=None)):
 def notice_detail(notice_id: str):
     notice = get_notice(notice_id)
     if notice is None:
+        notice = _session_notice(notice_id)
+    if notice is None:
         raise HTTPException(status_code=404, detail="Notice not found")
     card = notice_card(notice)
     card["official_text"] = notice["official_text"]
@@ -84,6 +132,134 @@ def notice_detail(notice_id: str):
     card["official_reference"] = notice["official_reference"]
     card["citizen_id"] = notice["citizen_id"]
     return card
+
+
+@router.get("/workflows")
+def workflows():
+    """Return the generic workflow contract for frontend routing and display."""
+    return {"workflows": list_workflows()}
+
+
+@router.post("/workflows/classify")
+def classify_workflow(payload: WorkflowClassificationRequest):
+    """Classify extracted content while preserving confidence and safe-stop state."""
+    return classify_extracted_notice(payload.notice, payload.grounding).payload()
+
+
+@router.post("/workflows/extract")
+async def extract_workflow(file: UploadFile = File(...)):
+    """Universal extraction boundary; workflow handlers remain separate."""
+    if file.content_type != "application/pdf":
+        raise HTTPException(status_code=415, detail="Only application/pdf is accepted")
+    content = await file.read(MAX_PDF_BYTES + 1)
+    result = ingest_pdf(content, file.filename, file.content_type)
+    text = "\n".join(page.get("text", "") for page in result.pages).strip()
+    notice = {"section": result.metadata.get("section"), "official_text": text}
+    grounding = {
+        "confidence": result.confidence,
+        "below_floor": result.confidence < 0.7,
+        "verified": False,
+    }
+    classification = classify_extracted_notice(notice, grounding)
+    workflow = get_workflow(classification.category)
+    safe_stop = bool(result.refusal_reason) or classification.status == "safe_stop"
+    extracted_requests = list(result.requests)
+    if not safe_stop and classification.category == "scrutiny_142_1":
+        # Reuse the established scrutiny request classifier; this is only the
+        # universal boundary's normalized representation, not new business logic.
+        extracted_requests = list(extract_pdf(content, lambda _query: None).requests)
+    payload = {
+        "supported": not safe_stop,
+        "status": "safe_stop" if safe_stop else "needs_confirmation",
+        "metadata": result.metadata,
+        "extraction": {
+            "status": result.status,
+            "confidence": result.confidence,
+            "warnings": list(result.warnings),
+            "refusal_reason": result.refusal_reason,
+            "method": result.extraction_method,
+            "page_count": result.page_count,
+        },
+        "classification": classification.payload(),
+        "workflow": workflow.payload() if workflow else None,
+        "requests": extracted_requests,
+        "pages": list(result.pages),
+    }
+    # Use the same short-lived confirmation boundary as the legacy scrutiny
+    # API, while retaining the classified workflow for the generic path.
+    if not safe_stop:
+        extraction_id, fingerprint = create_session({
+            **payload,
+            "requests": extracted_requests,
+            "workflow_id": classification.workflow_id,
+            "original_pdf_sha256": result.original_pdf_sha256,
+        }, content)
+        payload.update({"extraction_id": extraction_id, "fingerprint": fingerprint, "requires_human_confirmation": True})
+    return payload
+
+
+@router.post("/workflows/confirm")
+def confirm_workflow(payload: WorkflowExtractionConfirmation):
+    if not payload.confirmed:
+        return {"supported": False, "status": "refused", "reason": "Human confirmation was not provided."}
+    session = confirm_session(payload.extraction_id, payload.fingerprint, payload.corrections)
+    if session is None:
+        raise HTTPException(status_code=409, detail="Extraction session or fingerprint is invalid or expired")
+    workflow_id = session.get("workflow_id")
+    workflow = get_workflow(workflow_id)
+    if workflow is None or workflow.capability is WorkflowCapability.SAFE_STOP:
+        return {"supported": False, "status": "safe_stop", "frontend_entry": "unsupported"}
+    return {
+        "supported": True,
+        "status": "confirmed",
+        "extraction_id": payload.extraction_id,
+        "notice_id": payload.extraction_id,
+        "workflow_id": workflow.workflow_id,
+        "frontend_entry": workflow.frontend_entry,
+        "capability": workflow.capability.value,
+    }
+
+
+@router.get("/notices/{notice_id}/workflow")
+def notice_workflow(notice_id: str):
+    notice = get_notice(notice_id)
+    if notice is None:
+        raise HTTPException(status_code=404, detail="Notice not found")
+    classification = classify_extracted_notice(notice)
+    workflow = get_workflow(classification.category)
+    contract = {
+        "identity": {"workflow_id": classification.workflow_id, "category": classification.category, "title": workflow.title if workflow else {}},
+        "capability": workflow.capability.value if workflow else "SAFE_STOP",
+        "confidence": classification.confidence,
+        "grounding_status": classification.grounding_status,
+        "reason": classification.reason,
+        "notice_facts": {key: notice.get(key) for key in ("section", "assessment_year", "issue_date", "response_due_date", "official_reference")},
+        "requests": list((notice.get("synthetic_extraction") or {}).get("requests") or []),
+        "questions": [],
+        "evidence": [],
+        "safe_stop": {"reason": classification.reason, "facts": {"section": notice.get("section"), "deadline": notice.get("response_due_date")}},
+        "official_portal": {"url": "https://www.incometax.gov.in/iec/foportal/", "submission_boundary": "Tax Mitra never submits on the taxpayer's behalf."},
+    }
+    if workflow and workflow.capability not in {WorkflowCapability.SAFE_STOP, WorkflowCapability.EXPLANATION_ONLY}:
+        handler = get_workflow_handler(classification.category)
+        question_payload = handler.get_questions(notice, "en")
+        contract["questions"] = question_payload.get("questions", [])
+        contract["requests"] = question_payload.get("requests", contract["requests"])
+        contract["evidence"] = handler.get_evidence(notice)
+    payload = {
+        "notice_id": notice_id,
+        "classification": classification.payload(),
+        "workflow": workflow.payload() if workflow else None,
+        "contract": contract,
+    }
+    # Keep the original endpoint's unsupported category for legacy clients;
+    # the universal classify endpoint retains the precise reassessment/demand
+    # category and evidence.
+    if classification.category in {"reassessment_148", "reassessment_148a", "penalty_proceedings"}:
+        payload["classification"]["detected_category"] = classification.category
+        payload["classification"]["category"] = "unsupported"
+        payload["workflow"] = None
+    return payload
 
 
 @router.get("/notices/{notice_id}/refusal")

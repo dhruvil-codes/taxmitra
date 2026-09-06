@@ -144,11 +144,17 @@ def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
         return PdfExtraction(result.metadata, (), text, result.confidence, 0, "lexical", False, result.warnings, refusal, result.status, result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256, result.refusal_reason)
     if result.refusal_reason == "unsupported_notice":
         return PdfExtraction(result.metadata, (), text, 0, 0, "not_run", True, result.warnings, "unsupported_notice", "unsupported", result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256, result.refusal_reason)
+    # The legacy scrutiny endpoint remains scoped to 142(1). Universal routing
+    # is exposed separately through /api/workflows/extract.
+    if result.metadata.get("section") != "142(1)":
+        return PdfExtraction(result.metadata, (), text, 0, 0, "not_run", True, result.warnings, "unsupported_notice", "unsupported", result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256, "unsupported_notice")
     metadata = result.metadata
-    items = [(item["original_text"], item["page_number"]) for item in result.requests]
+    items = list(result.requests)
     logger.info(f"DETECTED NUMBERED ITEMS: count={len(items)}")
     extracted, scores, warnings = [], [], []
-    for idx, (item, page_number) in enumerate(items):
+    for idx, request in enumerate(items):
+        item = request["original_text"]
+        page_number = request["page_number"]
         truncated = item[:100] if len(item) > 100 else item
         logger.info(f"ITEM[{idx}]: {truncated}")
         classified = _classify(item)
@@ -173,7 +179,7 @@ def extract_pdf(content: bytes, ground_query) -> PdfExtraction:
             "page_number": page_number,
             "source_location": f"page {page_number}",
             "grounding": {"method": "lexical", "confidence": 0.0, "below_floor": False},
-            "confidence": round(result.confidence, 3),
+            "confidence": round(request.get("confidence", result.confidence), 3),
             "warnings": ["Retrieval and guidance are intentionally deferred until confirmation."],
         })
     logger.info(f"CLASSIFICATION COMPLETE: classified_items={len(extracted)}, total_items={len(items)}")

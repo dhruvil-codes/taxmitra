@@ -43,5 +43,12 @@ export default defineConfig(({ mode }) => {
     build: {
       copyPublicDir: true,
     },
+    test: {
+      environment: "jsdom",
+      setupFiles: "./src/test/setup.ts",
+      globals: true,
+      css: true,
+      exclude: ["e2e/**", "node_modules/**"],
+    },
   };
 });

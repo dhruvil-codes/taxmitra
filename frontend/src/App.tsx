@@ -6,7 +6,6 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Notice from "./pages/Notice";
 import Journey from "./pages/Journey";
-import Unsupported from "./pages/Unsupported";
 import Scrutiny from "./pages/Scrutiny";
 import Upload from "./pages/Upload";
 import Start from "./pages/Start";
@@ -17,9 +16,10 @@ function AppShell() {
 
   return (
     <>
+      {!isLanding && <a className="skip-link" href="#main-content">Skip to main content</a>}
       {!isLanding && <DisclaimerBanner />}
       {!isLanding && <Header />}
-      <main className={isLanding ? undefined : "min-h-[80vh] app-main-shell"}>
+      <main id="main-content" tabIndex={-1} className={isLanding ? undefined : "min-h-[80vh] app-main-shell"}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/guide" element={<Start />} />
@@ -29,7 +29,7 @@ function AppShell() {
           <Route path="/notices/:id/journey" element={<Journey />} />
           <Route path="/notices/:id/scrutiny" element={<Scrutiny />} />
           <Route path="/upload" element={<Upload />} />
-          <Route path="/notices/:id/unsupported" element={<Unsupported />} />
+          <Route path="/notices/:id/unsupported" element={<Journey />} />
         </Routes>
       </main>
       {!isLanding && (
