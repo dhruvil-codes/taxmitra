@@ -274,6 +274,119 @@ class Demand245Handler(WorkflowHandler):
     def review(self, notice, answers, **kwargs): return {"status": "approved" if kwargs.get("approved") else "blocked", "handoff_allowed": False, "message": "Review is required before payment or demand response on the official portal."}
 
 
+class InformationRequest1336Handler(WorkflowHandler):
+    """Request-scoped response preparation for section 133(6) communications."""
+
+    category = "scrutiny_information_133_6"
+    official_source = "https://www.incometax.gov.in/iec/foportal/help/respond-to-e-proceedings"
+
+    def _requests(self, notice: dict[str, Any]) -> list[dict[str, Any]]:
+        raw = (notice.get("synthetic_extraction") or {}).get("requests") or notice.get("requests") or []
+        normalized: list[dict[str, Any]] = []
+        for index, item in enumerate(raw):
+            if not isinstance(item, dict):
+                continue
+            wording = str(item.get("original_text") or item.get("source_text") or item.get("text") or "").strip()
+            if not wording:
+                continue
+            request_id = str(item.get("request_id") or item.get("id") or f"information-{index + 1}")
+            explanation = item.get("plain_language_explanation") or item.get("explanation") or {"en": "Review the exact information requested and provide the records that support it."}
+            if isinstance(explanation, str):
+                explanation = {"en": explanation}
+            evidence = item.get("required_evidence") or item.get("evidence") or []
+            normalized.append({"id": request_id, "request_id": request_id, "technical_term": str(item.get("technical_term") or item.get("title") or wording[:120]), "original_text": wording, "plain_language_explanation": explanation, "page_number": item.get("page_number", item.get("page")), "source_location": item.get("source_location"), "confidence": float(item.get("confidence", 0.0)), "required_evidence": evidence if isinstance(evidence, list) else [], "status": str(item.get("status") or "not_started")})
+        return normalized
+
+    def get_questions(self, notice, locale="en", answers=None):
+        requests = self._requests(notice)
+        questions = [{"id": "information_record_confirmed", "question_type": "single_choice", "text": "Do these extracted requests match the 133(6) communication?", "help": "We need to confirm the Department's exact requests before preparing any response.", "options": [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}, {"id": "unsure", "label": "Not sure"}], "required": True}]
+        for item in requests:
+            questions.append({"id": f"information_status_{item['id']}", "question_type": "single_choice", "text": f"How much of this request can you provide: {item['technical_term']}?", "help": "This determines whether the prepared response marks the request complete, partial, or unavailable. Not sure stays separate from unavailable.", "options": [{"id": "complete", "label": "I can provide it"}, {"id": "partial", "label": "I can provide some of it"}, {"id": "unavailable", "label": "I cannot provide it"}, {"id": "not_sure", "label": "Not sure"}], "conditions": [{"depends_on": "information_record_confirmed", "equals": "yes"}], "required": True})
+        return {"questions": questions, "requests": requests, "request_count": len(requests)}
+
+    def get_evidence(self, notice, statuses=None):
+        statuses = statuses or {}
+        items: list[dict[str, Any]] = []
+        for request in self._requests(notice):
+            for index, document in enumerate(request["required_evidence"]):
+                if isinstance(document, dict):
+                    name = document.get("name") or document.get("document_name") or document.get("title") or "Supporting document"
+                    reason = document.get("reason") or "Supports the information requested in the notice."
+                    document_id = str(document.get("id") or document.get("document_id") or f"{request['id']}-evidence-{index + 1}")
+                else:
+                    name, reason, document_id = str(document), "Supports the information requested in the notice.", f"{request['id']}-evidence-{index + 1}"
+                items.append({"request_id": request["id"], "document_id": document_id, "document_name": name, "reason": reason, "status": statuses.get(document_id, "not_sure"), "requirement_level": "required", "source": [self.official_source]})
+        return items
+
+    def resolve(self, notice, answers, **kwargs):
+        requests = self._requests(notice)
+        if not requests:
+            return {"supported": False, "status": "safe_stop", "handoff_allowed": False, "reason": "No specific 133(6) requests were extracted safely; Tax Mitra will not invent what to provide."}
+        if answers.get("information_record_confirmed") != "yes":
+            return {"supported": False, "status": "safe_stop", "handoff_allowed": False, "reason": "The extracted information requests were not confirmed against the communication."}
+        prepared: list[dict[str, Any]] = []
+        for item in requests:
+            status = answers.get(f"information_status_{item['id']}")
+            if status not in {"complete", "partial", "unavailable", "not_sure"}:
+                return {"supported": False, "status": "safe_stop", "handoff_allowed": False, "reason": f"The availability of request {item['id']} was not confirmed."}
+            prepared.append({"request_id": item["id"], "technical_term": item["technical_term"], "original_text": item["original_text"], "plain_language_explanation": item["plain_language_explanation"], "page_number": item["page_number"], "confidence": item["confidence"], "availability": status})
+        uncertain = [item["request_id"] for item in prepared if item["availability"] == "not_sure"]
+        action = "Prepare a structured 133(6) information response for taxpayer review, with each request answered separately and supporting attachments added where available."
+        if uncertain:
+            action += f" The following requests remain uncertain and must be resolved before submission: {', '.join(uncertain)}."
+        draft_lines = ["133(6) information response plan (review before use):", action, "", "Requests:"]
+        draft_lines.extend(f"{index}. {item['technical_term']} — {item['availability']} — {item['original_text']}" for index, item in enumerate(prepared, 1))
+        draft_lines.append("\nTax Mitra has not submitted this response or uploaded any document.")
+        return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "requests": prepared, "response_plan": {"items": prepared, "partial_information_allowed": True}, "action": action, "draft": "\n".join(draft_lines), "checklist": self.get_evidence(notice), "deadline": notice.get("deadline") or notice.get("response_deadline"), "next_step": "Review every request and attachment, then use the official e-Proceedings or applicable Comply to Notice route. Tax Mitra will not submit.", "handoff_allowed": False}
+
+    def generate_response(self, notice, answers, **kwargs): return self.resolve(notice, answers, **kwargs)
+    def review(self, notice, answers, **kwargs): return {"status": "approved" if kwargs.get("approved") else "blocked", "handoff_allowed": False, "message": "Review is required before submitting the 133(6) response on the official portal."}
+
+
+class AuthorityInformationRequestHandler(InformationRequest1336Handler):
+    """Section-independent fallback for grounded AO/authority requests."""
+
+    category = "authority_information_request"
+
+    def resolve(self, notice, answers, **kwargs):
+        result = super().resolve(notice, answers, **kwargs)
+        if result.get("status") == "supported":
+            result["status"] = "partial_support"
+            result["capability"] = "PARTIAL_SUPPORT"
+            result["action"] = "Prepare a structured response to the Income Tax authority for taxpayer and professional review, answering each extracted request separately."
+            result["draft"] = result["draft"].replace("133(6) information response plan", "Income Tax authority information response plan", 1)
+            result["draft"] = result["draft"].replace("Prepare a structured 133(6) information response", result["action"], 1)
+            uncertain = [item["request_id"] for item in result.get("requests", []) if item.get("availability") == "not_sure"]
+            if uncertain:
+                result["action"] += f" The following requests remain uncertain and must be resolved before submission: {', '.join(uncertain)}."
+            result["next_step"] = "Review the authority, deadline, requests and attachments with a qualified professional where needed, then use the official e-Proceedings or applicable portal route. Tax Mitra will not submit."
+        return result
+
+
+class ClarificationHandler(AuthorityInformationRequestHandler):
+    """Distinct clarification workflow sharing the generic request engine."""
+
+    category = "ao_notice_clarification"
+
+    def get_questions(self, notice, locale="en", answers=None):
+        result = super().get_questions(notice, locale, answers)
+        if result.get("questions"):
+            result["questions"][0]["text"] = "Do these extracted clarification points match the communication?"
+            result["questions"][0]["help"] = "We need to confirm the exact point that the Department wants clarified before preparing remarks."
+        return result
+
+    def resolve(self, notice, answers, **kwargs):
+        result = super().resolve(notice, answers, **kwargs)
+        if result.get("status") == "partial_support":
+            result["status"] = "supported"
+            result["capability"] = "SUPPORTED"
+            result["action"] = "Prepare a concise clarification response for taxpayer review, addressing each clarification point with only the verified facts and supporting records."
+            result["draft"] = result["draft"].replace("Income Tax authority information response plan", "Clarification response plan", 1)
+            result["draft"] = result["draft"].replace("Prepare a structured response to the Income Tax authority", result["action"], 1)
+            result["next_step"] = "Review the clarification, supporting records and deadline, then use the official e-Proceedings route. Tax Mitra will not submit."
+        return result
+
+
 class DefectiveReturn1399Handler(WorkflowHandler):
     """Grounded correction guidance for a defective-return notice.
 
@@ -672,5 +785,8 @@ def get_workflow_handler(category: str | None) -> WorkflowHandler:
         "tax_credit_tds_mismatch": TaxCreditMismatchHandler(),
         "demand_adjustment_245": Demand245Handler(),
         "outstanding_tax_demand": Demand245Handler(),
+        "scrutiny_information_133_6": InformationRequest1336Handler(),
+        "authority_information_request": AuthorityInformationRequestHandler(),
+        "ao_notice_clarification": ClarificationHandler(),
     }
     return handlers.get(category, SafeStopHandler())

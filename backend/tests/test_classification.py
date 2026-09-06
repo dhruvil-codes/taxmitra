@@ -36,6 +36,8 @@ def test_release_candidate_support_scope():
         NoticeCategory.TAX_CREDIT_TDS_MISMATCH,
         NoticeCategory.DEMAND_ADJUSTMENT_245,
         NoticeCategory.OUTSTANDING_TAX_DEMAND,
+        NoticeCategory.SCRUTINY_INFORMATION_133_6,
+        NoticeCategory.AO_NOTICE_CLARIFICATION,
     }
     assert is_supported(NoticeCategory.INCOME_MISMATCH_143_1A)
     assert is_supported(NoticeCategory.SCRUTINY_142_1)

@@ -73,7 +73,7 @@ def test_non_income_document_is_rejected_after_extraction(monkeypatch):
     assert body["extraction"]["refusal_reason"] is None
 
 
-def test_ai_explanation_only_route_does_not_become_unsupported_section(monkeypatch):
+def test_ai_133_6_route_becomes_supported_information_workflow(monkeypatch):
     def fake_classifier(notice, settings):
         return ({
             "is_income_tax_communication": True,
@@ -92,9 +92,9 @@ def test_ai_explanation_only_route_does_not_become_unsupported_section(monkeypat
 
     body = response.json()
     assert body["classification"]["category"] == "scrutiny_information_133_6"
-    assert body["classification"]["capability"] == "EXPLANATION_ONLY"
-    assert body["classification"]["status"] == "explanation_only"
-    assert body["workflow"]["capability"] == "EXPLANATION_ONLY"
+    assert body["classification"]["capability"] == "SUPPORTED"
+    assert body["classification"]["status"] == "supported"
+    assert body["workflow"]["capability"] == "SUPPORTED"
 
 
 def test_openai_adapter_receives_all_extracted_pages(monkeypatch):

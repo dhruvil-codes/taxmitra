@@ -81,7 +81,8 @@ _WORKFLOWS: tuple[WorkflowDefinition, ...] = (
     _w("income_intimation_143_1", "income_intimation_143_1", {"en": "143(1) processing intimation", "hi": "धारा 143(1) प्रसंस्करण सूचना"}, WorkflowCapability.SUPPORTED, ("143(1)", "intimation under section 143", "processed return", "refund", "tax payable"), ("notice section", "assessment year", "tax/refund figures", "response or follow-up action"), "journey", question_plan="minimum intimation action plan", response="explain the processed figures and prepare a taxpayer-controlled follow-up action"),
     _w("income_mismatch_143_1a", "income_mismatch_143_1a", {"en": "143(1)(a) income mismatch", "hi": "धारा 143(1)(a) आय बेमेल"}, WorkflowCapability.SUPPORTED, ("143(1)(a)", "income mismatch", "adjustment proposed", "proposed adjustment"), ("notice section", "assessment year", "proposed adjustment", "taxpayer position"), "journey", "app.routers.workflow", "existing /api/workflow/questions", "existing 143(1)(a) checklist", "existing response path and human approval"),
     _w("scrutiny_142_1", "scrutiny_142_1", {"en": "142(1) scrutiny information request", "hi": "धारा 142(1) जांच सूचना अनुरोध"}, WorkflowCapability.SUPPORTED, ("142(1)", "annexure", "information and documents", "furnish the information"), ("notice section", "assessment year", "original requests", "response deadline"), "scrutiny", "app.routers.scrutiny", "existing scrutiny minimum-question plan", "existing scrutiny evidence mapping", "existing response and human approval"),
-    _w("scrutiny_information_133_6", "scrutiny_information_133_6", {"en": "133(6) information request", "hi": "धारा 133(6) सूचना अनुरोध"}, WorkflowCapability.EXPLANATION_ONLY, ("133(6)", "section 133(6)", "information under section 133"), ("notice section", "requested information", "deadline")),
+    _w("scrutiny_information_133_6", "scrutiny_information_133_6", {"en": "133(6) information request", "hi": "धारा 133(6) सूचना अनुरोध"}, WorkflowCapability.SUPPORTED, ("133(6)", "section 133(6)", "information under section 133"), ("notice section", "requested information", "deadline"), "journey", question_plan="minimum information-request response plan", response="prepare a taxpayer-reviewed structured information response"),
+    _w("authority_information_request", "authority_information_request", {"en": "Income Tax authority information request", "hi": "आयकर प्राधिकरण सूचना अनुरोध"}, WorkflowCapability.PARTIAL_SUPPORT, ("assessing officer", "income tax authority", "information request", "furnish information"), ("issuing authority", "purpose", "requested information", "deadline"), "journey", question_plan="minimum authority information-request plan", response="prepare a taxpayer-reviewed response where the extracted requests are sufficiently grounded"),
     _w("rectification_154", "rectification_154", {"en": "Section 154 rectification", "hi": "धारा 154 सुधार"}, WorkflowCapability.SUPPORTED, ("154", "section 154", "rectification"), ("notice section", "error or adjustment", "assessment year", "rectification type"), "journey", question_plan="minimum rectification eligibility plan", response="prepare a taxpayer-reviewed rectification route"),
     _w("rectification_tax_credit_mismatch", "rectification_tax_credit_mismatch", {"en": "Rectification or tax credit mismatch", "hi": "सुधार या कर क्रेडिट बेमेल"}, WorkflowCapability.SUPPORTED, ("rectification", "tax credit mismatch", "tds credit mismatch", "credit mismatch"), ("notice section", "mismatch or error", "assessment year", "supporting records"), "journey", question_plan="minimum tax-credit correction plan", response="prepare a taxpayer-reviewed tax-credit correction route"),
     _w("tax_credit_tds_mismatch", "tax_credit_tds_mismatch", {"en": "Tax credit / TDS mismatch", "hi": "कर क्रेडिट / TDS बेमेल"}, WorkflowCapability.SUPPORTED, ("tds mismatch", "tax credit mismatch", "form 26as", "ais mismatch"), ("assessment year", "credit mismatch", "supporting records", "credit type"), "journey", question_plan="minimum tax-credit correction plan", response="prepare a taxpayer-reviewed tax-credit correction or deductor follow-up"),
@@ -91,7 +92,7 @@ _WORKFLOWS: tuple[WorkflowDefinition, ...] = (
     _w("reassessment_148", "reassessment_148", {"en": "Section 148 reassessment", "hi": "धारा 148 पुनर्मूल्यांकन"}, WorkflowCapability.SAFE_STOP, ("148", "section 148", "reassessment"), ("notice section", "issue date", "response deadline")),
     _w("reassessment_148a", "reassessment_148a", {"en": "Section 148A proceedings", "hi": "धारा 148A कार्यवाही"}, WorkflowCapability.SAFE_STOP, ("148a", "section 148a", "show cause notice"), ("notice section", "issue date", "response deadline")),
     _w("penalty_proceedings", "penalty_proceedings", {"en": "Penalty proceedings", "hi": "दंड कार्यवाही"}, WorkflowCapability.SAFE_STOP, ("penalty", "show cause penalty", "imposition of penalty"), ("proceeding section", "allegation", "deadline")),
-    _w("ao_notice_clarification", "ao_notice_clarification", {"en": "Assessing Officer clarification", "hi": "आकलन अधिकारी स्पष्टीकरण"}, WorkflowCapability.EXPLANATION_ONLY, ("assessing officer", "ao notice", "clarification", "clarify the information"), ("notice section", "specific clarification requested", "response deadline")),
+    _w("ao_notice_clarification", "ao_notice_clarification", {"en": "Assessing Officer clarification", "hi": "आकलन अधिकारी स्पष्टीकरण"}, WorkflowCapability.SUPPORTED, ("assessing officer", "ao notice", "clarification", "clarify the information"), ("issuing authority", "specific clarification requested", "response deadline"), "journey", question_plan="minimum clarification response plan", response="prepare a concise taxpayer-reviewed clarification response"),
     _w("unknown_income_tax_communication", "unknown_income_tax_communication", {"en": "Unknown Income Tax communication", "hi": "अज्ञात आयकर संचार"}, WorkflowCapability.SAFE_STOP, (), ("issuing authority", "dates", "requests")),
 )
 _BY_CATEGORY = {w.category: w for w in _WORKFLOWS}
@@ -133,6 +134,9 @@ def _section_candidate(text: str) -> WorkflowDefinition | None:
     if "154" in normalized and ("rectif" in normalized or normalized.startswith("section154")): return _BY_CATEGORY["rectification_154"]
     if "section245" in normalized or "u/s245" in normalized or "under245" in normalized or normalized.startswith("245") or "adjustment against demand" in normalized: return _BY_CATEGORY["demand_adjustment_245"]
     if "143(1)" in normalized: return _BY_CATEGORY["income_intimation_143_1"]
+    if "clarification" in normalized and ("assessingofficer" in normalized or "incometaxauthority" in normalized): return _BY_CATEGORY["ao_notice_clarification"]
+    if ("assessingofficer" in normalized or "incometaxauthority" in normalized) and any(term in normalized for term in ("informationrequest", "furnishinformation", "provideinformation", "documentsrequested")):
+        return _BY_CATEGORY["authority_information_request"]
     return None
 
 
@@ -168,7 +172,7 @@ def classify_extracted_notice(notice: dict[str, Any], grounding: Any = None) -> 
         return ClassificationResult(selected.workflow_id, selected.category, confidence, grounding_status, False, "safe_stop", "communication is legally sensitive or not safe to automate", tuple(evidence), selected.capability.value)
     if selected.capability is WorkflowCapability.EXPLANATION_ONLY:
         return ClassificationResult(selected.workflow_id, selected.category, confidence, grounding_status, False, "safe_stop", "explanation is available but a guided response is not safe to automate", tuple(evidence), selected.capability.value)
-    if selected.category == "defective_return_139_9" and not (notice.get("synthetic_extraction") or {}).get("requests"):
+    if selected.category in {"defective_return_139_9", "authority_information_request", "ao_notice_clarification"} and not (notice.get("synthetic_extraction") or {}).get("requests"):
         return ClassificationResult(selected.workflow_id, selected.category, confidence, grounding_status, False, "safe_stop", "notice facts require confirmation before partial guidance can begin", tuple(evidence), selected.capability.value)
     return ClassificationResult(selected.workflow_id, selected.category, confidence, grounding_status, selected.supported, "supported" if selected.supported else "partial_support", reason, tuple(evidence), selected.capability.value)
 
@@ -185,6 +189,12 @@ def classify_ai_proposal(notice: dict[str, Any], proposal: dict[str, Any], groun
             evidence, WorkflowCapability.SAFE_STOP.value,
         )
     category = str(proposal.get("category") or "unknown_income_tax_communication")
+    if category == "unknown_income_tax_communication" and proposal.get("is_income_tax_communication") is True:
+        proposal_text = " ".join(str(proposal.get(key) or "") for key in ("authority", "authority_type", "communication_type", "purpose", "reason")) .lower()
+        if "clarif" in proposal_text and ("assessing officer" in proposal_text or "income tax authority" in proposal_text or "ao" in proposal_text):
+            category = "ao_notice_clarification"
+        elif ("assessing officer" in proposal_text or "income tax authority" in proposal_text or "ao" in proposal_text) and any(term in proposal_text for term in ("information", "document", "furnish", "provide")):
+            category = "authority_information_request"
     selected = get_workflow(category)
     try:
         confidence = max(0.0, min(1.0, float(proposal.get("confidence", 0.0))))

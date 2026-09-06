@@ -11,7 +11,10 @@ Current capability map:
 - `income_intimation_143_1`: guided final-processing workflow that explains refund, demand, tax-calculation, tax-credit and no-action outcomes and routes only to verified taxpayer-controlled portal actions.
 - `rectification_154` and `tax_credit_tds_mismatch`: guided rectification and credit-mismatch workflows with record-based eligibility, evidence, taxpayer/deductor routing, and safe-stop boundaries.
 - `demand_adjustment_245` and `outstanding_tax_demand`: guided demand-response workflow covering correct, paid, fully disputed, and partially disputed demand states; payment and submission remain on the official portal.
-- 133(6), refund communications, and AO clarification: explanation-only. Section 245 and outstanding demand are guided demand-response workflows; refund reissue remains explanation-only.
+- `scrutiny_information_133_6`: guided request-by-request information response with partial availability, evidence mapping, and official e-Proceedings/Comply to Notice handoff.
+- `authority_information_request`: section-independent partial-support fallback for grounded Assessing Officer or other Income Tax authority information requests.
+- `ao_notice_clarification`: distinct guided clarification response using the shared request/evidence engine; it does not become 142(1) scrutiny.
+- Refund communications and AO clarification: explanation-only. Section 245 and outstanding demand are guided demand-response workflows; refund reissue remains explanation-only.
 - Reassessment, penalty, ambiguous, and unknown communications: useful safe-stop.
 
 The backend owns classification and workflow decisions. Classification returns

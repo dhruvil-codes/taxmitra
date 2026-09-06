@@ -1,0 +1,12 @@
+{
+  "section": "133(6)",
+  "assessment_year": "AY 2024-25",
+  "response_deadline": "2026-10-15",
+  "official_text": "Income Tax Department notice under section 133(6) asking for information regarding business receipts and bank transactions.",
+  "synthetic_extraction": {
+    "requests": [
+      {"id": "receipts", "technical_term": "Business receipts", "original_text": "Provide a month-wise summary of business receipts for FY 2023-24.", "plain_language_explanation": {"en": "Show how much your business received in each month."}, "page_number": 1, "confidence": 0.96, "required_evidence": [{"id": "sales-ledger", "name": "Sales ledger or receipt summary", "reason": "Supports the month-wise receipts requested."}]},
+      {"id": "bank-transactions", "technical_term": "Bank transaction statement", "original_text": "Provide the bank statement and explain the highlighted credits.", "plain_language_explanation": {"en": "Share the relevant bank record and explain the deposits marked in the notice."}, "page_number": 2, "confidence": 0.94, "required_evidence": [{"id": "bank-statement", "name": "Relevant bank statement", "reason": "Supports the highlighted bank credits."}]}
+    ]
+  }
+}

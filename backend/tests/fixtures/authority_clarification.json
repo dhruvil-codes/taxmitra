@@ -1,0 +1,11 @@
+{
+  "issuing_authority": "Assessing Officer, Income Tax Department",
+  "assessment_year": "AY 2024-25",
+  "response_deadline": "2026-11-05",
+  "official_text": "The Assessing Officer seeks clarification on the deduction claimed in the return.",
+  "synthetic_extraction": {
+    "requests": [
+      {"id": "deduction", "technical_term": "Deduction claim clarification", "original_text": "Clarify the basis of the deduction claimed and provide supporting records.", "plain_language_explanation": {"en": "Explain why the deduction was claimed and attach the records that support it."}, "page_number": 1, "confidence": 0.95, "required_evidence": [{"id": "deduction-records", "name": "Records supporting the deduction", "reason": "Supports the clarification requested by the authority."}]}
+    ]
+  }
+}

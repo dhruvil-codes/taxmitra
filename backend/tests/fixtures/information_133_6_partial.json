@@ -1,0 +1,11 @@
+{
+  "section": "133(6)",
+  "assessment_year": "AY 2023-24",
+  "deadline": "2026-10-30",
+  "official_text": "Information is required under section 133(6) regarding an investment transaction.",
+  "synthetic_extraction": {
+    "requests": [
+      {"id": "investment", "technical_term": "Investment transaction details", "original_text": "Provide the date, amount and source of funds for the investment transaction.", "plain_language_explanation": {"en": "Give the transaction details and explain where the invested money came from."}, "page_number": 1, "confidence": 0.91, "required_evidence": [{"id": "investment-record", "name": "Investment statement or confirmation", "reason": "Supports the transaction date and amount."}, {"id": "funds-record", "name": "Bank statement showing source of funds", "reason": "Supports the source of funds."}]}
+    ]
+  }
+}

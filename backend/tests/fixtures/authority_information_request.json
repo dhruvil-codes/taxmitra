@@ -1,0 +1,11 @@
+{
+  "issuing_authority": "Assessing Officer, Income Tax Department",
+  "assessment_year": "AY 2024-25",
+  "response_deadline": "2026-11-10",
+  "official_text": "The Assessing Officer requires information and documents regarding a property transaction.",
+  "synthetic_extraction": {
+    "requests": [
+      {"id": "property-payment", "technical_term": "Property transaction consideration", "original_text": "Provide the agreement and details of consideration paid for the property transaction.", "plain_language_explanation": {"en": "Share the agreement and explain how much was paid for the property."}, "page_number": 1, "confidence": 0.93, "required_evidence": [{"id": "agreement", "name": "Property agreement", "reason": "Supports the transaction details requested by the authority."}]}
+    ]
+  }
+}
