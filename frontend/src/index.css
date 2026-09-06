@@ -2547,3 +2547,88 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px
   .upload-zone strong { font-size: 19px; text-align: center; }
   .app-footer { width: min(100% - 32px, 540px); min-height: 0; padding: 26px 0; }
 }
+
+/* Merge-safe landing authority: keep this block last in the stylesheet. */
+.tm-site > .tm-hero-reworked {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: minmax(0, 620px) minmax(340px, 450px);
+  justify-content: space-between;
+  gap: clamp(40px, 6vw, 88px);
+  padding-inline: max(32px, calc((100vw - 1200px) / 2));
+  overflow: hidden;
+}
+
+.tm-site > .tm-hero-reworked > .tm-hero-copy {
+  width: 100%;
+  min-width: 0;
+  max-width: 620px;
+  padding: 0;
+  border: 0;
+}
+
+.tm-site > .tm-hero-reworked .tm-hero-title {
+  width: 100%;
+  max-width: 620px;
+  font-family: var(--font-sans);
+  font-size: clamp(52px, 5vw, 72px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.055em;
+  text-transform: none;
+  overflow-wrap: normal;
+}
+
+.tm-site > .tm-hero-reworked .tm-hero-lede,
+.tm-site > .tm-hero-reworked .tm-hero-scope,
+.tm-site > .tm-hero-reworked .tm-hero-actions,
+.tm-site > .tm-hero-reworked .tm-hero-flow {
+  width: 100%;
+  max-width: 540px;
+  font-family: var(--font-sans);
+}
+
+.tm-site > .tm-hero-reworked > .tm-notice-preview {
+  width: 100%;
+  min-width: 0;
+  max-width: 450px;
+  justify-self: end;
+}
+
+@media (max-width: 900px) {
+  .tm-site > .tm-hero-reworked {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+    gap: 36px;
+  }
+
+  .tm-site > .tm-hero-reworked .tm-hero-title {
+    font-size: clamp(48px, 6vw, 60px);
+  }
+}
+
+@media (max-width: 760px) {
+  .tm-site > .tm-hero-reworked {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 48px 16px 44px;
+    overflow: clip;
+  }
+
+  .tm-site > .tm-hero-reworked .tm-hero-title {
+    max-width: 560px;
+    font-size: clamp(40px, 12vw, 56px);
+    line-height: 1;
+  }
+
+  .tm-site > .tm-hero-reworked > .tm-notice-preview {
+    width: calc(100% - 10px);
+    max-width: 520px;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 390px) {
+  .tm-site > .tm-hero-reworked .tm-hero-title {
+    font-size: 40px;
+  }
+}
