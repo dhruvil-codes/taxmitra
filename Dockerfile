@@ -8,9 +8,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app/backend
-COPY backend/requirements.txt ./requirements.txt
+COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-COPY backend/ .
+COPY . .
 
 # Fail the image build if production OCR or the Hindi traineddata is absent.
 RUN tesseract --version && tesseract --list-langs | grep -E '^(eng|hin)$'
