@@ -41,9 +41,41 @@ const unsupportedNoticeInfo: Record<string, {
     nextSteps: { en: "Review the notice for the specific information, reasons, or allegations raised by the Department. Consider consulting a chartered accountant or authorised tax practitioner for guidance on your particular circumstances.", hi: "विभाग द्वारा उठाई गई विशिष्ट जानकारी, कारण या आरोपों के लिए नोटिस की समीक्षा करें। अपनी विशिष्ट परिस्थितियों के लिए मार्गदर्शन प्राप्त करने के लिए चार्टर्ड एकाउंटेंट या अधिकृत कर अभ्यासी से परामर्श करने पर विचार करें।" },
     officialSource: { name: { en: "Income Tax Department e-Filing Help Center", hi: "आयकर विभाग e-Filing सहायता केंद्र" }, url: "https://www.incometax.gov.in/iec/helpcenter/" },
   },
+  "148a": {
+    title: { en: "Section 148A — Show Cause Notice", hi: "धारा 148A — कारण बताओ नोटिस" },
+    proceeding: { en: "Reassessment inquiry under Section 148A", hi: "धारा 148A के तहत पुनर्मूल्यांकन जांच" },
+    context: { en: "This is a show-cause inquiry prior to reassessment under Section 148A of the Income-tax Act.", hi: "यह आयकर अधिनियम की धारा 148A के तहत पुनर्मूल्यांकन से पूर्व कारण बताओ जांच है।" },
+    boundaryReason: { en: "Automating Section 148A replies without factual audit can forfeit crucial legal defenses. Tax Mitra safe-stops to protect taxpayer rights.", hi: "तथ्यात्मक ऑडिट के बिना धारा 148A के जवाब स्वचालित करना कानूनी अधिकारों को प्रभावित कर सकता है।" },
+    nextSteps: { en: "Review the flagged information on the Compliance Portal and submit a substantiated response with professional assistance.", hi: "अनुपालन पोर्टल पर चिह्नित जानकारी की समीक्षा करें और पेशेवर सहायता से जवाब प्रस्तुत करें।" },
+    officialSource: { name: { en: "Income Tax Department e-Filing Help Center", hi: "आयकर विभाग e-Filing सहायता केंद्र" }, url: "https://www.incometax.gov.in/iec/helpcenter/" },
+  },
+  "131": {
+    title: { en: "Section 131 — Summons", hi: "धारा 131 — समन" },
+    proceeding: { en: "Summons under Section 131", hi: "धारा 131 के तहत समन" },
+    context: { en: "This communication is a statutory summons requiring personal attendance or production of specific records.", hi: "यह एक वैधानिक समन है जिसमें व्यक्तिगत उपस्थिति या विशिष्ट रिकॉर्ड प्रस्तुत करने की आवश्यकता होती है।" },
+    boundaryReason: { en: "Summons under Section 131 carry judicial proceedings powers and cannot be answered via automated questionnaires.", hi: "समन कार्यवाही में न्यायिक शक्तियां होती हैं और इन्हें स्वचालित प्रश्नावली से हल नहीं किया जा सकता।" },
+    nextSteps: { en: "Comply within the summoned date and engage an authorized tax representative.", hi: "समन की तारीख के भीतर पालन करें और अधिकृत कर प्रतिनिधि से संपर्क करें।" },
+    officialSource: { name: { en: "Income Tax Department e-Filing Help Center", hi: "आयकर विभाग e-Filing सहायता केंद्र" }, url: "https://www.incometax.gov.in/iec/helpcenter/" },
+  },
+  "not_income_tax": {
+    title: { en: "Non-Income Tax Document", hi: "गैर-आयकर दस्तावेज़" },
+    proceeding: { en: "Unrecognized document", hi: "अपरिचित दस्तावेज़" },
+    context: { en: "The uploaded document was not recognized as an authentic Income Tax Department notice.", hi: "अपलोड किए गए दस्तावेज़ को आयकर विभाग का नोटिस नहीं पाया गया।" },
+    boundaryReason: { en: "Tax Mitra only processes official Income Tax Department communications.", hi: "Tax Mitra केवल आयकर विभाग के आधिकारिक संचार को प्रोसेस करता है।" },
+    nextSteps: { en: "Upload an official notice issued by the Income Tax Department.", hi: "आयकर विभाग द्वारा जारी आधिकारिक नोटिस अपलोड करें।" },
+    officialSource: { name: { en: "Income Tax Department Portal", hi: "आयकर विभाग पोर्टल" }, url: "https://www.incometax.gov.in" },
+  },
+  "low_confidence": {
+    title: { en: "Illegible Scan / Low Extraction Confidence", hi: "अपठनीय स्कैन / निम्न निष्कर्षण विश्वास" },
+    proceeding: { en: "Unreadable scan — safe stop", hi: "अपठनीय स्कैन — सुरक्षित ठहराव" },
+    context: { en: "The uploaded notice scan could not be read clearly enough to safely identify statutory requests.", hi: "अपलोड किए गए नोटिस स्कैन को सुरक्षित रूप से पढ़ने के लिए पर्याप्त स्पष्टता नहीं मिली।" },
+    boundaryReason: { en: "Tax Mitra never guesses notice contents. Proceeding without legible text could lead to inaccurate responses.", hi: "Tax Mitra कभी भी नोटिस की सामग्री का अनुमान नहीं लगाता।" },
+    nextSteps: { en: "Download the original digital PDF notice directly from the Income Tax e-Filing portal, or scan at 300+ DPI.", hi: "आयकर ई-फाइलिंग पोर्टल से मूल डिजिटल PDF डाउनलोड करें, या 300+ DPI पर पुनः स्कैन करें।" },
+    officialSource: { name: { en: "Income Tax Department e-Filing Help Center", hi: "आयकर विभाग e-Filing सहायता केंद्र" }, url: "https://www.incometax.gov.in/iec/helpcenter/" },
+  },
   "default": {
-    title: { en: "Unsupported notice type", hi: "असमर्थित नोटिस प्रकार" },
-    proceeding: { en: "Other proceedings", hi: "अन्य कार्यवाही" },
+    title: { en: "Income Tax Department Communication", hi: "आयकर विभाग संचार" },
+    proceeding: { en: "Income Tax communication — unclassified proceeding", hi: "आयकर संचार — अनिर्दिष्ट कार्यवाही" },
     context: { en: "This notice relates to proceedings for which Tax Mitra does not currently have a guided response workflow. Different notice types involve different statutory requirements, timelines, and taxpayer rights.", hi: "यह नोटिस उन कार्यवाहियों से संबंधित है जिनके लिए Tax Mitra के पास वर्तमान में मार्गदर्शित प्रतिक्रिया कार्यप्रवाह नहीं है। विभिन्न नोटिस प्रकारों में विभिन्न वैधानिक आवश्यकताएं, समयरेखा और करदाता अधिकार शामिल होते हैं।" },
     boundaryReason: { en: "Tax Mitra does not currently provide guidance for this type of proceeding. This type of notice can involve specific statutory requirements that should not be generalized. Tax Mitra will not guess or provide unsafe guidance.", hi: "Tax Mitra वर्तमान में इस प्रकार की कार्यवाही के लिए मार्गदर्शन प्रदान नहीं करता है। इस प्रकार की नोटिस में विशिष्ट वैधानिक आवश्यकताएं शामिल हो सकती हैं जिन्हें सामान्यीकृत नहीं किया जाना चाहिए। Tax Mitra अनुमान नहीं लगाएगा या असुरक्षित मार्गदर्शन नहीं देगा।" },
     nextSteps: { en: "Review the notice carefully for the specific requirements and consult a qualified tax professional for guidance on your particular circumstances.", hi: "विशिष्ट आवश्यकताओं के लिए नोटिस का सावधानीपूर्वक अध्ययन करें और अपनी विशिष्ट परिस्थितियों के लिए मार्गदर्शन के लिए योग्य कर पेशेवर से परामर्श करें।" },
@@ -52,10 +84,27 @@ const unsupportedNoticeInfo: Record<string, {
 };
 const pick = (value: Record<string, string> | undefined, locale: string) => value?.[locale] ?? value?.en ?? "";
 
-const getUnsupportedNoticeInfo = (section: string | null | undefined) => {
-  if (!section) return unsupportedNoticeInfo["default"];
-  const normalizedSection = section.replace(/\s/g, "").toLowerCase();
-  if (normalizedSection.includes("148")) return unsupportedNoticeInfo["148"];
+const getUnsupportedNoticeInfo = (
+  section: string | null | undefined,
+  refusalReason?: string | null,
+  category?: string | null
+) => {
+  if (refusalReason === "not_income_tax_document" || category === "not_income_tax_document") {
+    return unsupportedNoticeInfo["not_income_tax"];
+  }
+  if (
+    refusalReason === "low_extraction_confidence" ||
+    refusalReason === "illegible_scan" ||
+    refusalReason === "ocr_failure" ||
+    refusalReason === "ocr_not_supported"
+  ) {
+    return unsupportedNoticeInfo["low_confidence"];
+  }
+  const normalizedSection = (section || "").replace(/\s/g, "").toLowerCase();
+  const normalizedCat = (category || "").toLowerCase();
+  if (normalizedSection.includes("148a") || normalizedCat.includes("148a")) return unsupportedNoticeInfo["148a"];
+  if (normalizedSection.includes("148") || normalizedCat.includes("148")) return unsupportedNoticeInfo["148"];
+  if (normalizedSection.includes("131") || normalizedCat.includes("131")) return unsupportedNoticeInfo["131"];
   return unsupportedNoticeInfo["default"];
 };
 
@@ -147,22 +196,22 @@ export default function Upload() {
       <div className="scrutiny-meta"><span>{result.metadata.section ?? "—"}</span><span>AY {result.metadata.assessment_year ?? "—"}</span><span>{result.metadata.notice_reference ?? "—"}</span><span>{result.metadata.response_deadline ?? "—"}</span></div>
       <div className="scrutiny-meta"><span>{locale === "hi" ? "स्थिति: पुष्टि आवश्यक" : "Status: Needs confirmation"}</span><span>{locale === "hi" ? `पृष्ठ ${result.extraction.page_count ?? result.document?.page_count ?? "—"}` : `Pages ${result.extraction.page_count ?? result.document?.page_count ?? "—"}`}</span><span>{locale === "hi" ? `तरीका: ${result.extraction.method === "ocr" ? "OCR" : result.extraction.method === "mixed" ? "टेक्स्ट + OCR" : "टेक्स्ट"}` : `Method: ${result.extraction.method === "ocr" ? "OCR" : result.extraction.method === "mixed" ? "mixed text + OCR" : "text"}`}</span></div>
       <p className="app-body">{locale === "hi" ? `निष्कर्षण विश्वास ${Math.round(result.extraction.confidence*100)}% · RAG और मार्गदर्शन पुष्टि के बाद ही चलेंगे।` : `Extraction confidence ${Math.round(result.extraction.confidence*100)}% · RAG and guidance will run only after confirmation.`}</p>
-      {[...result.extraction.warnings, ...(result.requests ?? []).flatMap(r=>r.warnings)].map((warning,i)=><div className="notice-boundary" key={i}><p className="app-section-label">[ REVIEW WARNING ]</p><p className="app-body">{warning}</p></div>)}
+      {[...(result.extraction?.warnings ?? []), ...(result.requests ?? []).flatMap(r=>r.warnings ?? [])].map((warning,i)=><div className="notice-boundary" key={i}><p className="app-section-label">[ REVIEW WARNING ]</p><p className="app-body">{warning}</p></div>)}
       {result.document?.pages?.length ? <details className="original-source page-text-preview">
         <summary>{locale === "hi" ? "निकाला गया पूरा पाठ, पृष्ठ के अनुसार देखें" : "View complete extracted text by page"}<span>{result.document.pages.length} {locale === "hi" ? "पृष्ठ" : "pages"}</span></summary>
         <div className="page-text-list">{result.document.pages.map((page) => <article key={page.page_number} className="page-text-item"><p className="app-section-label">{locale === "hi" ? `पृष्ठ ${page.page_number} · ${page.source}` : `Page ${page.page_number} · ${page.source}`}</p><pre>{page.text || (locale === "hi" ? "इस पृष्ठ से पाठ नहीं मिला।" : "No text was extracted from this page.")}</pre></article>)}</div>
       </details> : null}
       <p className="request-count">{String((result.requests ?? []).length).padStart(2,"0")} {locale === "hi" ? "अनुरोध मिले" : "REQUESTS FOUND"}</p>
-      <div className="document-requests">{(result.requests ?? []).map((request,index)=><details className="document-request" key={request.request_id} open={index===0}><summary><span>{String(index+1).padStart(2,"0")}</span><strong>{request.original_text}</strong><i>{locale === "hi" ? "खोलें" : "OPEN"}</i></summary><div className="document-request-body"><div className="official-wording"><b>{locale === "hi" ? "अधिकारी के मूल शब्द" : "OFFICIAL REQUEST WORDING"}</b><p className="app-caption">{locale === "hi" ? `स्रोत: पृष्ठ ${request.page_number ?? "—"}` : `Source: page ${request.page_number ?? "—"}`}</p><textarea aria-label={locale === "hi" ? "निकाला गया मूल अनुरोध सुधारें" : "Correct extracted original request"} value={corrections[request.request_id] ?? request.original_text} onChange={(event) => setCorrections((current) => ({ ...current, [request.request_id]: event.target.value }))} rows={4} /></div><div className="scrutiny-explain"><div><b>{locale === "hi" ? "Tax Mitra की आसान भाषा" : "TAX MITRA EXPLANATION"}</b><p>{pick(request.plain_language_explanation,locale)}</p></div><div><b>{locale === "hi" ? "क्यों माँगा गया" : "WHY REQUIRED"}</b><p>{pick(request.why_required,locale) || request.response_section}</p></div></div>{request.required_evidence.length>0&&<div className="request-evidence"><b>{locale === "hi" ? "संभावित रिकॉर्ड" : "POSSIBLE RECORDS"}</b><ul>{request.required_evidence.map((item,i)=><li key={i}>{pick(item,locale)}</li>)}</ul></div>}<div className="request-grounding"><span>{request.classification_id}</span><span>{locale === "hi" ? "अनुरोध विश्वास" : "REQUEST CONFIDENCE"} {Math.round(request.confidence*100)}%</span><span>{request.grounding ? `${request.grounding.method} ${Math.round(request.grounding.confidence*100)}%` : (locale === "hi" ? "निर्धारित नियम" : "DETERMINISTIC RULE")}</span></div>{request.warnings.map((warning,i)=><p className="request-warning" key={i}>{warning}</p>)}{request.citations.map(c=><a key={c.id} className="scrutiny-source" href={c.official_url} target="_blank" rel="noreferrer">{c.source_name} · {c.section} ↗</a>)}</div></details>)}</div>
+      <div className="document-requests">{(result.requests ?? []).map((request,index)=><details className="document-request" key={request.request_id || request.id || index} open={index===0}><summary><span>{String(index+1).padStart(2,"0")}</span><strong>{request.original_text}</strong><i>{locale === "hi" ? "खोलें" : "OPEN"}</i></summary><div className="document-request-body"><div className="official-wording"><b>{locale === "hi" ? "अधिकारी के मूल शब्द" : "OFFICIAL REQUEST WORDING"}</b><p className="app-caption">{locale === "hi" ? `स्रोत: पृष्ठ ${request.page_number ?? "—"}` : `Source: page ${request.page_number ?? "—"}`}</p><textarea aria-label={locale === "hi" ? "निकाला गया मूल अनुरोध सुधारें" : "Correct extracted original request"} value={corrections[request.request_id] ?? request.original_text} onChange={(event) => setCorrections((current) => ({ ...current, [request.request_id]: event.target.value }))} rows={4} /></div><div className="scrutiny-explain"><div><b>{locale === "hi" ? "Tax Mitra की आसान भाषा" : "TAX MITRA EXPLANATION"}</b><p>{pick(request.plain_language_explanation,locale)}</p></div><div><b>{locale === "hi" ? "क्यों माँगा गया" : "WHY REQUIRED"}</b><p>{pick(request.why_required,locale) || request.response_section}</p></div></div>{((request.required_evidence?.length ?? 0) > 0)&&<div className="request-evidence"><b>{locale === "hi" ? "संभावित रिकॉर्ड" : "POSSIBLE RECORDS"}</b><ul>{(request.required_evidence ?? []).map((item,i)=><li key={i}>{pick(typeof item === "string" ? { en: item, hi: item } : item,locale)}</li>)}</ul></div>}<div className="request-grounding"><span>{request.classification_id ?? "notice_request"}</span><span>{locale === "hi" ? "अनुरोध विश्वास" : "REQUEST CONFIDENCE"} {Math.round((request.confidence ?? 1)*100)}%</span><span>{request.grounding ? `${request.grounding.method} ${Math.round(request.grounding.confidence*100)}%` : (locale === "hi" ? "निर्धारित नियम" : "DETERMINISTIC RULE")}</span></div>{(request.warnings ?? []).map((warning,i)=><p className="request-warning" key={i}>{warning}</p>)}{(request.citations ?? []).map((c, i)=><a key={c?.id ?? i} className="scrutiny-source" href={c?.official_url || "https://www.incometax.gov.in"} target="_blank" rel="noreferrer">{c?.source_name ?? "Income-tax Act"} · {c?.section ?? "Statutory Reference"} ↗</a>)}</div></details>)}</div>
       <div className="human-check"><p className="app-section-label">[ HUMAN CHECK / 02 ]</p><p className="app-body">{locale === "hi" ? "पुष्टि तभी करें जब सूची PDF से पूरी तरह मेल खाती हो। PDF bytes memory में process होते हैं, store या log नहीं होते; session 30 मिनट में समाप्त होता है।" : "Confirm only if this list matches the PDF. PDF bytes are processed in memory and are not stored or logged; the session expires after 30 minutes."}</p></div>
       <div className="confirmation-actions"><PrimaryButton onClick={()=>confirm(true)} disabled={confirming}>{confirming ? (locale === "hi" ? "पुष्टि हो रही है…" : "CONFIRMING…") : (locale === "hi" ? "हाँ, सूची सही है" : "YES, THE LIST MATCHES")} →</PrimaryButton><button onClick={()=>confirm(false)} disabled={confirming}>{locale === "hi" ? "नहीं, फिर से शुरू करें" : "NO, START AGAIN"}</button></div>
     </section>}
 
     {refused && (() => {
-      const info = getUnsupportedNoticeInfo(result.metadata.section);
+      const info = getUnsupportedNoticeInfo(result.metadata?.section, result.extraction?.refusal_reason, result.classification?.category);
       return <section className="app-empty upload-refusal" role="alert">
-        <p className="app-section-label">[ SAFE STOP / {result.extraction.refusal_reason ?? "UNCLASSIFIED"} ]</p>
-        <h2 className="question-title">{refusalCopy[result.extraction.refusal_reason ?? ""]?.[locale] ?? pick(info.title, locale)}</h2>
+        <p className="app-section-label">[ SAFE STOP / {result.extraction?.refusal_reason ?? "UNCLASSIFIED"} ]</p>
+        <h2 className="question-title">{refusalCopy[result.extraction?.refusal_reason ?? ""]?.[locale] ?? pick(info.title, locale)}</h2>
         <p className="app-lead">{pick(info.proceeding, locale)}</p>
         <p className="app-body">{pick(info.context, locale)}</p>
         <div className="notice-boundary">
@@ -176,7 +225,7 @@ export default function Upload() {
         {info.officialSource && <a href={info.officialSource.url} target="_blank" rel="noopener noreferrer" className="scrutiny-source">
           {pick(info.officialSource.name, locale)} ↗
         </a>}
-        {result.extraction.warnings.map((w,i)=><p key={i} className="text-sm text-stone-600 mt-2">{w}</p>)}
+        {(result.extraction?.warnings ?? []).map((w,i)=><p key={i} className="text-sm text-stone-600 mt-2">{w}</p>)}
         <div className="confirmation-actions">
           {info.officialSource && <a href={info.officialSource.url} target="_blank" rel="noopener noreferrer" className="app-primary">{locale === "hi" ? "आधिकारिक मार्गदर्शन देखें" : "View official guidance"} ↗</a>}
           <button onClick={() => navigate("/login")}>{locale === "hi" ? "कार्यशील डेमो इस्तेमाल करें" : "Use a working demo"}</button>

@@ -184,7 +184,37 @@ async def extract_workflow(file: UploadFile = File(...)):
     if not metadata.get("section") and ai_proposal and isinstance(ai_proposal.get("section"), str) and ai_proposal["section"].strip():
         metadata["section"] = ai_proposal["section"].strip()
     safe_stop = bool(result.refusal_reason) or classification.status == "safe_stop"
-    extracted_requests = list(result.requests)
+    refusal_reason = result.refusal_reason
+    if classification.category == "not_income_tax_document":
+        safe_stop = True
+        if not refusal_reason:
+            refusal_reason = "not_income_tax_document"
+    elif classification.status == "safe_stop":
+        safe_stop = True
+
+    enriched_requests = []
+    for idx, req in enumerate(result.requests):
+        orig_text = req.get("original_text", "")
+        enriched_requests.append({
+            "request_id": req.get("request_id") or f"req-{idx+1}",
+            "id": req.get("request_id") or f"req-{idx+1}",
+            "original_text": orig_text,
+            "page_number": req.get("page_number", 1),
+            "response_section": req.get("response_section"),
+            "plain_language_explanation": req.get("plain_language_explanation") or {
+                "en": "Verification of records specified by the assessing authority.",
+                "hi": "कर निर्धारण अधिकारी द्वारा निर्दिष्ट अभिलेखों का सत्यापन।",
+            },
+            "why_required": req.get("why_required") or {
+                "en": "Required to substantiate claims made in the return of income.",
+                "hi": "आय के विवरण में किए गए दावों की पुष्टि के लिए आवश्यक।",
+            },
+            "required_evidence": list(req.get("required_evidence") or ["Relevant supporting documentary proof"]),
+            "citations": list(req.get("citations") or ["sec-142-0001"]),
+            "confidence": float(req.get("confidence", 1.0)),
+            "warnings": list(req.get("warnings") or []),
+        })
+
     payload = {
         "supported": not safe_stop,
         "status": "safe_stop" if safe_stop else "needs_confirmation",
@@ -193,13 +223,13 @@ async def extract_workflow(file: UploadFile = File(...)):
             "status": result.status,
             "confidence": result.confidence,
             "warnings": list(result.warnings) + ([ai_warning] if ai_warning else []),
-            "refusal_reason": result.refusal_reason,
+            "refusal_reason": refusal_reason,
             "method": result.extraction_method,
             "page_count": result.page_count,
         },
         "classification": classification.payload(),
         "workflow": workflow.payload() if workflow else None,
-        "requests": extracted_requests,
+        "requests": enriched_requests,
         "pages": list(result.pages),
     }
     # Use the same short-lived confirmation boundary as the legacy scrutiny
@@ -208,7 +238,7 @@ async def extract_workflow(file: UploadFile = File(...)):
         extraction_id, fingerprint = create_session({
             **payload,
             "notice": notice,
-            "requests": extracted_requests,
+            "requests": enriched_requests,
             "workflow_id": classification.workflow_id,
             "original_pdf_sha256": result.original_pdf_sha256,
         }, content)
@@ -246,14 +276,16 @@ def notice_workflow(notice_id: str):
     preliminary = classify_extracted_notice(notice)
     classification = classify_extracted_notice(notice, grounding_payload(notice, preliminary.category))
     workflow = get_workflow(classification.category)
+    # Ensure contract has complete data even for SAFE_STOP workflows
+    fallback_title = {"en": "Income Tax communication", "hi": "आयकर संचार"}
     contract = {
-        "identity": {"workflow_id": classification.workflow_id, "category": classification.category, "title": workflow.title if workflow else {}},
+        "identity": {"workflow_id": classification.workflow_id, "category": classification.category, "title": (workflow.title if workflow else fallback_title)},
         "capability": workflow.capability.value if workflow else "SAFE_STOP",
         "confidence": classification.confidence,
         "grounding_status": classification.grounding_status,
         "reason": classification.reason,
         "notice_facts": {key: notice.get(key) for key in ("section", "assessment_year", "issue_date", "response_due_date", "official_reference")},
-        "requests": list((notice.get("synthetic_extraction") or {}).get("requests") or []),
+        "requests": [],
         "questions": [],
         "evidence": [],
         "safe_stop": {"reason": classification.reason, "facts": {"section": notice.get("section"), "deadline": notice.get("response_due_date")}},
@@ -264,10 +296,15 @@ def notice_workflow(notice_id: str):
         handler = get_workflow_handler(classification.category)
         question_payload = handler.get_questions(notice, "en")
         contract["questions"] = question_payload.get("questions", [])
-        contract["requests"] = question_payload.get("requests", contract["requests"])
+        contract["requests"] = question_payload.get("requests", [])
         contract["evidence"] = handler.get_evidence(notice)
         contract["notice_facts"].update(question_payload.get("facts") or {})
         contract["next_steps"] = [workflow.official_next_step]
+    else:
+        # Fallback to raw requests for SAFE_STOP workflows
+        contract["requests"] = list((notice.get("synthetic_extraction") or {}).get("requests") or [])
+        # Ensure SAFE_STOP workflows always have complete contract data
+        contract["next_steps"] = ["Review the communication and its deadline.", "Use the official Income Tax e-Filing portal for any required action."]
     payload = {
         "notice_id": notice_id,
         "classification": classification.payload(),

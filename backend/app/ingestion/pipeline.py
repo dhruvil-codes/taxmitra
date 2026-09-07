@@ -60,19 +60,26 @@ def _metadata(text: str) -> dict:
 
 
 def _section(text: str) -> str | None:
-    patterns = (
-        (r"143\s*[\(\[]\s*1\s*[\)\]]\s*[\(\[]\s*a\s*[\)\]]", "143(1)(a)"),
-        (r"142\s*[\(\[]\s*1\s*[\)\]]", "142(1)"),
-        (r"139\s*[\(\[]\s*9\s*[\)\]]", "139(9)"),
-        (r"133\s*[\(\[]\s*6\s*[\)\]]", "133(6)"),
-        (r"148\s*[\(\[]\s*a\s*[\)\]]", "148A"),
-        (r"section\s*245\b", "245"),
-        (r"section\s*154\b", "154"),
-        (r"section\s*148\b", "148"),
-    )
-    for pattern, value in patterns:
-        if re.search(r"section\s*" + pattern if not pattern.startswith("section") else pattern, text, re.I):
-            return value
+    if re.search(r"(?:section|sec\.?|s\.?|u/s\.?|\b)\s*143\s*[\(\[]\s*1\s*[\)\]]\s*[\(\[]\s*a\s*[\)\]]", text, re.I):
+        return "143(1)(a)"
+    if re.search(r"(?:section|sec\.?|s\.?|u/s\.?|\b)\s*142\s*[\(\[]\s*1\s*[\)\]]", text, re.I) or re.search(r"\b142\(1\)\b", text, re.I) or re.search(r"ITBA/AST/[A-Z]/142\b", text, re.I):
+        return "142(1)"
+    if re.search(r"(?:section|sec\.?|s\.?|u/s\.?|\b)\s*139\s*[\(\[]\s*9\s*[\)\]]", text, re.I):
+        return "139(9)"
+    if re.search(r"(?:section|sec\.?|s\.?|u/s\.?|\b)\s*133\s*[\(\[]\s*6\s*[\)\]]", text, re.I):
+        return "133(6)"
+    if re.search(r"(?:section|sec\.?|s\.?|u/s\.?|\b)\s*148\s*[\(\[]\s*a\s*[\)\]]", text, re.I) or re.search(r"(?:section|sec\.?|s\.?|u/s\.?)\s*148a\b", text, re.I):
+        return "148A"
+    if re.search(r"(?:section|sec\.?|s\.?|u/s\.?)\s*148\b", text, re.I) or re.search(r"\bnotice\s+under\s+section\s+148\b", text, re.I):
+        return "148"
+    if re.search(r"(?:section|sec\.?|s\.?|u/s\.?)\s*245\b", text, re.I) or "adjustment against demand" in text.lower():
+        return "245"
+    if re.search(r"(?:section|sec\.?|s\.?|u/s\.?)\s*154\b", text, re.I) or re.search(r"\bmistake\s+apparent\b", text, re.I):
+        return "154"
+    if re.search(r"(?:section|sec\.?|s\.?|u/s\.?|\b)\s*143\s*[\(\[]\s*1\s*[\)\]]", text, re.I):
+        return "143(1)"
+    if re.search(r"(?:section|sec\.?|s\.?|u/s\.?|\b)\s*131\b", text, re.I) and any(term in text.lower() for term in ("summons", "attendance")):
+        return "131"
     return None
 
 

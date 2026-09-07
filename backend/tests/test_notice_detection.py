@@ -121,3 +121,97 @@ def test_openai_adapter_receives_all_extracted_pages(monkeypatch):
     assert warning is None
     assert proposal and "PAGE 1" in seen["user"] and "PAGE 2" in seen["user"]
     assert "Annexure and response deadline" in seen["user"]
+
+
+def test_scanned_notice_with_ocr_noise_identified_as_income_tax(monkeypatch):
+    """Verify that a genuine scanned Income Tax notice with OCR artifacts is recognized
+
+    and not misclassified or dropped to 'Other proceedings'.
+    """
+    scanned_noisy_text = """
+    1NCOME TAX DEPARTMENT
+    GOVERNMENT OF INDlA
+    Natlonal Faceless Assessment Centre
+    PAN: ABCDE1234F | A.Y. 2024-25 | DIN: ITBA/AST/S/142(1)/2024-25/1068832811(1)
+    NOTICE UNDER SECTlON 142(1) OF THE INCOME TAX ACT, 1961
+    Sir/Madam,
+    In connection with assessment for A.Y. 2024-25, you are requested to produce:
+    1. Books of account and cash book.
+    2. Bank statements of all accounts maintained during F.Y. 2023-24.
+    3. Computation of total income.
+    Response Due Date: 15/10/2024
+    """
+    response = client.post(
+        "/api/workflows/extract",
+        files={"file": ("scanned_notice.pdf", pdf_with_text(scanned_noisy_text), "application/pdf")},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["supported"] is True
+    assert body["classification"]["category"] == "scrutiny_142_1"
+    assert body["classification"]["workflow_id"] == "scrutiny_142_1"
+    assert body["workflow"]["capability"] == "SUPPORTED"
+    assert body["metadata"]["section"] == "142(1)"
+    assert len(body["requests"]) >= 1
+    # Verify no 'Other proceedings' fallback in title or classification
+    assert "other proceedings" not in str(body).lower()
+
+
+def test_unsupported_proceeding_scanned_safe_stops_with_explicit_reason():
+    """Verify that an income tax communication for an unsupported proceeding (e.g. 148 reassessment)
+
+    stops cleanly with explicit classification, not generic other proceedings.
+    """
+    reassessment_text = """
+    INCOME TAX DEPARTMENT
+    GOVERNMENT OF INDIA
+    PAN: ABCDE1234F | A.Y. 2021-22
+    NOTICE UNDER SECTION 148 OF THE INCOME-TAX ACT, 1961
+    I have reason to believe that income chargeable to tax has escaped assessment.
+    """
+    response = client.post(
+        "/api/workflows/extract",
+        files={"file": ("notice148.pdf", pdf_with_text(reassessment_text), "application/pdf")},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["supported"] is False
+    assert body["status"] == "safe_stop"
+    assert body["classification"]["category"] == "reassessment_148"
+    assert body["classification"]["status"] == "safe_stop"
+    assert body["workflow"]["capability"] == "SAFE_STOP"
+    assert "legally sensitive" in body["classification"]["reason"].lower() or "reassessment" in body["classification"]["reason"].lower() or "section 148" in body["classification"]["reason"].lower()
+
+
+def test_illegible_scan_produces_explicit_safe_stop(monkeypatch):
+    """Verify that an unreadable or low confidence scan produces an explicit refusal / safe stop."""
+    from app.extraction.pdf import PdfExtraction
+    def fake_extract(content, grounder=None):
+        return PdfExtraction(
+            metadata={},
+            requests=(),
+            text="",
+            extraction_confidence=0.1,
+            grounding_confidence=0.0,
+            grounding_method="none",
+            grounding_below_floor=True,
+            warnings=("Low OCR quality",),
+            refusal_reason="low_extraction_confidence",
+            status="refused",
+            extraction_method="ocr",
+            pages=(),
+            page_count=1,
+            original_pdf_sha256="abc",
+            error_code="low_extraction_confidence",
+        )
+    monkeypatch.setattr(notices_router, "extract_pdf", fake_extract)
+    response = client.post(
+        "/api/workflows/extract",
+        files={"file": ("illegible.pdf", pdf_with_text("xyz"), "application/pdf")},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["supported"] is False
+    assert body["status"] == "safe_stop"
+    assert body["extraction"]["refusal_reason"] in ("low_extraction_confidence", "ocr_failure")
+

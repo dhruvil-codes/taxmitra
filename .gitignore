@@ -24,6 +24,7 @@ frontend/.vite/
 
 # OS
 .DS_Store
+.DS_Store
 Thumbs.db
 
 # Editor
@@ -34,3 +35,7 @@ Thumbs.db
 .agents/
 .tmp/
 skills-lock.json
+
+# Test outputs
+playwright-report/
+frontend/playwright-report/

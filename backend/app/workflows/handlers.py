@@ -103,8 +103,9 @@ class Scrutiny142Handler(WorkflowHandler):
 
     def get_questions(self, notice, locale="en", answers=None):
         from app.rules.scrutiny import minimum_question_plan, minimum_question_plan_payload
-        plan = minimum_question_plan(self._requests(notice), answers)
-        return {"questions": minimum_question_plan_payload(plan, locale)}
+        requests = self._requests(notice)
+        plan = minimum_question_plan(requests, answers)
+        return {"questions": minimum_question_plan_payload(plan, locale), "requests": [r.__dict__ for r in requests]}
 
     def resolve(self, notice, answers, **kwargs):
         from app.rules.scrutiny import resolve_minimum_scrutiny

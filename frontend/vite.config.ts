@@ -33,6 +33,9 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
       allowedHosts: [".vercel.run", ".vercel.app", ".vusercontent.net", ".v0.build"],
+      watch: {
+        ignored: ["**/playwright-report/**", "**/test-results/**"],
+      },
       proxy: {
         "/api": {
           target: target ?? "http://127.0.0.1:8000",

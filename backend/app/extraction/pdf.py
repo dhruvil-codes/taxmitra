@@ -143,8 +143,8 @@ def extract_pdf(content: bytes, ground_query, *, allow_unidentified: bool = Fals
     refusal = result.refusal_reason
     if refusal == "invalid_pdf":
         refusal = "malformed_pdf"
-    if refusal == "ocr_failure":
-        refusal = "ocr_not_supported"
+    if refusal in {"ocr_failure", "ocr_not_supported"}:
+        refusal = "low_extraction_confidence"
     if result.refusal_reason and result.refusal_reason not in {"unsupported_notice", "missing_critical_information"}:
         return PdfExtraction(result.metadata, (), text, result.confidence, 0, "lexical", False, result.warnings, refusal, result.status, result.extraction_method, result.pages, result.page_count, result.original_pdf_sha256, result.refusal_reason)
     if result.refusal_reason == "unsupported_notice":

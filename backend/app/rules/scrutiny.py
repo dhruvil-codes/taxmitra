@@ -280,8 +280,9 @@ def build_scrutiny_requests(notice: dict, extraction_confirmed: bool = True) -> 
 def _enrich_request(item: ExtractedRequest) -> ScrutinyRequest:
     configured = _REQUEST_LIBRARY.get(item.classification_id or item.id)
     if configured is None:
-        raise KeyError(f"Unknown scrutiny request id: {item.id}")
+        configured = _GENERIC_REQUEST
     citations = tuple(dict.fromkeys((*item.citations, "sec-142-0001")))
+    category = getattr(item, "category", None) or _REQUEST_CATEGORIES.get(item.classification_id or item.id, "other_notice_request")
     return ScrutinyRequest(
         id=item.id,
         original_text=item.original_text,
@@ -295,7 +296,7 @@ def _enrich_request(item: ExtractedRequest) -> ScrutinyRequest:
         grounding=getattr(item, "grounding", None),
         page_number=getattr(item, "page_number", None),
         source_location=getattr(item, "source_location", None),
-        category=getattr(item, "category", None) or _REQUEST_CATEGORIES.get(item.classification_id or item.id, "other_notice_request"),
+        category=category,
         clarifying_questions=getattr(item, "clarifying_questions", ()) or ({"id": f"has_{item.id}", "text": _REQUEST_QUESTIONS.get(item.classification_id or item.id, _REQUEST_QUESTIONS["req_notice_document"])},),
         status=getattr(item, "status", "not_started"),
     )

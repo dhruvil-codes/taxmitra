@@ -124,21 +124,84 @@ def _grounding_status(grounding: Any) -> str:
     return "available"
 
 
+def is_income_tax_communication(text: str) -> tuple[bool, float, list[str]]:
+    """Determine if document is an authentic Income Tax Department communication."""
+    normalized = text.lower()
+    signals: list[str] = []
+    strong_markers = (
+        ("income tax department", "Income Tax Department header"),
+        ("income-tax department", "Income-tax Department header"),
+        ("आयकर विभाग", "Income Tax Department Hindi header"),
+        ("government of india", "Government of India header"),
+        ("govt. of india", "Govt. of India header"),
+        ("govt of india", "Govt of India header"),
+        ("भारत सरकार", "Government of India Hindi header"),
+        ("central board of direct taxes", "CBDT"),
+        ("cbdt", "CBDT"),
+        ("national faceless assessment centre", "NFAC"),
+        ("nfac", "NFAC"),
+        ("ministry of finance", "Ministry of Finance"),
+        ("वित्त मंत्रालय", "Ministry of Finance Hindi"),
+        ("incometax.gov.in", "Official portal URL"),
+        ("incometaxindia.gov.in", "Official portal URL"),
+        ("itba/ast", "ITBA AST reference"),
+        ("itba/com", "ITBA COM reference"),
+        ("income-tax act, 1961", "Income-tax Act, 1961"),
+        ("income tax act, 1961", "Income Tax Act, 1961"),
+        ("income-tax act", "Income-tax Act"),
+        ("income tax act", "Income Tax Act"),
+        ("income tax act, 2025", "Income Tax Act, 2025"),
+        ("आयकर अधिनियम", "Income Tax Act Hindi"),
+    )
+    for pattern, name in strong_markers:
+        if pattern in normalized:
+            signals.append(name)
+    if re.search(r"\b(?:pan|permanent\s+account\s+number)\b", normalized, re.I):
+        signals.append("PAN reference")
+    if re.search(r"\b(?:din|document\s+identification\s+number)\b", normalized, re.I):
+        signals.append("DIN reference")
+    if re.search(r"\b(?:assessment\s+year|a\.y\.|ay\s*20\d\d)\b", normalized, re.I):
+        signals.append("Assessment Year reference")
+    if re.search(r"\b(?:assessing\s+officer|income\s+tax\s+officer|ward\s+\d+|circle\s+\d+)\b", normalized, re.I):
+        signals.append("Assessing Officer / Ward")
+    if re.search(r"\b(?:u/s|under\s+section|section)\s*(?:142|143|139|148|154|245|133|131)\b", normalized, re.I):
+        signals.append("Statutory tax section reference")
+    if re.search(r"\b[l1]ncome\s*[- ]?tax\b", normalized, re.I):
+        signals.append("OCR Income Tax Department")
+    if len(signals) >= 2 or any("header" in s or "Act" in s or "NFAC" in s or "Statutory" in s for s in signals):
+        confidence = min(0.99, 0.6 + len(signals) * 0.1)
+        return True, confidence, signals
+    return False, 0.0, signals
+
+
 def _section_candidate(text: str) -> WorkflowDefinition | None:
     normalized = "".join(text.lower().split())
-    if "143(1)(a)" in normalized or "143[1][a]" in normalized: return _BY_CATEGORY["income_mismatch_143_1a"]
-    if "142(1)" in normalized: return _BY_CATEGORY["scrutiny_142_1"]
-    if "139(9)" in normalized: return _BY_CATEGORY["defective_return_139_9"]
-    if "148a" in normalized or "148(a)" in normalized: return _BY_CATEGORY["reassessment_148a"]
-    if re.search(r"(?:section|u/s|under)148\b", normalized) or normalized.startswith("148"): return _BY_CATEGORY["reassessment_148"]
-    if "133(6)" in normalized: return _BY_CATEGORY["scrutiny_information_133_6"]
-    if "131" in normalized and any(term in normalized for term in ("summons", "authority", "attendance", "assessingofficer")): return _BY_CATEGORY["authority_131"]
-    if ("tds" in normalized or "tcs" in normalized or "26as" in normalized or "taxcredit" in normalized) and ("mismatch" in normalized or "credit" in normalized): return _BY_CATEGORY["tax_credit_tds_mismatch"]
-    if "154" in normalized and ("rectif" in normalized or normalized.startswith("section154")): return _BY_CATEGORY["rectification_154"]
-    if "section245" in normalized or "u/s245" in normalized or "under245" in normalized or normalized.startswith("245") or "adjustment against demand" in normalized: return _BY_CATEGORY["demand_adjustment_245"]
-    if "143(1)" in normalized: return _BY_CATEGORY["income_intimation_143_1"]
-    if any(term in normalized for term in ("annualinformationstatement", "e-campaign", "ecampaign", "e-verification", "everification", "complianceportal", "sftinformation")): return _BY_CATEGORY["compliance_ais"]
-    if "clarification" in normalized and ("assessingofficer" in normalized or "incometaxauthority" in normalized): return _BY_CATEGORY["ao_notice_clarification"]
+    if "143(1)(a)" in normalized or "143[1][a]" in normalized or "143(1)a" in normalized:
+        return _BY_CATEGORY["income_mismatch_143_1a"]
+    if "142(1)" in normalized or "142[1]" in normalized or "l42(1)" in normalized or "142(l)" in normalized or re.search(r"itba/ast/[a-z]/142\b", normalized):
+        return _BY_CATEGORY["scrutiny_142_1"]
+    if "139(9)" in normalized or "139[9]" in normalized:
+        return _BY_CATEGORY["defective_return_139_9"]
+    if "148a" in normalized or "148(a)" in normalized or "148[a]" in normalized or "148-a" in normalized:
+        return _BY_CATEGORY["reassessment_148a"]
+    if re.search(r"(?:section|u/s|under)148\b", normalized) or normalized.startswith("148") or "noticeundersection148" in normalized:
+        return _BY_CATEGORY["reassessment_148"]
+    if "133(6)" in normalized or "133[6]" in normalized:
+        return _BY_CATEGORY["scrutiny_information_133_6"]
+    if "131" in normalized and any(term in normalized for term in ("summons", "authority", "attendance", "assessingofficer")):
+        return _BY_CATEGORY["authority_131"]
+    if ("tds" in normalized or "tcs" in normalized or "26as" in normalized or "taxcredit" in normalized) and ("mismatch" in normalized or "credit" in normalized):
+        return _BY_CATEGORY["tax_credit_tds_mismatch"]
+    if "154" in normalized and ("rectif" in normalized or normalized.startswith("section154")):
+        return _BY_CATEGORY["rectification_154"]
+    if "section245" in normalized or "u/s245" in normalized or "under245" in normalized or normalized.startswith("245") or "adjustmentagainstdemand" in normalized:
+        return _BY_CATEGORY["demand_adjustment_245"]
+    if "143(1)" in normalized:
+        return _BY_CATEGORY["income_intimation_143_1"]
+    if any(term in normalized for term in ("annualinformationstatement", "e-campaign", "ecampaign", "e-verification", "everification", "complianceportal", "sftinformation")):
+        return _BY_CATEGORY["compliance_ais"]
+    if "clarification" in normalized and ("assessingofficer" in normalized or "incometaxauthority" in normalized):
+        return _BY_CATEGORY["ao_notice_clarification"]
     if ("assessingofficer" in normalized or "incometaxauthority" in normalized) and any(term in normalized for term in ("informationrequest", "furnishinformation", "provideinformation", "documentsrequested")):
         return _BY_CATEGORY["authority_information_request"]
     return None
@@ -146,11 +209,25 @@ def _section_candidate(text: str) -> WorkflowDefinition | None:
 
 def classify_extracted_notice(notice: dict[str, Any], grounding: Any = None) -> ClassificationResult:
     content = _text(notice)
-    section_value = "".join(str(notice.get("section") or "").lower().split())
-    if section_value in {"139(9)", "143(1)", "143(1)(a)", "142(1)", "133(6)", "154", "245", "148", "148a", "148(a)"}:
-        content = f"section{section_value} {content}"
+    raw_text = str(notice.get("official_text") or content)
+    candidate = _section_candidate(content) or _section_candidate(raw_text)
+    is_tax, tax_conf, tax_signals = is_income_tax_communication(raw_text)
+    if candidate is not None:
+        is_tax = True
     grounding_status = _grounding_status(grounding)
-    selected = _section_candidate(content)
+
+    if len(raw_text.strip()) >= 50 and not is_tax and not notice.get("section") and candidate is None:
+        return ClassificationResult(
+            "not_income_tax_document", "not_income_tax_document", 0.0,
+            grounding_status, False, "safe_stop",
+            "the uploaded document was not recognized as an Indian Income Tax Department communication",
+            (), WorkflowCapability.SAFE_STOP.value
+        )
+
+    section_value = "".join(str(notice.get("section") or "").lower().split())
+    if section_value in {"139(9)", "143(1)", "143(1)(a)", "142(1)", "133(6)", "154", "245", "148", "148a", "148(a)", "131"}:
+        content = f"section{section_value} {content}"
+    selected = candidate or _section_candidate(content)
     evidence: list[dict[str, Any]] = []
     if selected:
         evidence.append({"kind": "section_reference", "value": selected.classification_signals[0], "source": "extracted_text"})
@@ -163,7 +240,13 @@ def classify_extracted_notice(notice: dict[str, Any], grounding: Any = None) -> 
         top = scored[0][0] if scored else 0
         tied = [w for score, w in scored if score == top and score > 0]
         if not tied:
-            return ClassificationResult("unknown_income_tax_communication", "unknown_income_tax_communication", 0.0, grounding_status, False, "safe_stop", "no registered workflow matched the extracted communication", (), WorkflowCapability.SAFE_STOP.value)
+            evidence.extend({"kind": "tax_signal", "value": s} for s in tax_signals)
+            return ClassificationResult(
+                "unknown_income_tax_communication", "unknown_income_tax_communication",
+                tax_conf if is_tax else 0.0, grounding_status, False, "safe_stop",
+                "identified as an Income Tax communication, but the specific proceeding is not currently supported for guided response",
+                tuple(evidence), WorkflowCapability.SAFE_STOP.value
+            )
         if len(tied) > 1:
             return ClassificationResult("ambiguous", "ambiguous", 0.0, grounding_status, False, "safe_stop", "more than one registered workflow matched the extracted communication", tuple({"kind": "competing_signal", "value": w.category} for w in tied), WorkflowCapability.SAFE_STOP.value)
         selected, confidence, reason = tied[0], min(0.85, 0.55 + 0.1 * top), "department terminology and structural content signals"
@@ -185,14 +268,14 @@ def classify_ai_proposal(notice: dict[str, Any], proposal: dict[str, Any], groun
     """Validate an AI identification proposal through the canonical registry."""
     grounding_status = _grounding_status(grounding)
     evidence = tuple(item for item in proposal.get("evidence", ()) if isinstance(item, dict))
+    category = str(proposal.get("category") or "unknown_income_tax_communication")
     is_income_tax = proposal.get("is_income_tax_communication")
-    if is_income_tax is False:
+    if is_income_tax is False and category != "unknown_income_tax_communication":
         return ClassificationResult(
-            "unknown_income_tax_communication", "unknown_income_tax_communication", 1.0,
+            "not_income_tax_document", "not_income_tax_document", 1.0,
             grounding_status, False, "safe_stop", "the uploaded document was not identified as an Indian Income Tax Department communication",
             evidence, WorkflowCapability.SAFE_STOP.value,
         )
-    category = str(proposal.get("category") or "unknown_income_tax_communication")
     if category == "unknown_income_tax_communication" and proposal.get("is_income_tax_communication") is True:
         proposal_text = " ".join(str(proposal.get(key) or "") for key in ("authority", "authority_type", "communication_type", "purpose", "reason")) .lower()
         if "clarif" in proposal_text and ("assessing officer" in proposal_text or "income tax authority" in proposal_text or "ao" in proposal_text):

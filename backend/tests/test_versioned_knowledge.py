@@ -101,7 +101,8 @@ def test_grounding_surfaces_ambiguous_context_as_safe_refusal():
 
 
 def test_new_official_sources_have_provenance_and_current_status():
-    citation = citations_for(("v2-tax-credit-mismatch-current",), "backend/app/knowledge/corpus")[0]
+    import os
+    citation = citations_for(("v2-tax-credit-mismatch-current",), os.path.join(get_settings().kb_dir, "corpus"))[0]
     assert citation["official_url"].startswith("https://www.incometax.gov.in/")
     assert citation["publication_date"] == "2026-01-01"
     assert citation["update_date"] == "2026-09-06"

@@ -50,6 +50,8 @@
       "requests": [
         {
           "id": "req_computation_income",
+          "classification_id": "req_computation_income",
+          "category": "income_computation",
           "page": 2,
           "original_text": "Detailed computation of total income for Assessment Year 2024-25.",
           "response_section": "Computation of total income",
@@ -57,6 +59,8 @@
         },
         {
           "id": "req_balance_sheet",
+          "classification_id": "req_balance_sheet",
+          "category": "balance_sheet",
           "page": 2,
           "original_text": "Balance sheet as at 31/03/2024.",
           "response_section": "Balance sheet",
@@ -64,6 +68,8 @@
         },
         {
           "id": "req_profit_loss",
+          "classification_id": "req_profit_loss",
+          "category": "profit_loss_statement",
           "page": 2,
           "original_text": "Profit and Loss account for Financial Year 2023-24.",
           "response_section": "Profit and Loss account",
@@ -71,6 +77,8 @@
         },
         {
           "id": "req_bank_statements",
+          "classification_id": "req_bank_statements",
+          "category": "bank_statements",
           "page": 2,
           "original_text": "Complete bank statements for all business and personal accounts used for business transactions during Financial Year 2023-24.",
           "response_section": "Bank statements",
@@ -78,6 +86,8 @@
         },
         {
           "id": "req_cash_deposits",
+          "classification_id": "req_cash_deposits",
+          "category": "cash_deposits",
           "page": 3,
           "original_text": "Explanation of sources of cash deposits appearing in the bank accounts during Financial Year 2023-24.",
           "response_section": "Sources of cash deposits",
@@ -85,6 +95,8 @@
         },
         {
           "id": "req_significant_transactions",
+          "classification_id": "req_significant_transactions",
+          "category": "credits_debits",
           "page": 3,
           "original_text": "Explanation and supporting evidence for significant credits and debits identified in the bank statements.",
           "response_section": "Significant credits and debits",
@@ -92,6 +104,8 @@
         },
         {
           "id": "req_deductions_exemptions",
+          "classification_id": "req_deductions_exemptions",
+          "category": "deductions_exemptions",
           "page": 3,
           "original_text": "Supporting documents for deductions and exemptions claimed in the return.",
           "response_section": "Deductions and exemptions",
@@ -99,6 +113,8 @@
         },
         {
           "id": "req_notice_document",
+          "classification_id": "req_notice_document",
+          "category": "other_notice_request",
           "page": 3,
           "original_text": "Any other information or document specifically requested in this notice.",
           "response_section": "Other notice-specific information",
