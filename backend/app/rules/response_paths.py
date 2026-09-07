@@ -188,7 +188,7 @@ def build_draft(
         "assessment_year": str(notice.get("assessment_year", "")),
         "amount": f"₹{notice.get('amount_in_question', 0):,}",
         "income_source": localized_income_source(notice, "en"),  # drafts are English official letters
-        "issue_date": notice.get("issue_date", ""),
+        "issue_date": notice.get("issue_date") or "",
         "deadline_date": due_date.strftime('%d/%m/%Y') if due_date else "",
         "documents_sentence": _DOCUMENT_SENTENCES[evidence_from_answers(answers)],
         "today_date": today.strftime('%d/%m/%Y'),

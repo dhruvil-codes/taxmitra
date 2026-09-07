@@ -145,9 +145,34 @@ class IncomeMismatch143Handler(WorkflowHandler):
         path = resolve_path(self.category, answers)
         if path is None:
             return {"supported": False, "status": "safe_stop"}
-        due = compute_due_date(date.fromisoformat(notice["issue_date"]), self.category)
+
+        raw_issue_date = notice.get("issue_date")
+        parsed_issue_date = None
+        if isinstance(raw_issue_date, date):
+            parsed_issue_date = raw_issue_date
+        elif isinstance(raw_issue_date, str) and raw_issue_date.strip():
+            try:
+                parsed_issue_date = date.fromisoformat(raw_issue_date.strip())
+            except (ValueError, TypeError):
+                parsed_issue_date = None
+
+        due = compute_due_date(parsed_issue_date, self.category) if parsed_issue_date else None
+        if due is None and notice.get("response_due_date"):
+            raw_response_due = notice.get("response_due_date")
+            if isinstance(raw_response_due, date):
+                due = raw_response_due
+            elif isinstance(raw_response_due, str) and raw_response_due.strip():
+                try:
+                    due = date.fromisoformat(raw_response_due.strip())
+                except (ValueError, TypeError):
+                    due = None
+
         template = load_draft_templates()[path.draft_template_id]
-        draft = build_draft(template, notice, get_citizen(notice["citizen_id"]) or {}, answers, due)
+        safe_notice = dict(notice)
+        if safe_notice.get("issue_date") is None:
+            safe_notice["issue_date"] = ""
+        citizen = get_citizen(notice.get("citizen_id")) or {}
+        draft = build_draft(template, safe_notice, citizen, answers, due)
         return {"supported": True, "path": {"path_id": path.path_id, "position": path.position, "headline": path.headline, "guidance": path.guidance}, "checklist": [{"id": item.id, "title": item.title, "why_needed": item.why_needed} for item in checklist_for(path.checklist_ids)], "deadline": {"due_date": due.isoformat() if due else None, "days_remaining": days_remaining(due), "status": deadline_status(due)}, "draft": draft}
 
     def get_evidence(self, notice, statuses=None):
