@@ -465,6 +465,15 @@ export const api = {
   resolve: (noticeId: string, answers: Record<string, QuestionAnswer>) =>
     post<ResolveResult>("/api/workflow/resolve", { notice_id: noticeId, answers }),
   refusal: (id: string) => get<ResolveResult>(`/api/notices/${id}/refusal`),
+  exportResponse: async (text: string, format: "pdf" | "txt" | "md", filename: string): Promise<Blob> => {
+    const response = await fetch("/api/workflow/export", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, format, filename }),
+    });
+    if (!response.ok) throw new Error("Failed to export response");
+    return response.blob();
+  },
   extractScrutiny: (file: File, signal?: AbortSignal) => {
     const body = new FormData();
     body.append("file", file);

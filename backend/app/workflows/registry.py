@@ -118,10 +118,16 @@ def _text(notice: dict[str, Any]) -> str:
 def _grounding_status(grounding: Any) -> str:
     if grounding is None: return "not_provided"
     get = grounding.get if isinstance(grounding, dict) else lambda k, default=None: getattr(grounding, k, default)
-    if get("below_floor", False) or (get("confidence") is not None and float(get("confidence")) < 0.7): return "below_floor"
+    below_floor = get("below_floor", None)
+    if below_floor is True:
+        return "below_floor"
+    if below_floor is None and get("confidence") is not None and float(get("confidence")) < 0.7:
+        return "below_floor"
     if get("verified") is False: return "pending"
     if get("verified") is True: return "verified"
     return "available"
+
+
 
 
 def is_income_tax_communication(text: str) -> tuple[bool, float, list[str]]:
@@ -162,13 +168,13 @@ def is_income_tax_communication(text: str) -> tuple[bool, float, list[str]]:
         signals.append("DIN reference")
     if re.search(r"\b(?:assessment\s+year|a\.y\.|ay\s*20\d\d)\b", normalized, re.I):
         signals.append("Assessment Year reference")
-    if re.search(r"\b(?:assessing\s+officer|income\s+tax\s+officer|ward\s+\d+|circle\s+\d+)\b", normalized, re.I):
+    if re.search(r"\b(?:assessing\s+officer|income\s+tax\s+officer|ward\s+\d+|circle\s+\d+|\bao\b)\b", normalized, re.I):
         signals.append("Assessing Officer / Ward")
     if re.search(r"\b(?:u/s|under\s+section|section)\s*(?:142|143|139|148|154|245|133|131)\b", normalized, re.I):
         signals.append("Statutory tax section reference")
     if re.search(r"\b[l1]ncome\s*[- ]?tax\b", normalized, re.I):
         signals.append("OCR Income Tax Department")
-    if len(signals) >= 2 or any("header" in s or "Act" in s or "NFAC" in s or "Statutory" in s for s in signals):
+    if len(signals) >= 2 or any("header" in s or "Act" in s or "NFAC" in s or "Statutory" in s or "Assessing" in s for s in signals):
         confidence = min(0.99, 0.6 + len(signals) * 0.1)
         return True, confidence, signals
     return False, 0.0, signals
@@ -216,13 +222,16 @@ def classify_extracted_notice(notice: dict[str, Any], grounding: Any = None) -> 
         is_tax = True
     grounding_status = _grounding_status(grounding)
 
-    if len(raw_text.strip()) >= 50 and not is_tax and not notice.get("section") and candidate is None:
+    has_workflow_signals = any(any(signal in content for signal in w.classification_signals) for w in _WORKFLOWS if w.classification_signals)
+    if not is_tax and not notice.get("section") and candidate is None and not has_workflow_signals:
         return ClassificationResult(
             "not_income_tax_document", "not_income_tax_document", 0.0,
             grounding_status, False, "safe_stop",
             "the uploaded document was not recognized as an Indian Income Tax Department communication",
             (), WorkflowCapability.SAFE_STOP.value
         )
+
+
 
     section_value = "".join(str(notice.get("section") or "").lower().split())
     if section_value in {"139(9)", "143(1)", "143(1)(a)", "142(1)", "133(6)", "154", "245", "148", "148a", "148(a)", "131"}:

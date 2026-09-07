@@ -91,7 +91,7 @@ def _session_notice(extraction_id: str) -> dict | None:
         "response_due_date": metadata.get("response_deadline"),
         "issue_date": metadata.get("issue_date"),
         "official_reference": metadata.get("notice_reference"),
-        "synthetic_extraction": {"source_type": "pdf", "requires_human_confirmation": True, "requests": session["requests"]},
+        "synthetic_extraction": {"source_type": "pdf", "requires_human_confirmation": not session.get("confirmed", False), "requests": session["requests"]},
     }
 
 

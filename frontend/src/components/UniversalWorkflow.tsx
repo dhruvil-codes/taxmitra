@@ -19,7 +19,7 @@ type ContractExplanationProps = {
   locale: string;
 };
 
-const requestTitle = (request: ScrutinyRequest, index: number) =>
+export const requestTitle = (request: ScrutinyRequest, index: number) =>
   request.what_department_is_asking || request.response_section || request.category || `Request ${index + 1}`;
 
 const requestExplanation = (request: ScrutinyRequest, locale: string) =>
@@ -91,13 +91,106 @@ export function ContractQuestion({ question, locale, value, onChange, onContinue
 
 export function ContractRequests({ requests, locale }: { requests: ScrutinyRequest[]; locale: string }) {
   if (!requests.length) return null;
-  return <section className="universal-section" aria-labelledby="notice-requests-heading"><p className="contract-kicker">{locale === "hi" ? "नोटिस के अनुरोध" : "Requests in this notice"}</p><h2 id="notice-requests-heading" className="question-title">{locale === "hi" ? "विभाग क्या मांग रहा है" : "What the Department is asking"}</h2><div className="universal-request-list">{requests.map((request, index) => <article className="universal-request" key={request.request_id || request.id || index}><div className="universal-request-number">{String(index + 1).padStart(2, "0")}</div><div><p className="app-section-label">{request.category || request.response_section || "Notice request"}</p><h3>{requestTitle(request, index)}</h3><p className="app-body">{requestExplanation(request, locale)}</p><details><summary>{locale === "hi" ? "मूल शब्द और स्रोत" : "View original notice wording"}</summary><blockquote>{request.original_text}</blockquote><p className="app-caption">{request.source_location || (request.page_number ? `Page ${request.page_number}` : "Source page not identified")}</p></details></div></article>)}</div></section>;
+  return (
+    <section className="universal-section contract-requests-section" aria-labelledby="notice-requests-heading">
+      <p className="contract-kicker">{locale === "hi" ? "नोटिस के अनुरोध" : "Requests in this notice"}</p>
+      <h2 id="notice-requests-heading" className="question-title">
+        {locale === "hi" ? "विभाग क्या मांग रहा है" : "What the Department is asking"}
+      </h2>
+      <p className="app-lead">
+        {locale === "hi"
+          ? "इस नोटिस में निम्नलिखित अनुरोध मिले हैं। विवरण देखने के लिए किसी भी अनुरोध पर क्लिक करें।"
+          : `This notice contains ${requests.length} extracted request${requests.length === 1 ? "" : "s"}. Click any request to expand its explanation, requested information, and relevant evidence.`}
+      </p>
+      <div className="compact-requests-list">
+        {requests.map((request, index) => {
+          const num = String(index + 1).padStart(2, "0");
+          const title = requestTitle(request, index);
+          const location = request.source_location || (request.page_number ? (locale === "hi" ? `पृष्ठ ${request.page_number}` : `Page ${request.page_number}`) : undefined);
+          const whyText = pick(request.why_required, locale) || request.response_section;
+          const evidenceItems = request.required_evidence ?? [];
+
+          return (
+            <details className="compact-request-item" key={request.request_id || request.id || index}>
+              <summary className="compact-request-summary">
+                <span className="compact-request-badge">{num}</span>
+                <strong className="compact-request-title">{title}</strong>
+                {location && <span className="compact-request-loc">{location}</span>}
+                <span className="compact-request-toggle" aria-hidden="true">
+                  <span className="toggle-indicator">Expand ↓</span>
+                </span>
+              </summary>
+              <div className="compact-request-details">
+                <div className="compact-detail-block">
+                  <strong className="compact-detail-label">{locale === "hi" ? "विभाग क्या चाहता है" : "What the Department wants"}</strong>
+                  <p className="compact-detail-text">{requestExplanation(request, locale)}</p>
+                </div>
+                {whyText && (
+                  <div className="compact-detail-block">
+                    <strong className="compact-detail-label">{locale === "hi" ? "मांगी गई जानकारी / क्यों आवश्यक है" : "Requested information / Why required"}</strong>
+                    <p className="compact-detail-text">{whyText}</p>
+                  </div>
+                )}
+                {evidenceItems.length > 0 && (
+                  <div className="compact-detail-block">
+                    <strong className="compact-detail-label">{locale === "hi" ? "प्रासंगिक प्रमाण व दस्तावेज़" : "Relevant evidence & records"}</strong>
+                    <ul className="compact-evidence-list">
+                      {evidenceItems.map((item, i) => (
+                        <li key={i}>{pick(typeof item === "string" ? { en: item, hi: item } : item, locale)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <div className="compact-detail-block compact-detail-original">
+                  <strong className="compact-detail-label">{locale === "hi" ? "नोटिस के मूल शब्द" : "Original notice wording"}</strong>
+                  <blockquote className="compact-original-quote">{request.original_text}</blockquote>
+                  {location && <p className="compact-original-source">{location}</p>}
+                </div>
+              </div>
+            </details>
+          );
+        })}
+      </div>
+    </section>
+  );
 }
 
 export function ContractEvidence({ evidence, locale }: { evidence: EvidenceRecommendation[]; locale: string }) {
   if (!evidence.length) return null;
-  return <section className="universal-section" aria-labelledby="evidence-heading"><p className="contract-kicker">{locale === "hi" ? "तैयारी" : "Preparation"}</p><h2 id="evidence-heading" className="question-title">{locale === "hi" ? "क्या तैयार रखना है" : "What you may need"}</h2><div className="universal-evidence-list">{evidence.map((item) => <article className="universal-evidence" key={item.document_id}><div><h3>{pick(item.document_name, locale)}</h3><p>{pick(item.reason, locale)}</p><small>{item.requirement_level === "required" ? (locale === "hi" ? "नोटिस में आवश्यक" : "Required by the notice") : (locale === "hi" ? "संभवतः प्रासंगिक" : "Possibly relevant")}</small></div></article>)}</div></section>;
+  const required = evidence.filter((item) => item.requirement_level === "required");
+  const optional = evidence.filter((item) => item.requirement_level !== "required");
+  const renderItem = (item: EvidenceRecommendation) => (
+    <article className="universal-evidence" key={item.document_id}>
+      <div>
+        <h3>{pick(item.document_name, locale)}</h3>
+        <p>{pick(item.reason, locale)}</p>
+      </div>
+    </article>
+  );
+  return (
+    <section className="universal-section" aria-labelledby="evidence-heading">
+      <p className="contract-kicker">{locale === "hi" ? "तैयारी" : "Preparation"}</p>
+      <h2 id="evidence-heading" className="question-title">{locale === "hi" ? "क्या तैयार रखना है" : "What you may need"}</h2>
+      {required.length > 0 && (
+        <div className="evidence-group">
+          <p className="evidence-group-label evidence-group-label--required">
+            {locale === "hi" ? "✓ नोटिस में मांगे गए दस्तावेज़" : "Required by the notice"}
+          </p>
+          <div className="universal-evidence-list">{required.map(renderItem)}</div>
+        </div>
+      )}
+      {optional.length > 0 && (
+        <div className="evidence-group">
+          <p className="evidence-group-label evidence-group-label--optional">
+            {locale === "hi" ? "इनकी भी ज़रूरत पड़ सकती है" : "Also helpful to have ready"}
+          </p>
+          <div className="universal-evidence-list">{optional.map(renderItem)}</div>
+        </div>
+      )}
+    </section>
+  );
 }
+
 
 export function CapabilityBoundary({ capability, reason, nextSteps, locale }: { capability: WorkflowCapability; reason: string; nextSteps: string[]; locale: string }) {
   const partial = capability === "PARTIAL_SUPPORT";

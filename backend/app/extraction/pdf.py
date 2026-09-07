@@ -100,13 +100,35 @@ def _items(text: str) -> list[str]:
             out.append(value)
     return out
 
+def _clean_request_title(item: str) -> str:
+    value = item.lower()
+    if "capital gain" in value or "property" in value:
+        return "Capital gains and property records"
+    if "share" in value or "equity" in value or "scrip" in value or "broker" in value:
+        return "Share and securities transactions"
+    if "unsecured loan" in value or "loan transaction" in value or "borrowing" in value:
+        return "Unsecured loans and borrowings"
+    if "cash withdrawal" in value or "cash book" in value or "cash flow" in value:
+        return "Cash book and withdrawal records"
+    if "investment" in value:
+        return "Investments and financial sources"
+    if "depreciation" in value or "fixed asset" in value:
+        return "Depreciation and fixed asset records"
+    if "business activit" in value:
+        return "Business activities and profile"
+    clean = re.sub(r"^(?:please furnish|provide|furnish|submit|copy of|details of|detailed)\s+", "", item, flags=re.I).strip()
+    if len(clean) > 40:
+        return clean[:38].rstrip() + "…"
+    return clean.capitalize() if clean else "Additional notice request"
+
+
 def _classify(item: str):
     value = item.lower()
     # These requests need topic-specific law that is not present in the
     # current 1961 corpus. Preserve the exact notice wording and ground only
     # the authority to request information under section 142(1).
     if any(needle in value for needle in ("capital gain", "capital loss", "property transaction", "share", "equity", "scrip", "broker", "cash withdrawal", "cash withdrawn", "cash book", "cash flow", "unsecured loan", "financial transaction", "investment", "depreciation", "fixed asset", "loan transaction", "business activities", "financial sources")):
-        return "req_notice_document", f"Request: {item}", ("sec-142-0001",)
+        return "req_notice_document", _clean_request_title(item), ("sec-142-0001",)
     rules = (
         (("computation", "total income", "income computation"), "req_computation_income", "Computation of total income", ("kb-142-1-scrutiny-documents",)),
         (("balance sheet",), "req_balance_sheet", "Balance sheet", ("kb-142-1-scrutiny-documents",)),

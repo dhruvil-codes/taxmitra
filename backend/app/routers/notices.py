@@ -59,7 +59,12 @@ def _session_notice(notice_id: str) -> dict | None:
         "income_source": "Uploaded notice",
         "official_text": "\n".join(page.get("text", "") for page in session.get("pages", [])),
         "citizen_id": "uploaded",
-        "synthetic_extraction": {**(stored.get("synthetic_extraction") or {}), "source_type": "pdf", "requires_human_confirmation": True, "requests": session.get("requests", [])},
+        "synthetic_extraction": {
+            **(stored.get("synthetic_extraction") or {}),
+            "source_type": "pdf",
+            "requires_human_confirmation": not session.get("confirmed", False),
+            "requests": session.get("requests", []),
+        },
     }
 
 
@@ -172,48 +177,93 @@ async def extract_workflow(file: UploadFile = File(...)):
         "pages": list(result.pages),
         "synthetic_extraction": {"requests": list(result.requests)},
     }
+    confidence_floor = 0.30 if result.extraction_method in {"ocr", "mixed"} else 0.7
     grounding = {
         "confidence": result.confidence,
-        "below_floor": result.confidence < 0.7,
+        "below_floor": result.confidence < confidence_floor,
         "verified": False,
     }
+
     ai_proposal, ai_warning = classify_notice_with_ai(notice, get_settings())
     classification = classify_ai_proposal(notice, ai_proposal, grounding) if ai_proposal else classify_extracted_notice(notice, grounding)
     workflow = get_workflow(classification.category)
     metadata = dict(result.metadata)
     if not metadata.get("section") and ai_proposal and isinstance(ai_proposal.get("section"), str) and ai_proposal["section"].strip():
         metadata["section"] = ai_proposal["section"].strip()
+    if not metadata.get("section"):
+        category_to_section = {
+            "scrutiny_142_1": "142(1)",
+            "income_mismatch_143_1a": "143(1)(a)",
+            "income_intimation_143_1": "143(1)",
+            "defective_return_139_9": "139(9)",
+            "reassessment_148": "148",
+            "reassessment_148a": "148A",
+            "scrutiny_information_133_6": "133(6)",
+            "authority_131": "131",
+            "rectification_154": "154",
+            "demand_adjustment_245": "245",
+        }
+        if classification.category in category_to_section:
+            metadata["section"] = category_to_section[classification.category]
+
     safe_stop = bool(result.refusal_reason) or classification.status == "safe_stop"
     refusal_reason = result.refusal_reason
-    if classification.category == "not_income_tax_document":
+    if not refusal_reason and classification.category == "not_income_tax_document":
         safe_stop = True
-        if not refusal_reason:
-            refusal_reason = "not_income_tax_document"
+        refusal_reason = "not_income_tax_document"
+    elif classification.category == "not_income_tax_document":
+        safe_stop = True
     elif classification.status == "safe_stop":
         safe_stop = True
+
+    from app.extraction.pdf import _classify
+    from app.rules.scrutiny import _REQUEST_LIBRARY, _REQUEST_CATEGORIES, _GENERIC_REQUEST
 
     enriched_requests = []
     for idx, req in enumerate(result.requests):
         orig_text = req.get("original_text", "")
+        kind = req.get("classification_id")
+        resp_sec = req.get("response_section")
+        citations = list(req.get("citations") or [])
+        if not kind or not resp_sec:
+            classified = _classify(orig_text)
+            if classified:
+                kind = kind or classified[0]
+                resp_sec = resp_sec or classified[1]
+                citations = list(dict.fromkeys(citations + list(classified[2])))
+        kind = kind or "req_notice_document"
+        resp_sec = resp_sec or "Notice request"
+        lib_entry = _REQUEST_LIBRARY.get(kind, _GENERIC_REQUEST)
+        category = req.get("category") or _REQUEST_CATEGORIES.get(kind, "other_notice_request")
+        page_num = req.get("page_number", 1)
         enriched_requests.append({
             "request_id": req.get("request_id") or f"req-{idx+1}",
             "id": req.get("request_id") or f"req-{idx+1}",
+            "classification_id": kind,
+            "category": category,
             "original_text": orig_text,
-            "page_number": req.get("page_number", 1),
-            "response_section": req.get("response_section"),
-            "plain_language_explanation": req.get("plain_language_explanation") or {
+            "page_number": page_num,
+            "source_location": req.get("source_location") or f"page {page_num}",
+            "response_section": resp_sec,
+            "plain_language_explanation": req.get("plain_language_explanation") or lib_entry.get("plain") or {
                 "en": "Verification of records specified by the assessing authority.",
                 "hi": "कर निर्धारण अधिकारी द्वारा निर्दिष्ट अभिलेखों का सत्यापन।",
             },
-            "why_required": req.get("why_required") or {
+            "why_required": req.get("why_required") or lib_entry.get("why") or {
                 "en": "Required to substantiate claims made in the return of income.",
                 "hi": "आय के विवरण में किए गए दावों की पुष्टि के लिए आवश्यक।",
             },
-            "required_evidence": list(req.get("required_evidence") or ["Relevant supporting documentary proof"]),
-            "citations": list(req.get("citations") or ["sec-142-0001"]),
+            "required_evidence": list(req.get("required_evidence") or lib_entry.get("evidence") or ["Relevant supporting documentary proof"]),
+            "citations": citations or ["sec-142-0001"],
             "confidence": float(req.get("confidence", 1.0)),
             "warnings": list(req.get("warnings") or []),
         })
+
+    cleaned_warnings = list(dict.fromkeys(result.warnings))
+    if ai_warning:
+        cleaned_warnings.append(ai_warning)
+    if metadata.get("section"):
+        cleaned_warnings = [w for w in cleaned_warnings if "No section reference was confidently extracted" not in w]
 
     payload = {
         "supported": not safe_stop,
@@ -222,11 +272,12 @@ async def extract_workflow(file: UploadFile = File(...)):
         "extraction": {
             "status": result.status,
             "confidence": result.confidence,
-            "warnings": list(result.warnings) + ([ai_warning] if ai_warning else []),
+            "warnings": cleaned_warnings,
             "refusal_reason": refusal_reason,
             "method": result.extraction_method,
             "page_count": result.page_count,
         },
+
         "classification": classification.payload(),
         "workflow": workflow.payload() if workflow else None,
         "requests": enriched_requests,

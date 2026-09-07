@@ -38,4 +38,36 @@ describe("workflow shell", () => {
     expect(screen.getByLabelText("Key notice facts")).toHaveTextContent("AY 2024-25");
     expect(screen.getByText("DIN-TEST-123456")).toBeInTheDocument();
   });
+
+  it("always renders main content children inside workflow-main regardless of viewport", () => {
+    // Regression: CSS cascade bugs caused sidebar to remain visible on mobile,
+    // squishing workflow-main to ~170px and hiding content off-screen at ≤768px.
+    renderApp(
+      <WorkflowLayout currentStep={0} notice={notice} noticeId={notice.id}>
+        <h1 data-testid="main-content-heading">Step Content</h1>
+        <p data-testid="main-content-body">This text must always be accessible.</p>
+      </WorkflowLayout>
+    );
+    // Main content must always be in the DOM
+    expect(screen.getByTestId("main-content-heading")).toBeInTheDocument();
+    expect(screen.getByTestId("main-content-body")).toBeInTheDocument();
+    expect(screen.getByText("Step Content")).toBeInTheDocument();
+    expect(screen.getByText("This text must always be accessible.")).toBeInTheDocument();
+  });
+
+  it("always renders the mobile progress bar element in the DOM", () => {
+    // The mobile bar must always be in the DOM (CSS controls visibility via display:none/flex)
+    renderApp(<WorkflowLayout currentStep={2} notice={notice}><span>content</span></WorkflowLayout>);
+    const mobileBar = document.querySelector(".workflow-mobile-bar");
+    expect(mobileBar).toBeInTheDocument();
+  });
+
+  it("always keeps sidebar in DOM but controlled by CSS class workflow-sidebar", () => {
+    // The sidebar element must be present so CSS can hide it on mobile
+    renderApp(<WorkflowLayout currentStep={1} notice={notice}><span>content</span></WorkflowLayout>);
+    const sidebar = document.querySelector(".workflow-sidebar");
+    expect(sidebar).toBeInTheDocument();
+    // The sidebar must have aria-label for accessibility
+    expect(screen.getByRole("complementary", { name: "Workflow navigation" })).toBeInTheDocument();
+  });
 });

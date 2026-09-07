@@ -67,12 +67,22 @@ def _validate_against_questions(questions: list[dict], answers: dict) -> None:
             continue
         kind = _question_type(question)
         options = {str(option.get("id")) for option in question.get("options") or []}
-        values = value if isinstance(value, list) else [value.get("choice")] if isinstance(value, dict) else [value]
-        if kind in {"single_choice", "yes_no", "choice_with_other"}:
+        if kind in {"single_choice", "yes_no"}:
+            values = [value] if not isinstance(value, list) else value
             if not all(isinstance(item, str) and item in options for item in values):
                 raise HTTPException(status_code=422, detail=f"Invalid option for question {question_id}")
-            if kind == "choice_with_other" and values[0] in {"other", "something_else"} and not str(value.get("other", "")).strip():
-                raise HTTPException(status_code=422, detail=f"Please describe the other answer for {question_id}")
+        elif kind == "choice_with_other":
+            if isinstance(value, dict):
+                choice = value.get("choice")
+                if not isinstance(choice, str) or choice not in options:
+                    raise HTTPException(status_code=422, detail=f"Invalid option for question {question_id}")
+                if choice in {"other", "something_else"} and not str(value.get("other", "")).strip():
+                    raise HTTPException(status_code=422, detail=f"Please describe the other answer for {question_id}")
+            elif isinstance(value, str):
+                if value not in options and not value.strip():
+                    raise HTTPException(status_code=422, detail=f"Please provide an answer for {question_id}")
+            else:
+                raise HTTPException(status_code=422, detail=f"Invalid answer for question {question_id}")
         elif kind == "multi_choice":
             if not isinstance(value, list) or not all(isinstance(item, str) and item in options for item in value):
                 raise HTTPException(status_code=422, detail=f"Invalid multi-choice answer for question {question_id}")
@@ -101,7 +111,12 @@ def _notice_for_workflow(notice_id: str) -> dict:
         "official_reference": metadata.get("notice_reference"),
         "citizen_id": "uploaded",
         "official_text": "\n".join(page.get("text", "") for page in session.get("pages", [])),
-        "synthetic_extraction": {**(stored.get("synthetic_extraction") or {}), "source_type": "pdf", "requires_human_confirmation": True, "requests": session.get("requests", [])},
+        "synthetic_extraction": {
+            **(stored.get("synthetic_extraction") or {}),
+            "source_type": "pdf",
+            "requires_human_confirmation": not session.get("confirmed", False),
+            "requests": session.get("requests", []),
+        },
     }
 
 
@@ -132,8 +147,13 @@ def resolve(payload: Answers):
         return {**build_refusal(category), "classification": classification.payload(), "workflow": definition.payload() if definition else None}
 
     try:
-        question_payload = get_workflow_handler(classification.category).get_questions(notice, "en", payload.answers)
-        _validate_against_questions(question_payload.get("questions", []), payload.answers)
+        # Validate only the initial (unconditional) questions the user was shown.
+        # Passing answers here would cause conditional follow-up questions to appear
+        # in the plan, but those were never shown to the user in the initial question set.
+        # The handler's resolve() performs its own complete internal validation,
+        # including conditional answers where they exist.
+        initial_question_payload = get_workflow_handler(classification.category).get_questions(notice, "en")
+        _validate_against_questions(initial_question_payload.get("questions", []), payload.answers)
         result = get_workflow_handler(classification.category).resolve(notice, payload.answers)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -151,3 +171,42 @@ def resolve(payload: Answers):
             },
         },
     }
+
+
+class ExportRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    text: str
+    format: str = "pdf"
+    filename: str = "Income_Tax_Reply"
+
+
+@router.post("/export")
+def export_response(payload: ExportRequest):
+    from fastapi import Response
+    export_format = payload.format.lower().strip()
+    safe_name = payload.filename.replace(" ", "_").replace("/", "_").replace("\\", "_")
+    if not safe_name.endswith(f".{export_format}"):
+        safe_name = f"{safe_name}.{export_format}"
+
+    if export_format == "txt":
+        return Response(
+            content=payload.text.encode("utf-8"),
+            media_type="text/plain; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+        )
+    elif export_format == "md":
+        return Response(
+            content=payload.text.encode("utf-8"),
+            media_type="text/markdown; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+        )
+    elif export_format == "pdf":
+        from app.export import generate_pdf_from_text
+        pdf_bytes = generate_pdf_from_text(payload.text)
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+        )
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported export format '{payload.format}'. Supported formats: pdf, txt, md")

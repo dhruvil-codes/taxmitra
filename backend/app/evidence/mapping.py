@@ -60,14 +60,34 @@ _EVIDENCE: dict[str, tuple[tuple[str, dict[str, str], dict[str, str], str], ...]
 
 
 def map_evidence(requests: tuple[Any, ...], statuses: dict[str, str] | None = None) -> list[dict]:
-    """Return request-scoped recommendations without reading or storing files."""
+    """Return deduplicated, citizen-readable evidence recommendations.
+
+    Each unique document (by English name + requirement level) appears at most
+    once.  Required items come first.  The generic fallback is suppressed when
+    there is already at least one real named item, preventing the list from
+    being flooded with dozens of identical "Records addressing the specific
+    notice request" entries.
+    """
     statuses = statuses or {}
-    mapped: list[dict] = []
+    raw: list[dict] = []
+    has_named = False  # True once any recognised-category entry is added
+
     for request in requests:
-        entries = _EVIDENCE.get(request.category, (("request_records", {"en": "Records addressing the specific notice request", "hi": "नोटिस के विशेष अनुरोध से संबंधित रिकॉर्ड"}, {"en": "These may be relevant if the notice asks for supporting information not covered above.", "hi": "यदि नोटिस में ऊपर के अलावा सहायक जानकारी मांगी गई है तो ये उपयोगी हो सकते हैं।"}, "possibly_relevant"),))
+        category_entries = _EVIDENCE.get(request.category)
+        is_fallback = category_entries is None
+        entries = category_entries or (
+            ("request_records",
+             {"en": "Records addressing the specific notice request",
+              "hi": "नोटिस के विशेष अनुरोध से संबंधित रिकॉर्ड"},
+             {"en": "These may be relevant if the notice asks for supporting information not covered above.",
+              "hi": "यदि नोटिस में ऊपर के अलावा सहायक जानकारी मांगी गई है तो ये उपयोगी हो सकते हैं।"},
+             "possibly_relevant"),
+        )
+        if not is_fallback:
+            has_named = True
         for document_id, name, reason, level in entries:
             key = f"{request.id}:{document_id}"
-            mapped.append({
+            raw.append({
                 "request_id": request.id,
                 "document_id": key,
                 "document_name": name,
@@ -76,8 +96,27 @@ def map_evidence(requests: tuple[Any, ...], statuses: dict[str, str] | None = No
                 "required_or_possibly_relevant": level,
                 "source": list(request.citations),
                 "status": statuses.get(key, "not_sure"),
+                "_is_fallback": is_fallback,
             })
-    return mapped
+
+    # Deduplicate: keep the first occurrence of each (English name, level) pair.
+    # Required items sort before possibly-relevant so dedup keeps the more
+    # important copy when names collide.
+    raw.sort(key=lambda item: (0 if item["requirement_level"] == "required" else 1, item["_is_fallback"]))
+    seen: set[tuple[str, str]] = set()
+    deduped: list[dict] = []
+    for item in raw:
+        # Suppress the generic fallback entirely if any real items exist.
+        if item["_is_fallback"] and has_named:
+            continue
+        key_tuple = (item["document_name"].get("en", ""), item["requirement_level"])
+        if key_tuple in seen:
+            continue
+        seen.add(key_tuple)
+        item.pop("_is_fallback", None)
+        deduped.append(item)
+
+    return deduped
 
 
 def missing_evidence(recommendations: list[dict]) -> list[dict]:

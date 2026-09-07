@@ -69,10 +69,12 @@ test.describe("universal Tax Mitra browser journey", () => {
     const governmentRequests: string[] = [];
     page.on("request", (request) => { if (request.url().includes("incometax.gov.in")) governmentRequests.push(request.url()); });
     await uploadSynthetic(page);
+    await expect(page.getByText(/Why we are asking/i)).toBeVisible();
+    await assertAccessible(page);
+    await page.getByRole("button", { name: /Back to overview/i }).click();
     await expect(page.getByRole("heading", { name: /What the Department wants/i })).toBeVisible();
     const visibleText = await page.locator("body").innerText();
     expect(visibleText).not.toMatch(/REQUEST CONFIDENCE|DETERMINISTIC RULE|NOT_PROVIDED|classification_id|à¤/i);
-    await assertAccessible(page);
     await page.getByText("View original notice wording").first().click();
     await expect(page.getByText(/Page 1/).first()).toBeVisible();
     await page.getByRole("button", { name: /Continue/i }).click();
@@ -95,10 +97,9 @@ test.describe("universal Tax Mitra browser journey", () => {
   test("143(1)(a) uses the universal journey and not scrutiny presentation", async ({ page }) => {
     const s: Scenario = { id: "e2e-143a", workflowId: "income_mismatch_143_1a", title: "Section 143(1)(a) proposed adjustment", category: "processing", capability: "SUPPORTED", section: "143(1)(a)", reason: "A proposed processing adjustment was identified." };
     await mockScenario(page, s, { upload: true }); await uploadSynthetic(page);
-    await expect(page).toHaveURL(/\/notices\/e2e-143a\/journey$/);
-    await expect(page.getByRole("heading", { name: "Section 143(1)(a) proposed adjustment" })).toBeVisible();
+    await expect(page).toHaveURL(/\/notices\/e2e-143a\/journey/);
+    await expect(page.getByText(/Why we are asking/i)).toBeVisible();
     await expect(page.getByText(/scrutiny requests/i)).toHaveCount(0);
-    await page.getByRole("button", { name: /Continue/i }).click();
     await page.getByRole("radio", { name: "Not sure" }).check();
     await page.getByRole("button", { name: /Continue/i }).click();
     await expect(page.getByText("HUMAN REVIEW REQUIRED")).toBeVisible();

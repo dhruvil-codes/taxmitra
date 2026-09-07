@@ -535,8 +535,15 @@ export function PrimaryButton({
 }) {
   const cls = `app-primary-btn ${className}`.trim();
   if (href) {
+    if (!href.startsWith("http")) {
+      return (
+        <Link to={href} className={cls}>
+          {children}
+        </Link>
+      );
+    }
     return (
-      <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className={cls}>
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
         {children}
       </a>
     );

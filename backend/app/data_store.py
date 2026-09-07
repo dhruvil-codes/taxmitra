@@ -49,7 +49,7 @@ def get_notice(notice_id: str) -> dict | None:
         "synthetic_extraction": {
             **(stored.get("synthetic_extraction") or {}),
             "source_type": "pdf",
-            "requires_human_confirmation": True,
+            "requires_human_confirmation": not session.get("confirmed", False),
             "requests": session.get("requests", []),
         },
     }

@@ -131,15 +131,43 @@ def ingest_pdf(content: bytes, filename: str | None, content_type: str | None, o
         return IngestionResult({}, (), (), "uploaded", False, 0.0, (validation.message or "The PDF could not be processed.",), validation.code, 0, fingerprint, "none")
 
     source_pages = tuple(validation.reader.pages)
-    pages = tuple({"page_number": i + 1, "text": (page.extract_text() or ""), "source": "text", "confidence": 0.88} for i, page in enumerate(source_pages))
-    # Short pages can still be perfectly usable (for example a one-line
-    # continuation or a numbered annexure item). Only OCR genuinely sparse
-    # pages; this is the mixed-PDF fast path.
+    
+    # Try PyMuPDF for high-fidelity text extraction if available
+    fitz_doc = None
+    try:
+        import pymupdf as fitz
+        fitz_doc = fitz.open(stream=content, filetype="pdf")
+    except Exception:
+        pass
+
+    extracted_pages = []
+    for i, page in enumerate(source_pages):
+        pypdf_text = (page.extract_text() or "").strip()
+        fitz_text = ""
+        if fitz_doc and i < len(fitz_doc):
+            try:
+                fitz_text = (fitz_doc[i].get_text() or "").strip()
+            except Exception:
+                pass
+        # Use fitz_text if it has more or equal readable characters
+        best_text = fitz_text if len(fitz_text) >= len(pypdf_text) else pypdf_text
+        extracted_pages.append({
+            "page_number": i + 1,
+            "text": best_text,
+            "source": "text",
+            "confidence": 0.88 if len(best_text) >= 20 else 0.5,
+        })
+    if fitz_doc:
+        fitz_doc.close()
+
+    pages = tuple(extracted_pages)
+    
+    # Identify pages that truly lack sufficient text for reliable routing
     image_pages = {i + 1 for i, page in enumerate(source_pages) if _has_embedded_image(page)}
     weak_pages = tuple(
         page["page_number"]
         for page in pages
-        if len(page["text"].strip()) < 20 or page["page_number"] in image_pages
+        if len(page["text"].strip()) < 30 or (len(page["text"].strip()) < 80 and page["page_number"] in image_pages)
     )
     method = "text"
     warnings: list[str] = []
@@ -159,11 +187,13 @@ def ingest_pdf(content: bytes, filename: str | None, content_type: str | None, o
                 merged.append(page)
         pages = tuple(merged)
         method = "ocr" if len(weak_pages) == len(pages) else "mixed"
-        warnings.append(ocr.warning or "OCR output requires confirmation for one or more pages.")
-        if ocr.status in {"failed", "unavailable"}:
+        if ocr.warning:
+            warnings.append(ocr.warning)
+        if ocr.status in {"failed", "unavailable"} and all(not page["text"].strip() for page in pages):
             return IngestionResult({}, (), pages, "needs_confirmation", False, 0.0, tuple(warnings), "ocr_failure" if ocr.status == "failed" else "low_extraction_confidence", len(pages), fingerprint, method)
         if any(not page["text"].strip() for page in pages if page["page_number"] in weak_pages):
             warnings.append("One or more pages remain unreadable after OCR. Review the original PDF before continuing.")
+
     full_text = "\n".join(page["text"] for page in pages)
     metadata = _metadata(full_text)
     meaningful_characters = len(re.sub(r"\W", "", full_text, flags=re.UNICODE))
@@ -183,6 +213,5 @@ def ingest_pdf(content: bytes, filename: str | None, content_type: str | None, o
         confidence = round(sum(page.get("confidence", 0.88) for page in pages) / len(pages), 3) if pages else 0.0
         return IngestionResult(metadata, (), pages, "needs_confirmation", True, confidence, tuple(warnings) + ("No clearly numbered annexure or questionnaire requests were found; classification will use the communication as a whole.",), None, len(pages), fingerprint, method)
     confidence = round(sum(page.get("confidence", 0.88) for page in pages) / len(pages), 3) if pages else 0.0
-    if method in {"ocr", "mixed"}:
-        warnings.append("OCR text is not authoritative. Compare the original wording, dates, identifiers, and page numbers before confirming.")
-    return IngestionResult(metadata, tuple({**item, "request_id": "req-" + hashlib.sha256(item["original_text"].encode()).hexdigest()[:16], "confidence": confidence, "warnings": list(warnings)} for item in requests), pages, "needs_confirmation", True, confidence, tuple(dict.fromkeys(warnings)), None, len(pages), fingerprint, method)
+    return IngestionResult(metadata, tuple({**item, "request_id": "req-" + hashlib.sha256(item["original_text"].encode()).hexdigest()[:16], "confidence": confidence, "warnings": list(item.get("warnings") or [])} for item in requests), pages, "needs_confirmation", True, confidence, tuple(dict.fromkeys(warnings)), None, len(pages), fingerprint, method)
+

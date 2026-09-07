@@ -249,6 +249,17 @@ _REQUEST_CATEGORIES = {
     "req_cash_deposits": "cash_deposits",
     "req_significant_transactions": "credits_debits",
     "req_deductions_exemptions": "deductions_exemptions",
+    "req_capital_gains": "capital_gains",
+    "req_shares_securities": "shares_securities",
+    "req_unsecured_loans": "unsecured_loans",
+    "req_cash_records": "cash_records",
+    "req_investments": "investments",
+    "req_depreciation_assets": "depreciation_assets",
+    "req_business_profile": "business_profile",
+    "req_ledger_extract": "accounts",
+    "req_high_value_transactions": "credits_debits",
+    "req_tax_payments": "income_computation",
+    "req_evidence": "deductions_exemptions",
     "req_notice_document": "other_notice_request",
 }
 
@@ -332,6 +343,24 @@ _SOURCE_OPTIONS = (
 
 _AVAILABILITY_OPTIONS = _OPTIONS
 
+# Choice ids that mean "the taxpayer's own words" for choice_with_other questions.
+# Mirrors the accepted set in app/routers/workflow.py and the frontend detector.
+_OTHER_CHOICE_IDS = {"other", "something_else"}
+
+_TRANSACTION_EXPLANATION_OPTIONS = (
+    Option("business_transactions", {"en": "Business transactions recorded in my books", "hi": "बही-खातों में दर्ज व्यापारिक लेन-देन"}),
+    Option("loan_or_borrowing", {"en": "Loan received or repaid", "hi": "ऋण लिया गया या चुकाया गया"}),
+    Option("personal_or_family_transfer", {"en": "Personal or family transfer", "hi": "व्यक्तिगत या पारिवारिक हस्तांतरण"}),
+    Option("something_else", {"en": "Something else", "hi": "कुछ और"}),
+)
+
+_OTHER_REQUEST_OPTIONS = (
+    Option("records_available", {"en": "Supporting records and documents are available", "hi": "सहायक रिकॉर्ड और दस्तावेज़ उपलब्ध हैं"}),
+    Option("need_time_to_obtain", {"en": "Need time to obtain records from bank or third party", "hi": "बैंक या तीसरे पक्ष से रिकॉर्ड प्राप्त करने के लिए समय चाहिए"}),
+    Option("not_applicable", {"en": "Not applicable to my return or already reported", "hi": "मेरे रिटर्न पर लागू नहीं या पहले ही सूचित किया जा चुका है"}),
+    Option("something_else", {"en": "Something else", "hi": "कुछ और"}),
+)
+
 
 def minimum_question_plan(
     requests: tuple[ScrutinyRequest, ...], answers: dict[str, Any] | None = None
@@ -376,7 +405,8 @@ def minimum_question_plan(
             id="significant_transaction_explanation",
             text={"en": "How would you explain the significant credits and debits?", "hi": "महत्वपूर्ण क्रेडिट और डेबिट का स्पष्टीकरण कैसे देंगे?"},
             why={"en": "The explanation determines which transaction records may help and what needs review.", "hi": "स्पष्टीकरण से तय होता है कि कौनसे रिकार्ड मदद कर सकते हैं और क्या जांचना है।"},
-            question_type="free_text",
+            question_type="choice_with_other",
+            options=_TRANSACTION_EXPLANATION_OPTIONS,
             related_request_ids=(transactions.id,),
         ))
 
@@ -384,9 +414,10 @@ def minimum_question_plan(
     if other:
         plan.append(MinimumQuestion(
             id="other_request_details",
-            text={"en": "What information can you provide for this other notice request?", "hi": "इस अन्य नोटिस अनुरोध के लिए आप क्या जानकारी दे सकते हैं?"},
-            why={"en": "The notice does not identify a more specific evidence path, so your description is needed.", "hi": "नोटिस में इसके लिए अधिक स्पष्ट सबूत मार्ग नहीं है, इसलिए आपका वर्णन जरूरी है।"},
-            question_type="free_text",
+            text={"en": "How will you address this other notice request?", "hi": "आप इस अन्य नोटिस अनुरोध का समाधान कैसे करेंगे?"},
+            why={"en": "Your selection determines how Tax Mitra structures your response.", "hi": "आपका चयन तय करता है कि Tax Mitra आपके उत्तर को कैसे तैयार करे।"},
+            question_type="choice_with_other",
+            options=_OTHER_REQUEST_OPTIONS,
             related_request_ids=(other.id,),
         ))
 
@@ -523,6 +554,50 @@ def resolve_scrutiny(notice: dict, answers: dict[str, str], extraction_confirmed
     }
 
 
+def _transaction_explanation_label(choice: str) -> str:
+    for option in _TRANSACTION_EXPLANATION_OPTIONS:
+        if option.id == choice:
+            return str(option.label.get("en", choice.replace("_", " ")))
+    return choice.replace("_", " ")
+
+
+def _validate_explanation_answer(answer: Any) -> None:
+    """A choice-with-other answer must name a backend option and describe 'Something else'."""
+    if not isinstance(answer, dict):
+        return  # Legacy plain-string explanations remain accepted.
+    choice = str(answer.get("choice", ""))
+    if choice not in {option.id for option in _TRANSACTION_EXPLANATION_OPTIONS}:
+        raise ValueError(f"Invalid answer '{choice}' for significant_transaction_explanation")
+    if choice in _OTHER_CHOICE_IDS and not str(answer.get("other", "")).strip():
+        raise ValueError("Please describe the other answer for significant_transaction_explanation")
+
+
+def _other_request_text(answer: Any) -> str:
+    if isinstance(answer, dict):
+        choice = str(answer.get("choice", "")).strip()
+        other = str(answer.get("other", "")).strip()
+        if choice in _OTHER_CHOICE_IDS:
+            return other or "Something else"
+        labels = {
+            "records_available": "Supporting records and documents are available.",
+            "need_time_to_obtain": "Need time to obtain records from bank or third party.",
+            "not_applicable": "Not applicable to the return or already reported.",
+        }
+        return labels.get(choice, choice.replace("_", " "))
+    return str(answer)
+
+
+def _explanation_text(answer: Any) -> str:
+    """Human-readable draft text for the significant-transaction explanation."""
+    if isinstance(answer, dict):
+        choice = str(answer.get("choice", "")).strip()
+        other = str(answer.get("other", "")).strip()
+        if choice in _OTHER_CHOICE_IDS:
+            return other or _transaction_explanation_label(choice)
+        return _transaction_explanation_label(choice)
+    return str(answer)
+
+
 def resolve_minimum_scrutiny(
     notice: dict,
     answers: dict[str, Any],
@@ -533,17 +608,32 @@ def resolve_minimum_scrutiny(
     requests = build_scrutiny_requests(notice, extraction_confirmed=extraction_confirmed)
     if not requests:
         return insufficient_information_refusal("Extraction has not been confirmed or no annexure requests were found.")
-    plan = minimum_question_plan(requests, answers)
-    required = {item.id for item in plan if item.required}
-    missing = [item for item in required if not str(answers.get(item, "")).strip()]
+    # Build the initial (unconditional) plan — no answers supplied — to identify
+    # which questions the user was actually shown in the UI.  Only those require
+    # a non-empty answer.  Conditional follow-up questions (those with conditions)
+    # are optional refinements: if absent, they default to "unsure" so the draft
+    # and path remain safe without blocking the workflow.
+    initial_plan = minimum_question_plan(requests)
+    initial_ids = {item.id for item in initial_plan if item.required and not item.conditions}
+    missing = [qid for qid in initial_ids if not str(answers.get(qid, "")).strip()]
     if missing:
         raise ValueError(f"Missing answers for: {sorted(missing)}")
+    # Build the full plan (with answers) to validate any conditional answers that
+    # *were* provided, without requiring them when absent.
+    plan = minimum_question_plan(requests, answers)
     source = answers.get("cash_deposit_source")
     if source not in {None, "business_income", "loan", "savings", "gift", "other", "unsure"}:
         raise ValueError(f"Invalid answer '{source}' for cash_deposit_source")
-    for key in (item.id for item in plan if item.question_type == "document_availability"):
-        if answers.get(key) not in DOCUMENT_STATUSES:
-            raise ValueError(f"Invalid document status for {key}")
+    for item in plan:
+        if item.question_type == "document_availability" and answers.get(item.id) is not None:
+            if answers.get(item.id) not in DOCUMENT_STATUSES:
+                raise ValueError(f"Invalid document status for {item.id}")
+    explanation = answers.get("significant_transaction_explanation")
+    if "significant_transaction_explanation" in {item.id for item in plan} and explanation is not None:
+        _validate_explanation_answer(explanation)
+    other_ans = answers.get("other_request_details")
+    if isinstance(other_ans, dict) and other_ans.get("choice") in _OTHER_CHOICE_IDS and not str(other_ans.get("other", "")).strip():
+        raise ValueError("Please describe the other answer for other_request_details")
 
     statuses = {
         request.id: (ANSWER_UNSURE if request.category == "cash_deposits" and source == "unsure" else ANSWER_YES)
@@ -556,31 +646,23 @@ def resolve_minimum_scrutiny(
     mapped_evidence = map_evidence(requests, document_statuses)
     uncertain = source == "unsure" or any(value == "unsure" for value in answers.values())
     path = "needs_review" if uncertain else "ready_to_respond"
-    lines = [
-        f"Response to notice under section {notice.get('section', '142(1)')} (Assessment Year {notice.get('assessment_year', '')})",
-        "",
-        "The following response sections are based on the original notice wording and the information provided by the taxpayer.",
-        "",
-    ]
-    for index, request in enumerate(requests, start=1):
-        lines.extend([f"{index}. {request.response_section}", f"Department request: {request.original_text}"])
-        if request.category == "cash_deposits" and source and source != "unsure":
-            lines.append(f"Taxpayer information provided: The stated source is {source.replace('_', ' ')}.")
-        elif request.category == "credits_debits" and answers.get("significant_transaction_explanation"):
-            lines.append(f"Taxpayer information provided: {answers['significant_transaction_explanation']}")
-        elif request.category == "other_notice_request" and answers.get("other_request_details"):
-            lines.append(f"Taxpayer information provided: {answers['other_request_details']}")
-        else:
-            lines.append("The taxpayer should attach the relevant records identified in the evidence checklist and verify this section before submission.")
-        lines.append("")
-    lines.append("Tax Mitra has not submitted anything to the Income Tax Department. The taxpayer must review and verify this draft before official filing.")
+    from app.rules.letter_templates import format_formal_reply_letter
+    draft_letter = format_formal_reply_letter(
+        notice=notice,
+        requests=requests,
+        answers=answers,
+        evidence=mapped_evidence,
+        due_date=notice.get("response_due_date"),
+        explanation_fn=_explanation_text,
+        other_fn=_other_request_text,
+    )
     return {
         "supported": True,
         "category": "scrutiny_142_1",
         "answers": answers,
         "path": {"path_id": path, "headline": _headline(path), "professional_help_recommended": uncertain},
         "checklist": evidence,
-        "draft": "\n".join(lines),
+        "draft": draft_letter,
         "evidence": mapped_evidence,
         "missing_evidence": [item for item in mapped_evidence if item["status"] in {"need_to_find", "dont_have", "not_sure"}],
         "deadline": {"due_date": notice.get("response_due_date"), "status": "action_required" if notice.get("response_due_date") else "no_deadline"},

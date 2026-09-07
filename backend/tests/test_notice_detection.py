@@ -215,3 +215,60 @@ def test_illegible_scan_produces_explicit_safe_stop(monkeypatch):
     assert body["status"] == "safe_stop"
     assert body["extraction"]["refusal_reason"] in ("low_extraction_confidence", "ocr_failure")
 
+
+def test_scanned_pdf_image_processed_via_ocr():
+    """Verify that a scanned image PDF is processed with OCR and succeeds into confirmation."""
+    import io
+    import pymupdf as fitz
+    from PIL import Image, ImageDraw
+
+    doc = fitz.open()
+    page = doc.new_page(width=500, height=300)
+    img = Image.new('RGB', (500, 300), color=(255, 255, 255))
+    d = ImageDraw.Draw(img)
+    d.text((20, 20), 'INCOME TAX DEPARTMENT', fill=(0, 0, 0))
+    d.text((20, 50), 'Notice under section 142(1) of the Income-tax Act, 1961', fill=(0, 0, 0))
+    d.text((20, 80), 'Assessment Year: 2024-25', fill=(0, 0, 0))
+    d.text((20, 120), '1. Furnish bank account statements for all accounts.', fill=(0, 0, 0))
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    page.insert_image(page.rect, stream=buf.getvalue())
+    scanned_bytes = doc.tobytes()
+    doc.close()
+
+    response = client.post(
+        "/api/workflows/extract",
+        files={"file": ("scanned_notice.pdf", scanned_bytes, "application/pdf")},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["supported"] is True
+    assert body["status"] == "needs_confirmation"
+    assert body["classification"]["category"] == "scrutiny_142_1"
+    assert body["extraction"]["method"] in ("ocr", "mixed")
+    assert body["extraction_id"] is not None
+    assert len(body["requests"]) >= 1
+
+
+def test_non_tax_pdf_document_triggers_upfront_refusal():
+    """Verify that an unrelated PDF (e.g. invoice) produces an upfront not_income_tax_document refusal."""
+    import pymupdf as fitz
+
+    doc = fitz.open()
+    page = doc.new_page(width=500, height=300)
+    page.insert_text((20, 40), 'ACME CORP INVOICE\nInvoice #INV-2024-9988\nBilled to: John Doe\nAmount: $450.00\nPayment due upon receipt.')
+    nontax_bytes = doc.tobytes()
+    doc.close()
+
+    response = client.post(
+        "/api/workflows/extract",
+        files={"file": ("invoice.pdf", nontax_bytes, "application/pdf")},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["supported"] is False
+    assert body["status"] == "safe_stop"
+    assert body["extraction"]["refusal_reason"] == "not_income_tax_document"
+    assert body["classification"]["category"] == "not_income_tax_document"
+
+

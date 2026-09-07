@@ -71,6 +71,55 @@ describe("universal workflow contract renderer", () => {
     expect(screen.getByLabelText("Something else", { selector: "textarea" })).toBeInTheDocument();
   });
 
+  const significantTransactionsQuestion = {
+    id: "significant_transaction_explanation",
+    text: "How would you explain the significant credits and debits?",
+    help: "The explanation determines which transaction records may help and what needs review.",
+    options: [
+      { id: "business_transactions", label: "Business transactions recorded in my books" },
+      { id: "loan_or_borrowing", label: "Loan received or repaid" },
+      { id: "personal_or_family_transfer", label: "Personal or family transfer" },
+      { id: "something_else", label: "Something else" },
+    ],
+    question_type: "choice_with_other" as const,
+  };
+
+  it("renders the 142(1) credits/debits question as backend choices, not a free-text box", () => {
+    const onChange = vi.fn();
+    const onContinue = vi.fn();
+    const { rerender } = renderWithRouter(<ContractQuestion question={significantTransactionsQuestion} locale="en" value={undefined} onChange={onChange} onContinue={onContinue} />);
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    for (const option of significantTransactionsQuestion.options) {
+      expect(screen.getByLabelText(option.label)).toHaveAttribute("type", "radio");
+    }
+    fireEvent.click(screen.getByLabelText("Loan received or repaid"));
+    expect(onChange).toHaveBeenCalledWith("loan_or_borrowing");
+    rerender(<ContractQuestion question={significantTransactionsQuestion} locale="en" value="loan_or_borrowing" onChange={onChange} onContinue={onContinue} />);
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    const continueButton = screen.getByRole("button", { name: "Continue" });
+    expect(continueButton).toBeEnabled();
+    fireEvent.click(continueButton);
+    expect(onContinue).toHaveBeenCalled();
+  });
+
+  it("reveals the free-text field only after Something else is chosen for the 142(1) question", () => {
+    const onChange = vi.fn();
+    const onContinue = vi.fn();
+    const { rerender } = renderWithRouter(<ContractQuestion question={significantTransactionsQuestion} locale="en" value={undefined} onChange={onChange} onContinue={onContinue} />);
+    fireEvent.click(screen.getByLabelText("Something else"));
+    expect(onChange).toHaveBeenCalledWith({ choice: "something_else", other: "" });
+    rerender(<ContractQuestion question={significantTransactionsQuestion} locale="en" value={{ choice: "something_else", other: "" }} onChange={onChange} onContinue={onContinue} />);
+    const otherField = screen.getByLabelText("Something else", { selector: "textarea" });
+    expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
+    fireEvent.change(otherField, { target: { value: "Agricultural income receipts" } });
+    expect(onChange).toHaveBeenLastCalledWith({ choice: "something_else", other: "Agricultural income receipts" });
+    rerender(<ContractQuestion question={significantTransactionsQuestion} locale="en" value={{ choice: "something_else", other: "Agricultural income receipts" }} onChange={onChange} onContinue={onContinue} />);
+    const continueButton = screen.getByRole("button", { name: "Continue" });
+    expect(continueButton).toBeEnabled();
+    fireEvent.click(continueButton);
+    expect(onContinue).toHaveBeenCalled();
+  });
+
   it("keeps genuinely explanatory questions as free text", () => {
     const onContinue = vi.fn();
     renderWithRouter(<ContractQuestion question={{ id: "explain", text: "Explain the transaction", help: "Why", options: [], question_type: "text" }} locale="en" value="" onChange={vi.fn()} onContinue={onContinue} />);
@@ -89,6 +138,30 @@ describe("universal workflow contract renderer", () => {
     renderWithRouter(<CapabilityBoundary capability={capability} reason="The classification is not safe for automated response preparation." nextSteps={["Review the deadline", "Consult a qualified professional"]} locale="en" />);
     expect(screen.getByText("The classification is not safe for automated response preparation.")).toBeInTheDocument();
     expect(screen.getByText("Consult a qualified professional")).toBeInTheDocument();
+  });
+
+  it("renders compact one-line collapsed requests that expand into explanation, why required, and original wording", () => {
+    renderWithRouter(
+      <ContractRequests
+        requests={[
+          {
+            ...request("req_bank_statements", "Please furnish certified true copies of all bank accounts maintained during the relevant previous year 2023-24 along with narration of credit entries exceeding Rs. 50,000."),
+            what_department_is_asking: "Bank account statements and narrations",
+            response_section: "Bank statements and deposit explanations",
+            source_location: "Page 2 · ¶ 4",
+          },
+        ]}
+        locale="en"
+      />
+    );
+    // Summary is concise, not the huge raw paragraph
+    expect(screen.getByText("Bank account statements and narrations")).toBeInTheDocument();
+    expect(screen.getAllByText("Page 2 · ¶ 4").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Expand ↓")).toBeInTheDocument();
+    expect(screen.getByText("What the Department wants")).toBeInTheDocument();
+    expect(screen.getByText("Requested information / Why required")).toBeInTheDocument();
+    expect(screen.getByText("Original notice wording")).toBeInTheDocument();
+    expect(screen.getByText(/certified true copies of all bank accounts/)).toBeInTheDocument();
   });
 
   it("does not expose internal grounding or classifier diagnostics", () => {
