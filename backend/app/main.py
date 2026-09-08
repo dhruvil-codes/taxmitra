@@ -113,6 +113,7 @@ def health():
         "version": app.version,
         "demo_mode": settings.demo_mode,
         "live_ai_allowed": store.live_allowed(),
+        "live_ai_for_uploaded": store.live_allowed(for_uploaded=True),
         "kb_loaded": Retriever.load(settings) is not None,
         "chat_model": settings.openai_chat_model,
         "embedding_model": settings.openai_embedding_model,

@@ -48,9 +48,22 @@ class ContentStore:
     def get_memory(self, key: str) -> dict | None:
         return self._memory.get(key)
 
-    def live_allowed(self) -> bool:
-        """Live AI is used only outside DEMO_MODE and only with a key."""
-        return not self._settings.demo_mode and bool(self._settings.openai_api_key)
+    def live_allowed(self, for_uploaded: bool = False) -> bool:
+        """Live AI is used only with a key.
+        
+        When DEMO_MODE=true:
+        - Demo notices: static content only (for_uploaded=False -> False)
+        - Uploaded PDFs: live AI allowed if key present (for_uploaded=True -> True with key)
+        
+        When DEMO_MODE=false:
+        - Everything: live AI allowed if key present
+        """
+        if not bool(self._settings.openai_api_key):
+            return False
+        if not self._settings.demo_mode:
+            return True
+        # DEMO_MODE=true: only allow live AI for uploaded PDFs
+        return for_uploaded
 
 
 _store: ContentStore | None = None

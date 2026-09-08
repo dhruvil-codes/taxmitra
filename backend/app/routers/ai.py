@@ -65,9 +65,27 @@ def _http_unavailable() -> HTTPException:
 @router.get("/explanation/{notice_id}")
 @limiter.limit(get_settings().ai_rate_limit)
 def explanation(request: Request, notice_id: str, locale: str = Query(default="en", pattern="^(en|hi)$")):
+    from app.extraction.sessions import get_session
+    
     notice = get_notice(notice_id)
+    is_uploaded = False
     if notice is None:
-        raise HTTPException(status_code=404, detail="Notice not found")
+        # Check if this is an uploaded PDF session
+        session = get_session(notice_id)
+        if session is None or not session.get("confirmed"):
+            raise HTTPException(status_code=404, detail="Notice not found")
+        is_uploaded = True
+        # Build notice from session data
+        metadata = session.get("metadata", {})
+        stored = dict(session.get("notice") or {})
+        notice = {
+            **stored,
+            "id": notice_id,
+            "section": metadata.get("section"),
+            "assessment_year": metadata.get("assessment_year"),
+            "official_text": "\n".join(page.get("text", "") for page in session.get("pages", [])),
+        }
+    
     category = classify_notice(notice)
     if category == NoticeCategory.SCRUTINY_142_1:
         raise HTTPException(status_code=400, detail="Use /api/scrutiny endpoints for 142(1) request-level explanations")
@@ -93,8 +111,8 @@ def explanation(request: Request, notice_id: str, locale: str = Query(default="e
 
     if content is None:
         # Dev-time generation: grounded in retrieved official-source context,
-        # gated by the confidence floor. Never reached in DEMO_MODE.
-        if not store.live_allowed():
+        # gated by the confidence floor. In DEMO_MODE, only for uploaded PDFs.
+        if not store.live_allowed(for_uploaded=is_uploaded):
             raise _http_unavailable()
         grounding = ground(settings, query)
         if grounding.below_floor or grounding.verified_source_count == 0:
@@ -129,7 +147,8 @@ def explanation(request: Request, notice_id: str, locale: str = Query(default="e
             "hi": "केवल सूचीबद्ध नोटिस प्रकारों को शामिल करता है। आधिकारिक आयकर पोर्टल ही प्रमाणिक स्रोत है।",
         },
         "source": source,
-        "degraded": source == "cache" and not store.live_allowed(),
+        "degraded": source == "cache" and not store.live_allowed(for_uploaded=is_uploaded),
         "demo_mode": settings.demo_mode,
+        "is_uploaded": is_uploaded,
         "grounding": _grounding_payload(grounding),
     }
