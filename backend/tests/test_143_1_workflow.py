@@ -95,3 +95,14 @@ def test_uploaded_text_can_route_an_explicit_outcome_without_fabricating_figures
     result = handler.resolve(notice, {"intimation_facts_confirmed": "yes", "refund_received": "yes"})
     assert result["status"] == "supported"
     assert result["facts"].get("refund_amount") is None
+
+
+def test_143_1_intimation_portal_navigation_path():
+    """Regression test: 143(1) intimation should navigate to e-Proceedings."""
+    handler = get_workflow_handler("income_intimation_143_1")
+    notice = load_fixture("intimation_143_1_refund.json")
+    result = handler.resolve(notice, {"intimation_facts_confirmed": "yes", "refund_received": "no"})
+    assert result["status"] == "supported"
+    assert "portal_navigation_path" in result
+    assert result["portal_navigation_path"]["en"] == "e-Proceedings"
+    assert result["portal_navigation_path"]["hi"] == "e-Proceedings"

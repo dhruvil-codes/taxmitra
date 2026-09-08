@@ -76,3 +76,25 @@ def test_tax_credit_requires_confirmation_and_never_invents_values():
     assert handler.resolve(notice, {"credit_record_confirmed": "no", "correction_owner": "taxpayer"})["status"] == "safe_stop"
     questions = handler.get_questions(notice)["questions"]
     assert any(item["id"] == "credit_type" for item in questions)
+
+
+def test_154_rectification_portal_navigation_path():
+    """Regression test: 154 rectification should navigate to Services → Rectification."""
+    handler = get_workflow_handler("rectification_154")
+    notice = fixture("rectification_154_reprocess.json")
+    result = handler.resolve(notice, {"rectification_record_confirmed": "yes"})
+    assert result["status"] == "supported"
+    assert "portal_navigation_path" in result
+    assert result["portal_navigation_path"]["en"] == "Services → Rectification"
+    assert result["portal_navigation_path"]["hi"] == "Services → Rectification"
+
+
+def test_tax_credit_mismatch_portal_navigation_path():
+    """Regression test: Tax credit mismatch should navigate to Services → Rectification."""
+    handler = get_workflow_handler("tax_credit_tds_mismatch")
+    notice = fixture("tax_credit_tds.json")
+    result = handler.resolve(notice, {"credit_record_confirmed": "yes", "correction_owner": "taxpayer"})
+    assert result["status"] == "supported"
+    assert "portal_navigation_path" in result
+    assert result["portal_navigation_path"]["en"] == "Services → Rectification"
+    assert result["portal_navigation_path"]["hi"] == "Services → Rectification"

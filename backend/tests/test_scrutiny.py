@@ -5,7 +5,7 @@ from app.extraction.notices import confirmed_requests, extract_notice_requests
 from app.main import app
 from app.rules.notice_types import NoticeCategory, classify_notice
 from app.rules.response_paths import resolve_path
-from app.rules.scrutiny import build_scrutiny_requests, resolve_scrutiny, scrutiny_questions
+from app.rules.scrutiny import build_scrutiny_requests, scrutiny_questions
 
 client = TestClient(app)
 
@@ -163,3 +163,14 @@ def test_existing_143_regression_still_resolves_same_path():
     )
     assert path.path_id == "disagree_already_reported"
     assert client.get("/api/ai/explanation/N-2026-001").status_code == 200
+
+
+def test_142_1_scrutiny_portal_navigation_path():
+    """Regression test: 142(1) scrutiny should navigate to e-Proceedings."""
+    answers = _answers("yes")
+    body = client.post("/api/scrutiny/resolve", json={"notice_id": "N-2026-003", "answers": answers}).json()
+    assert body["supported"] is True
+    assert "official_step" in body
+    assert "portal_navigation_path" in body["official_step"]
+    assert body["official_step"]["portal_navigation_path"]["en"] == "e-Proceedings"
+    assert body["official_step"]["portal_navigation_path"]["hi"] == "e-Proceedings"

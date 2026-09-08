@@ -56,3 +56,14 @@ def test_unconfirmed_or_missing_requests_safe_stop():
     notice = fixture("information_133_6_business.json")
     assert handler.resolve(notice, {"information_record_confirmed": "unsure"})["status"] == "safe_stop"
     assert handler.resolve({"section": "133(6)", "official_text": "Information notice"}, {})["status"] == "safe_stop"
+
+
+def test_133_6_portal_navigation_path():
+    """Regression test: 133(6) information requests should navigate to e-Proceedings."""
+    handler = get_workflow_handler("scrutiny_information_133_6")
+    notice = fixture("information_133_6_business.json")
+    result = handler.resolve(notice, {"information_record_confirmed": "yes", "information_status_receipts": "complete", "information_status_bank-transactions": "complete"})
+    assert result["status"] == "supported"
+    assert "portal_navigation_path" in result
+    assert result["portal_navigation_path"]["en"] == "e-Proceedings"
+    assert result["portal_navigation_path"]["hi"] == "e-Proceedings"

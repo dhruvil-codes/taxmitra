@@ -223,6 +223,7 @@ export default function Journey() {
             "Use the official Income Tax e-Filing portal for any required action.",
           ],
           officialPortalUrl: verifiedIncomeTaxUrl(backend?.official_portal.url ?? OFFICIAL_EFILING_PORTAL_URL),
+          portalNavigationPath: backend?.official_step?.portal_navigation_path,
         };
         setContract(base);
         let loadedQuestions: Question[] = [];
@@ -275,6 +276,12 @@ export default function Journey() {
       setResult(res);
       if (res?.evidence && Array.isArray(res.evidence)) {
         setMappedEvidence(res.evidence as EvidenceRecommendation[]);
+      }
+      if (res?.official_step && typeof res.official_step === "object") {
+        const officialStep = res.official_step as Record<string, unknown>;
+        if (officialStep.portal_navigation_path && typeof officialStep.portal_navigation_path === "object") {
+          setContract(prev => prev ? { ...prev, portalNavigationPath: officialStep.portal_navigation_path as Record<string, string> } : null);
+        }
       }
       return res;
     } catch {
@@ -634,10 +641,10 @@ export default function Journey() {
                   <li className="act-step">
                     <span className="act-step-num">2</span>
                     <div>
-                      <strong>{locale === "hi" ? "e-Proceedings पर जाएं" : "Navigate to e-Proceedings"}</strong>
+                      <strong>{locale === "hi" ? "पोर्टल पर नेविगेट करें" : "Navigate to the correct portal section"}</strong>
                       <p>{locale === "hi"
-                        ? "लॉगिन के बाद: Pending Actions → e-Proceedings पर क्लिक करें।"
-                        : "After login: Click Pending Actions → e-Proceedings in the top menu."}</p>
+                        ? `लॉगिन के बाद: ${contract.portalNavigationPath?.[locale] || contract.portalNavigationPath?.en || "Pending Actions"} पर जाएं।`
+                        : `After login: Navigate to ${contract.portalNavigationPath?.[locale] || contract.portalNavigationPath?.en || "Pending Actions"} in the portal.`}</p>
                     </div>
                   </li>
                   <li className="act-step">

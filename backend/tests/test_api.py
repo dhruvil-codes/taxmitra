@@ -14,6 +14,7 @@ def test_health():
     assert body["demo_mode"] is True  # conftest forces DEMO_MODE
     assert body["chat_model"] == get_settings().openai_chat_model
     # Deployment-dashboard fields.
+    assert body["kb_loaded"] is True
     assert body["embedding_model"] == get_settings().openai_embedding_model
     assert body["retrieval_method"] in ("lexical", "embedding")
     assert body["static_fallbacks"] >= 2
@@ -29,8 +30,13 @@ def test_security_and_gzip_headers():
 
 def test_citizens():
     body = client.get("/api/citizens").json()
-    assert len(body) == 1
-    assert body[0]["id"] == "C-001"
+    assert len(body) == 5
+    citizen_ids = [c["id"] for c in body]
+    assert "C-001" in citizen_ids
+    assert "C-002" in citizen_ids
+    assert "C-003" in citizen_ids
+    assert "C-004" in citizen_ids
+    assert "C-005" in citizen_ids
 
 
 def test_notices_list_includes_computed_deadline():
@@ -152,7 +158,7 @@ def test_non_string_answer_is_422_not_500():
 
 def test_notices_list_without_filter_returns_all():
     body = client.get("/api/notices").json()
-    assert len(body) == 3
+    assert len(body) == 19
 
 
 def test_explanation_income_source_is_locale_appropriate():
@@ -165,3 +171,20 @@ def test_explanation_income_source_is_locale_appropriate():
     # Bilingual shape is exposed on the notice itself.
     detail = client.get("/api/notices/N-2026-001").json()
     assert set(detail["income_source"].keys()) == {"en", "hi"}
+
+
+def test_workflow_resolve_includes_portal_navigation_path():
+    """Regression test: workflow resolve endpoint should include portal_navigation_path in official_step."""
+    # Use the 143(1)(a) notice which should navigate to e-Proceedings
+    payload = {
+        "notice_id": "N-2026-001",
+        "answers": {"q1_received": "yes", "q2_in_return": "yes", "q3_documents": "yes"},
+    }
+    response = client.post("/api/workflow/resolve", json=payload)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["supported"] is True
+    assert "official_step" in body
+    assert "portal_navigation_path" in body["official_step"]
+    assert body["official_step"]["portal_navigation_path"]["en"] == "e-Proceedings"
+    assert body["official_step"]["portal_navigation_path"]["hi"] == "e-Proceedings"

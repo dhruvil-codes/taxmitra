@@ -169,6 +169,7 @@ def resolve(payload: Answers):
                 "en": "Tax Mitra has not submitted your response. Nothing has been sent to the Income Tax Department.",
                 "hi": "Tax Mitra ने आपका उत्तर जमा नहीं किया है। आयकर विभाग को कुछ भी नहीं भेजा गया है।",
             },
+            "portal_navigation_path": result.get("portal_navigation_path", {"en": "Pending Actions", "hi": "Pending Actions"}),
         },
     }
 

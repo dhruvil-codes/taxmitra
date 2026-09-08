@@ -550,6 +550,7 @@ def resolve_scrutiny(notice: dict, answers: dict[str, str], extraction_confirmed
                 "en": "Tax Mitra has not submitted your response. No documents or facts have been sent to the Income Tax Department.",
                 "hi": "Tax Mitra ने आपका उत्तर जमा नहीं किया है। कोई दस्तावेज़ या तथ्य आयकर विभाग को नहीं भेजे गए हैं।",
             },
+            "portal_navigation_path": {"en": "e-Proceedings", "hi": "e-Proceedings"},
         },
     }
 
@@ -670,6 +671,7 @@ def resolve_minimum_scrutiny(
             "label": {"en": "Upload your response and evidence on the official e-Filing portal", "hi": "अपना उत्तर और प्रमाण आधिकारिक e-Filing पोर्टल पर अपलोड करें"},
             "url": OFFICIAL_EFILING_URL,
             "boundary": {"en": "Tax Mitra has not submitted your response. No documents or facts have been sent to the Income Tax Department.", "hi": "Tax Mitra ने आपका उत्तर जमा नहीं किया है।"},
+            "portal_navigation_path": {"en": "e-Proceedings", "hi": "e-Proceedings"},
         },
     }
 

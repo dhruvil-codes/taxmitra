@@ -13,12 +13,12 @@ export function uploadRoute(classification: { frontend_entry?: string; supported
 const refusalCopy: Record<string, { en: string; hi: string }> = {
   empty_pdf: { en: "This PDF is empty. Choose the complete notice PDF.", hi: "यह PDF खाली है। पूरा नोटिस PDF चुनें।" },
   malformed_pdf: { en: "This file could not be read as a valid PDF. Download it again and retry.", hi: "इस फ़ाइल को वैध PDF के रूप में पढ़ा नहीं जा सका। इसे फिर डाउनलोड करके प्रयास करें।" },
-  ocr_not_supported: { en: "This appears to be a scanned or image-only PDF. OCR is not supported in this version.", hi: "यह स्कैन या केवल-चित्र PDF लगता है। इस संस्करण में OCR समर्थित नहीं है।" },
-  ocr_failure: { en: "The PDF appears to be scanned, but OCR could not read it reliably. No text was invented.", hi: "यह PDF स्कैन की हुई लगती है, लेकिन OCR इसे विश्वसनीय रूप से पढ़ नहीं सका। कोई टेक्स्ट अनुमान से नहीं जोड़ा गया है।" },
+  ocr_not_supported: { en: "This appears to be a scanned or image-only PDF. Scanned PDFs are not supported in this version.", hi: "यह स्कैन या केवल-चित्र PDF लगता है। स्कैन PDF इस संस्करण में समर्थित नहीं है।" },
+  ocr_failure: { en: "The PDF appears to be scanned, but text could not be read reliably. No text was invented.", hi: "यह PDF स्कैन की हुई लगती है, लेकिन इसे विश्वसनीय रूप से पढ़ा नहीं जा सका। कोई टेक्स्ट अनुमान से नहीं जोड़ा गया है।" },
   password_protected_pdf: { en: "This PDF is password-protected. Remove the password or upload an accessible copy.", hi: "यह PDF पासवर्ड से सुरक्षित है। पासवर्ड हटाकर या बिना पासवर्ड वाली प्रति अपलोड करें।" },
   invalid_file_type: { en: "Only PDF files are accepted.", hi: "केवल PDF फ़ाइलें स्वीकार की जाती हैं।" },
   invalid_pdf: { en: "This file is not a readable PDF.", hi: "यह फ़ाइल पढ़ने योग्य PDF नहीं है।" },
-  low_extraction_confidence: { en: "The text could not be extracted with enough confidence to continue safely.", hi: "टेक्स्ट को सुरक्षित रूप से आगे बढ़ने के लिए पर्याप्त विश्वास के साथ नहीं निकाला जा सका।" },
+  low_extraction_confidence: { en: "The text could not be extracted clearly enough to continue safely.", hi: "टेक्स्ट को सुरक्षित रूप से आगे बढ़ने के लिए पर्याप्त स्पष्टता के साथ नहीं निकाला जा सका।" },
   missing_critical_information: { en: "The notice does not contain enough clearly numbered requests to continue without guessing.", hi: "अनुमान लगाए बिना आगे बढ़ने के लिए नोटिस में पर्याप्त स्पष्ट क्रमांकित अनुरोध नहीं हैं।" },
   file_too_large: { en: "This PDF exceeds the 10 MB processing limit.", hi: "यह PDF 10 MB की प्रोसेसिंग सीमा से बड़ी है।" },
   unsupported_notice_type: { en: "Tax Mitra identified an Income Tax communication outside the available guided workflow.", hi: "Tax Mitra ने ऐसे आयकर संचार की पहचान की जिसके लिए निर्देशित कार्यप्रवाह उपलब्ध नहीं है।" },
@@ -69,7 +69,7 @@ const unsupportedNoticeInfo: Record<string, {
   },
 
   "low_confidence": {
-    title: { en: "Illegible Scan / Low Extraction Confidence", hi: "अपठनीय स्कैन / निम्न निष्कर्षण विश्वास" },
+    title: { en: "Illegible Scan", hi: "अपठनीय स्कैन" },
     proceeding: { en: "Unreadable scan — safe stop", hi: "अपठनीय स्कैन — सुरक्षित ठहराव" },
     context: { en: "The uploaded notice scan could not be read clearly enough to safely identify statutory requests.", hi: "अपलोड किए गए नोटिस स्कैन को सुरक्षित रूप से पढ़ने के लिए पर्याप्त स्पष्टता नहीं मिली।" },
     boundaryReason: { en: "Tax Mitra never guesses notice contents. Proceeding without legible text could lead to inaccurate responses.", hi: "Tax Mitra कभी भी नोटिस की सामग्री का अनुमान नहीं लगाता।" },
@@ -86,6 +86,24 @@ const unsupportedNoticeInfo: Record<string, {
   },
 };
 const pick = (value: Record<string, string> | undefined, locale: string) => value?.[locale] ?? value?.en ?? "";
+
+export const filterInternalMetadata = (text: string | null | undefined): boolean => {
+  if (!text) return false;
+  const internalPatterns = [
+    "classification_id", "request_id", "extraction_id", "fingerprint",
+    "provider", "lexical", "deterministic", "confidence",
+    "workflow_id", "workflow status", "grounding_status", "capability",
+    "SAFE_STOP", "PARTIAL_SUPPORT", "EXPLANATION_ONLY", "SUPPORTED",
+    "OCR", "ocr", "AI", "ai", "backend", "routing", "evidence routing",
+    "method:", "sha256", "internal", "implementation",
+    "AI classification is unavailable",
+    "deterministic evidence routing was used",
+    "Retrieval and guidance are intentionally deferred",
+    "No section reference was confidently extracted"
+  ];
+  const containsInternal = internalPatterns.some(pattern => text.toLowerCase().includes(pattern.toLowerCase()));
+  return !containsInternal;
+};
 
 const getUnsupportedNoticeInfo = (
   section: string | null | undefined,
@@ -192,7 +210,7 @@ export default function Upload() {
       {previewUrl && <section className="pdf-preview" aria-label={locale === "hi" ? "चुनी गई PDF का पूर्वावलोकन" : "Selected PDF preview"}><object data={previewUrl} type="application/pdf"><p>{locale === "hi" ? "इस ब्राउज़र में PDF पूर्वावलोकन उपलब्ध नहीं है।" : "PDF preview is unavailable in this browser."}</p></object></section>}
     </div>}
     {uploading && <section className="extraction-status" aria-live="polite"><span className="status-pulse"/><div><p className="app-section-label">[ EXTRACTION IN PROGRESS ]</p><h2>{locale === "hi" ? "आपका नोटिस पढ़ा जा रहा है" : "Reading your notice"}</h2><p>{locale === "hi" ? "दस्तावेज़ मिल गया है। क्रमांकित अनुरोध और आधार निकाले जा रहे हैं।" : "Document received. Numbered requests and their grounding are being extracted."}</p></div></section>}
-    <div className="upload-actions">{file && <PrimaryButton onClick={extract} disabled={uploading}>{uploading ? (locale === "hi" ? "पढ़ा जा रहा है…" : "READING PDF…") : (locale === "hi" ? "अन��रोध निकालें" : "EXTRACT REQUESTS")} →</PrimaryButton>}{uploading && <button className="app-back !mt-0" onClick={()=>controller.current?.abort()}>{locale === "hi" ? "रोकें" : "CANCEL"}</button>}<Link className="app-back !mt-0" to="/">← {locale === "hi" ? "होम" : "HOME"}</Link></div></>}
+    <div className="upload-actions">{file && <PrimaryButton onClick={extract} disabled={uploading}>{uploading ? (locale === "hi" ? "पढ़ा जा रहा है…" : "READING PDF…") : (locale === "hi" ? "अनुरोध निकालें" : "EXTRACT REQUESTS")} →</PrimaryButton>}{uploading && <button className="app-back !mt-0" onClick={()=>controller.current?.abort()}>{locale === "hi" ? "रोकें" : "CANCEL"}</button>}<Link className="app-back !mt-0" to="/">← {locale === "hi" ? "होम" : "HOME"}</Link></div></>}
 
     {result?.supported && <section aria-labelledby="review-title">
       <p className="app-section-label">[ EXTRACTION NEEDS CONFIRMATION ]</p><h2 id="review-title" className="question-title">{locale === "hi" ? "मूल PDF से हर अनुरोध मिलाएँ" : "Match every request to the original PDF"}</h2>
@@ -205,23 +223,16 @@ export default function Upload() {
         const workflowDesc = pick((result.workflow as unknown as { description?: Record<string, string> })?.description, locale);
         const pageCount = result.extraction?.page_count ?? result.document?.page_count ?? 1;
         const methodLabel = result.extraction?.method === "ocr"
-          ? (locale === "hi" ? "OCR स्कैन" : "Scanned (OCR)")
+          ? (locale === "hi" ? "स्कैन PDF" : "Scanned PDF")
           : result.extraction?.method === "mixed"
-          ? (locale === "hi" ? "टेक्स्ट + OCR" : "Mixed PDF + OCR")
+          ? (locale === "hi" ? "टेक्स्ट + स्कैन PDF" : "Mixed PDF")
           : (locale === "hi" ? "डिजिटल PDF" : "Digital PDF");
 
         const rawWarnings = [
           ...(result.extraction?.warnings ?? []),
           ...(result.requests ?? []).flatMap(r => r.warnings ?? [])
         ];
-        const uniqueWarnings = Array.from(new Set(rawWarnings)).filter(w => {
-          if (!w) return false;
-          if (w.includes("AI classification is unavailable")) return false;
-          if (w.includes("deterministic evidence routing was used")) return false;
-          if (w.includes("Retrieval and guidance are intentionally deferred")) return false;
-          if (w.includes("No section reference was confidently extracted") && (result.metadata?.section || result.workflow?.title)) return false;
-          return true;
-        });
+        const uniqueWarnings = Array.from(new Set(rawWarnings)).filter(filterInternalMetadata);
 
         return (
           <>
@@ -247,7 +258,7 @@ export default function Upload() {
               <div className="notice-status-row">
                 <span>{locale === "hi" ? "स्थिति: पुष्टि आवश्यक" : "Status: Human verification needed"}</span>
                 <span>
-                  {pageCount} {locale === "hi" ? "पृष्ठ" : `page${pageCount > 1 ? "s" : ""}`} · {methodLabel} · {Math.round((result.extraction?.confidence ?? 1) * 100)}% {locale === "hi" ? "विश्वास" : "confidence"}
+                  {pageCount} {locale === "hi" ? "पृष्ठ" : `page${pageCount > 1 ? "s" : ""}`} · {methodLabel}
                 </span>
               </div>
             </div>
@@ -271,7 +282,7 @@ export default function Upload() {
         <div className="page-text-list">{result.document.pages.map((page) => <article key={page.page_number} className="page-text-item"><p className="app-section-label">{locale === "hi" ? `पृष्ठ ${page.page_number} · ${page.source}` : `Page ${page.page_number} · ${page.source}`}</p><pre>{page.text || (locale === "hi" ? "इस पृष्ठ से पाठ नहीं मिला।" : "No text was extracted from this page.")}</pre></article>)}</div>
       </details> : null}
       <p className="request-count">{String((result.requests ?? []).length).padStart(2,"0")} {locale === "hi" ? "अनुरोध मिले" : "REQUESTS FOUND"}</p>
-      <div className="document-requests">{(result.requests ?? []).map((request,index)=><details className="document-request" key={request.request_id || request.id || index} open={index===0}><summary><span>{String(index+1).padStart(2,"0")}</span><strong>{requestTitle(request, index)}</strong><i>{locale === "hi" ? "खोलें" : "OPEN"}</i></summary><div className="document-request-body"><div className="official-wording"><b>{locale === "hi" ? "अधिकारी के मूल शब्द" : "OFFICIAL REQUEST WORDING"}</b><p className="app-caption">{locale === "hi" ? `स्रोत: पृष्ठ ${request.page_number ?? "—"}` : `Source: page ${request.page_number ?? "—"}`}</p><textarea aria-label={locale === "hi" ? "निकाला गया मूल अनुरोध सुधारें" : "Correct extracted original request"} value={corrections[request.request_id] ?? request.original_text} onChange={(event) => setCorrections((current) => ({ ...current, [request.request_id]: event.target.value }))} rows={4} /></div><div className="scrutiny-explain"><div><b>{locale === "hi" ? "Tax Mitra की आसान भाषा" : "TAX MITRA EXPLANATION"}</b><p>{pick(request.plain_language_explanation,locale)}</p></div><div><b>{locale === "hi" ? "क्यों माँगा गया" : "WHY REQUIRED"}</b><p>{pick(request.why_required,locale) || request.response_section}</p></div></div>{((request.required_evidence?.length ?? 0) > 0)&&<div className="request-evidence"><b>{locale === "hi" ? "संभावित रिकॉर्ड" : "POSSIBLE RECORDS"}</b><ul>{(request.required_evidence ?? []).map((item,i)=><li key={i}>{pick(typeof item === "string" ? { en: item, hi: item } : item,locale)}</li>)}</ul></div>}<div className="request-grounding"><span>{request.classification_id ?? "notice_request"}</span><span>{locale === "hi" ? "अनुरोध विश्वास" : "REQUEST CONFIDENCE"} {Math.round((request.confidence ?? 1)*100)}%</span><span>{request.grounding ? `${request.grounding.method} ${Math.round(request.grounding.confidence*100)}%` : (locale === "hi" ? "निर्धारित नियम" : "DETERMINISTIC RULE")}</span></div>{(request.warnings ?? []).map((warning,i)=><p className="request-warning" key={i}>{warning}</p>)}{(request.citations ?? []).map((c, i)=><a key={c?.id ?? i} className="scrutiny-source" href={c?.official_url || "https://www.incometax.gov.in"} target="_blank" rel="noreferrer">{c?.source_name ?? "Income-tax Act"} · {c?.section ?? "Statutory Reference"} ↗</a>)}</div></details>)}</div>
+      <div className="document-requests">{(result.requests ?? []).map((request,index)=><details className="document-request" key={request.request_id || request.id || index} open={index===0}><summary><span>{String(index+1).padStart(2,"0")}</span><strong>{requestTitle(request, index)}</strong><i>{locale === "hi" ? "खोलें" : "OPEN"}</i></summary><div className="document-request-body"><div className="official-wording"><b>{locale === "hi" ? "अधिकारी के मूल शब्द" : "OFFICIAL REQUEST WORDING"}</b><p className="app-caption">{locale === "hi" ? `स्रोत: पृष्ठ ${request.page_number ?? "—"}` : `Source: page ${request.page_number ?? "—"}`}</p><textarea aria-label={locale === "hi" ? "निकाला गया मूल अनुरोध सुधारें" : "Correct extracted original request"} value={corrections[request.request_id] ?? request.original_text} onChange={(event) => setCorrections((current) => ({ ...current, [request.request_id]: event.target.value }))} rows={4} /></div><div className="scrutiny-explain"><div><b>{locale === "hi" ? "Tax Mitra की आसान भाषा" : "TAX MITRA EXPLANATION"}</b><p>{pick(request.plain_language_explanation,locale)}</p></div><div><b>{locale === "hi" ? "क्यों माँगा गया" : "WHY REQUIRED"}</b><p>{pick(request.why_required,locale) || request.response_section}</p></div></div>{((request.required_evidence?.length ?? 0) > 0)&&<div className="request-evidence"><b>{locale === "hi" ? "संभावित रिकॉर्ड" : "POSSIBLE RECORDS"}</b><ul>{(request.required_evidence ?? []).map((item,i)=><li key={i}>{pick(typeof item === "string" ? { en: item, hi: item } : item,locale)}</li>)}</ul></div>}</div></details>)}</div>
       <div className="human-check"><p className="app-section-label">[ HUMAN CHECK / 02 ]</p><p className="app-body">{locale === "hi" ? "पुष्टि तभी करें जब सूची PDF से पूरी तरह मेल खाती हो। PDF bytes memory में process होते हैं, store या log नहीं होते; session 30 मिनट में समाप्त होता है।" : "Confirm only if this list matches the PDF. PDF bytes are processed in memory and are not stored or logged; the session expires after 30 minutes."}</p></div>
       <div className="confirmation-actions"><PrimaryButton onClick={()=>confirm(true)} disabled={confirming}>{confirming ? (locale === "hi" ? "पुष्टि हो रही है…" : "CONFIRMING…") : (locale === "hi" ? "हाँ, सूची सही है" : "YES, THE LIST MATCHES")} →</PrimaryButton><button onClick={()=>confirm(false)} disabled={confirming}>{locale === "hi" ? "नहीं, फिर से शुरू करें" : "NO, START AGAIN"}</button></div>
     </section>}
@@ -280,7 +291,7 @@ export default function Upload() {
       const isNonTax = result.extraction?.refusal_reason === "not_income_tax_document" || result.classification?.category === "not_income_tax_document";
       const info = getUnsupportedNoticeInfo(result.metadata?.section, result.extraction?.refusal_reason, result.classification?.category);
       return <section className={`app-empty upload-refusal ${isNonTax ? "not-income-tax-refusal" : ""}`} role="alert">
-        <p className="app-section-label">{isNonTax ? "[ NOT AN INCOME TAX NOTICE ]" : `[ SAFE STOP / ${result.extraction?.refusal_reason ?? "UNCLASSIFIED"} ]`}</p>
+        <p className="app-section-label">{isNonTax ? "[ NOT AN INCOME TAX NOTICE ]" : "[ SAFE STOP ]"}</p>
         <h2 className="question-title">{refusalCopy[result.extraction?.refusal_reason ?? ""]?.[locale] ?? pick(info.title, locale)}</h2>
         <p className="app-lead">{pick(info.proceeding, locale)}</p>
         <p className="app-body">{pick(info.context, locale)}</p>
@@ -295,7 +306,7 @@ export default function Upload() {
         {info.officialSource && <a href={info.officialSource.url} target="_blank" rel="noopener noreferrer" className="scrutiny-source">
           {pick(info.officialSource.name, locale)} ↗
         </a>}
-        {(result.extraction?.warnings ?? []).map((w,i)=><p key={i} className="text-sm text-stone-600 mt-2">{w}</p>)}
+        {(result.extraction?.warnings ?? []).filter(filterInternalMetadata).map((w,i)=><p key={i} className="text-sm text-stone-600 mt-2">{w}</p>)}
         <div className="confirmation-actions">
           {isNonTax ? (
             <PrimaryButton onClick={reset}>{locale === "hi" ? "आधिकारिक नोटिस अपलोड करें" : "Upload official tax notice"} →</PrimaryButton>
@@ -308,7 +319,7 @@ export default function Upload() {
       </section>;
     })()}
     {error && <p className="upload-error" role="alert">{error}</p>}
-    <div className="notice-boundary"><p className="app-section-label">[ PROCESSING BOUNDARY ]</p><p className="app-body">{locale === "hi" ? "अपलोड की गई फ़ाइल, निकाला गया टेक्स्ट और पुष्टि की गई जानकारी अलग-अलग अवस्थाएं हैं। OCR से निकला टेक्स्ट भी आपकी पुष्टि से पहले विश्वसनीय नहीं माना जाता। Tax Mitra कुछ भी जमा नहीं करता।" : "Uploaded, extracted, and confirmed are separate states. OCR text is also untrusted until you confirm it against the original PDF. Tax Mitra does not submit anything."}</p></div>
+    <div className="notice-boundary"><p className="app-section-label">[ PROCESSING BOUNDARY ]</p><p className="app-body">{locale === "hi" ? "अपलोड की गई फ़ाइल, निकाला गया टेक्स्ट और पुष्टि की गई जानकारी अलग-अलग अवस्थाएं हैं। स्कैन PDF से निकला टेक्स्ट भी आपकी पुष्टि से पहले विश्वसनीय नहीं माना जाता। Tax Mitra कुछ भी जमा नहीं करता।" : "Uploaded, extracted, and confirmed are separate states. Scanned PDF text is also untrusted until you confirm it against the original PDF. Tax Mitra does not submit anything."}</p></div>
     </div>
   </WorkflowLayout>;
 }

@@ -52,7 +52,7 @@ def classify_notice(notice: dict) -> NoticeCategory:
     if notice.get("section") == "143(1)" and not notice.get("official_text"):
         return NoticeCategory.INCOME_MISMATCH_143_1A
     result = classify_extracted_notice(notice)
-    if result.category in {"reassessment_148", "demand_adjustment_245", "unknown_income_tax_communication"}:
+    if result.category in {"reassessment_148", "unknown_income_tax_communication"}:
         return NoticeCategory.UNSUPPORTED
     try:
         return NoticeCategory(result.category)

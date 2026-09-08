@@ -31,7 +31,7 @@
   },
   {
     "id": "N-2026-003",
-    "citizen_id": "C-142-DEMO",
+    "citizen_id": "C-005",
     "section": "142(1)",
     "issue_code": "SCRUTINY_INFORMATION_REQUEST",
     "issue_date": "2026-08-21",
@@ -39,7 +39,7 @@
     "assessment_year": "2024-25",
     "amount_in_question": 0,
     "income_source": {
-      "en": "scrutiny information request for a fictional proprietorship business",
+      "en": "scrutiny information request for fictional proprietorship business",
       "hi": "काल्पनिक प्रोप्राइटरशिप व्यवसाय के लिए स्क्रूटनी जानकारी अनुरोध"
     },
     "official_reference": "DIN-DEMO-2026-000003 (fictional)",
@@ -122,5 +122,388 @@
         }
       ]
     }
+  },
+  {
+    "id": "N-2026-004",
+    "citizen_id": "C-002",
+    "section": "139(9)",
+    "issue_code": "DEFECTIVE_RETURN",
+    "issue_date": "2026-07-15",
+    "response_due_date": "2026-08-14",
+    "assessment_year": "2024-25",
+    "amount_in_question": 0,
+    "income_source": {
+      "en": "defective return notice for fictional small business (fictional)",
+      "hi": "काल्पनिक छोटे व्यवसाय के लिए दोषपूर्ण रिटर्न नोटिस (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000004 (fictional)",
+    "official_text": "Office of the Centralized Processing Center - DEMO\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000004 (fictional)   |   Date of issue: 15/07/2026\n\nSubject: Intimation under section 139(9) of the Income-tax Act, 1961 - defective return for Assessment Year 2024-25\n\nSir/Madam,\n\n1. Your return of income for Assessment Year 2024-25 has been processed and found to be defective for the following reasons:\n   a. TDS credit claimed without corresponding TDS details\n   b. Bank account details not provided\n   c. Balance sheet not uploaded\n\n2. You are required to rectify the defects within 30 days from the date of this intimation by filing a revised return or updating the defective return through the e-Filing portal.\n\n3. If the defects are not rectified within the specified period, the return may be treated as invalid.\n\nAll names, numbers, and references in this document are fictional and synthetic.",
+    "synthetic_extraction": {
+      "source_type": "synthetic_pdf",
+      "requires_human_confirmation": true,
+      "requests": [
+        {
+          "id": "req_tds_credit_defect",
+          "classification_id": "req_tds_credit_defect",
+          "category": "tds_credit",
+          "page": 1,
+          "original_text": "TDS credit claimed without corresponding TDS details",
+          "response_section": "TDS credit defect",
+          "citations": ["kb-139-9-defects"]
+        },
+        {
+          "id": "req_bank_account_defect",
+          "classification_id": "req_bank_account_defect",
+          "category": "bank_account",
+          "page": 1,
+          "original_text": "Bank account details not provided",
+          "response_section": "Bank account defect",
+          "citations": ["kb-139-9-defects"]
+        },
+        {
+          "id": "req_balance_sheet_defect",
+          "classification_id": "req_balance_sheet_defect",
+          "category": "balance_sheet",
+          "page": 1,
+          "original_text": "Balance sheet not uploaded",
+          "response_section": "Balance sheet defect",
+          "citations": ["kb-139-9-defects"]
+        }
+      ]
+    }
+  },
+  {
+    "id": "N-2026-005",
+    "citizen_id": "C-003",
+    "section": "143(1)",
+    "issue_code": "PROCESSING_INTIMATION",
+    "issue_date": "2026-07-20",
+    "assessment_year": "2024-25",
+    "amount_in_question": 0,
+    "income_source": {
+      "en": "processing intimation for fictional freelancer (fictional)",
+      "hi": "काल्पनिक फ्रीलांसर के लिए प्रसंस्करण सूचना (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000005 (fictional)",
+    "official_text": "Office of the Centralized Processing Center - DEMO\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000005 (fictional)   |   Date of issue: 20/07/2026\n\nSubject: Intimation under section 143(1) of the Income-tax Act, 1961 for Assessment Year 2024-25\n\nSir/Madam,\n\n1. Your return of income for Assessment Year 2024-25 has been processed and the following computation has been arrived at:\n   Total income as per return: Rs. 8,50,000\n   Total income as per computation: Rs. 8,50,000\n   Tax payable: Rs. 52,500\n   TDS: Rs. 55,000\n   Refund due: Rs. 2,500\n\n2. The refund of Rs. 2,500 will be processed to your bank account provided no tax dues are outstanding.\n\n3. Please verify the computation and intimate any discrepancy within 30 days through the e-Filing portal.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  },
+  {
+    "id": "N-2026-006",
+    "citizen_id": "C-002",
+    "section": "133(6)",
+    "issue_code": "INFORMATION_REQUEST",
+    "issue_date": "2026-08-10",
+    "response_due_date": "2026-09-09",
+    "assessment_year": "2024-25",
+    "amount_in_question": 0,
+    "income_source": {
+      "en": "information request under section 133(6) for fictional business (fictional)",
+      "hi": "काल्पनिक व्यवसाय के लिए धारा 133(6) के तहत सूचना अनुरोध (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000006 (fictional)",
+    "official_text": "Office of the Assessing Officer (Faceless Assessment Unit - DEMO)\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000006 (fictional)   |   Date of issue: 10/08/2026\n\nSubject: Information request under section 133(6) of the Income-tax Act, 1961 for Assessment Year 2024-25\n\nSir/Madam,\n\n1. For the purpose of making assessment, you are required to furnish the following information on or before 09/09/2026 through the e-Filing portal:\n   a. Explanation for interest income of Rs. 1,25,000 reported by Demo Financial Services Ltd.\n   b. Supporting documents for the claimed business expenses of Rs. 3,50,000.\n   c. Details of all bank accounts used during the financial year.\n\n2. The information is required to verify the correctness of the income returned by you.\n\nAll names, numbers, and references in this document are fictional and synthetic.",
+    "synthetic_extraction": {
+      "source_type": "synthetic_pdf",
+      "requires_human_confirmation": true,
+      "requests": [
+        {
+          "id": "req_interest_income_explanation",
+          "classification_id": "req_interest_income_explanation",
+          "category": "income_explanation",
+          "page": 1,
+          "original_text": "Explanation for interest income of Rs. 1,25,000 reported by Demo Financial Services Ltd.",
+          "response_section": "Interest income explanation",
+          "citations": ["kb-133-6-information"]
+        },
+        {
+          "id": "req_business_expenses_documents",
+          "classification_id": "req_business_expenses_documents",
+          "category": "expense_documentation",
+          "page": 1,
+          "original_text": "Supporting documents for the claimed business expenses of Rs. 3,50,000.",
+          "response_section": "Business expenses documentation",
+          "citations": ["kb-133-6-information"]
+        },
+        {
+          "id": "req_bank_accounts_details",
+          "classification_id": "req_bank_accounts_details",
+          "category": "bank_accounts",
+          "page": 1,
+          "original_text": "Details of all bank accounts used during the financial year.",
+          "response_section": "Bank accounts details",
+          "citations": ["kb-133-6-information"]
+        }
+      ]
+    }
+  },
+  {
+    "id": "N-2026-007",
+    "citizen_id": "C-004",
+    "section": "131",
+    "issue_code": "SUMMONS",
+    "issue_date": "2026-08-05",
+    "response_due_date": "2026-08-25",
+    "assessment_year": "2024-25",
+    "amount_in_question": 0,
+    "income_source": {
+      "en": "summons under section 131 for fictional investor (fictional)",
+      "hi": "काल्पनिक निवेशक के लिए धारा 131 के तहत समन (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000007 (fictional)",
+    "official_text": "Office of the Assessing Officer (Ward - DEMO)\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000007 (fictional)   |   Date of issue: 05/08/2026\n\nSubject: Summons under section 131 of the Income-tax Act, 1961\n\nSir/Madam,\n\n1. You are hereby required to appear before the undersigned on 25/08/2026 at 11:00 AM at the Office of the Assessing Officer, Ward DEMO, for the purpose of giving evidence and producing documents regarding your capital gains transactions for Assessment Year 2024-25.\n\n2. You are required to bring the following documents:\n   a. Contract notes for all share transactions\n   b. Bank statements showing sale proceeds\n   c. Details of purchase cost of shares sold\n\n3. Non-compliance may result in adverse inference being drawn.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  },
+  {
+    "id": "N-2026-008",
+    "citizen_id": "C-005",
+    "section": "154",
+    "issue_code": "RECTIFICATION",
+    "issue_date": "2026-07-25",
+    "response_due_date": "2026-08-24",
+    "assessment_year": "2024-25",
+    "amount_in_question": 0,
+    "income_source": {
+      "en": "rectification application opportunity for fictional business (fictional)",
+      "hi": "काल्पनिक व्यवसाय के लिए सुधार आवेदन का अवसर (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000008 (fictional)",
+    "official_text": "Office of the Centralized Processing Center - DEMO\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000008 (fictional)   |   Date of issue: 25/07/2026\n\nSubject: Rectification under section 154 of the Income-tax Act, 1961 for Assessment Year 2024-25\n\nSir/Madam,\n\n1. Your return for Assessment Year 2024-25 has been processed and the following error has been identified:\n   Deduction under section 80C was computed as Rs. 1,50,000 instead of the claimed Rs. 1,50,000 - however, the schedule indicates an error in tax computation.\n\n2. You may file a rectification application under section 154 within 30 days from the date of this intimation to correct the mistake apparent from record.\n\n3. The rectification application can be filed through the e-Filing portal under 'Services' → 'Rectification'.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  },
+  {
+    "id": "N-2026-009",
+    "citizen_id": "C-004",
+    "section": "154",
+    "issue_code": "TAX_CREDIT_MISMATCH",
+    "issue_date": "2026-07-28",
+    "response_due_date": "2026-08-27",
+    "assessment_year": "2024-25",
+    "amount_in_question": 25000,
+    "income_source": {
+      "en": "tax credit mismatch for fictional investor (fictional)",
+      "hi": "काल्पनिक निवेशक के लिए कर क्रेडिट बेमेल (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000009 (fictional)",
+    "official_text": "Office of the Centralized Processing Center - DEMO\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000009 (fictional)   |   Date of issue: 28/07/2026\n\nSubject: Tax credit mismatch for Assessment Year 2024-25\n\nSir/Madam,\n\n1. Your return for Assessment Year 2024-25 shows TDS credit of Rs. 45,000 as per Form 26AS, but the credit available is only Rs. 20,000.\n\n2. The mismatch of Rs. 25,000 has resulted in additional tax demand.\n\n3. You may file a rectification application under section 154 or contact the deductor for rectification of TDS statements.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  },
+  {
+    "id": "N-2026-010",
+    "citizen_id": "C-003",
+    "section": "245",
+    "issue_code": "DEMAND_ADJUSTMENT",
+    "issue_date": "2026-08-12",
+    "response_due_date": "2026-09-11",
+    "assessment_year": "2023-24",
+    "amount_in_question": 15000,
+    "income_source": {
+      "en": "demand adjustment against refund for fictional freelancer (fictional)",
+      "hi": "काल्पनिक फ्रीलांसर के लिए रिफंड के खिलाफ मांग समायोजन (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000010 (fictional)",
+    "official_text": "Office of the Centralized Processing Center - DEMO\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000010 (fictional)   |   Date of issue: 12/08/2026\n\nSubject: Adjustment of refund against outstanding demand under section 245 of the Income-tax Act, 1961\n\nSir/Madam,\n\n1. Your refund of Rs. 15,000 for Assessment Year 2024-25 has been adjusted against the outstanding demand of Rs. 15,000 for Assessment Year 2023-24 under section 245 of the Income-tax Act, 1961.\n\n2. The demand for Assessment Year 2023-24 arose from mismatch in reported income and tax computation.\n\n3. If you disagree with the outstanding demand, you may file an appeal or response through the e-Filing portal within 30 days.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  },
+  {
+    "id": "N-2026-011",
+    "citizen_id": "C-002",
+    "section": "245",
+    "issue_code": "OUTSTANDING_DEMAND",
+    "issue_date": "2026-08-15",
+    "response_due_date": "2026-09-14",
+    "assessment_year": "2023-24",
+    "amount_in_question": 35000,
+    "income_source": {
+      "en": "outstanding tax demand for fictional business (fictional)",
+      "hi": "काल्पनिक व्यवसाय के लिए बकाया कर मांग (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000011 (fictional)",
+    "official_text": "Office of the Centralized Processing Center - DEMO\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000011 (fictional)   |   Date of issue: 15/08/2026\n\nSubject: Outstanding tax demand for Assessment Year 2023-24\n\nSir/Madam,\n\n1. An outstanding tax demand of Rs. 35,000 exists against your PAN for Assessment Year 2023-24.\n\n2. The demand arose from the following reasons:\n   a. Disallowed business expenses: Rs. 25,000\n   b. Under-reported income: Rs. 10,000\n\n3. You are required to pay the demand or file a response within 30 days to avoid interest and penalty.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  },
+  {
+    "id": "N-2026-012",
+    "citizen_id": "C-001",
+    "section": "REFUND",
+    "issue_code": "REFUND_ISSUED",
+    "issue_date": "2026-07-30",
+    "assessment_year": "2024-25",
+    "amount_in_question": 0,
+    "income_source": {
+      "en": "refund issued for fictional salaried teacher (fictional)",
+      "hi": "काल्पनिक वेतनभोगी शिक्षक के लिए रिफंड जारी (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000012 (fictional)",
+    "official_text": "Office of the Centralized Processing Center - DEMO\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000012 (fictional)   |   Date of issue: 30/07/2026\n\nSubject: Refund communication for Assessment Year 2024-25\n\nSir/Madam,\n\n1. Your refund of Rs. 8,500 for Assessment Year 2024-25 has been processed and credited to your bank account.\n\n2. The refund details are as follows:\n   Refund amount: Rs. 8,500\n   Credit date: 28/07/2026\n   Bank account: HDFC Bank ••••1234\n\n3. If you have not received the refund, please check your bank account or contact the CPC.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  },
+  {
+    "id": "N-2026-013",
+    "citizen_id": "C-003",
+    "section": "CLARIFICATION",
+    "issue_code": "AO_CLARIFICATION",
+    "issue_date": "2026-08-18",
+    "response_due_date": "2026-09-17",
+    "assessment_year": "2024-25",
+    "amount_in_question": 0,
+    "income_source": {
+      "en": "clarification request from AO for fictional freelancer (fictional)",
+      "hi": "काल्पनिक फ्रीलांसर के लिए AO से स्पष्टीकरण अनुरोध (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000013 (fictional)",
+    "official_text": "Office of the Assessing Officer (Ward - DEMO)\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000013 (fictional)   |   Date of issue: 18/08/2026\n\nSubject: Clarification regarding professional income for Assessment Year 2024-25\n\nSir/Madam,\n\n1. During the processing of your return, it was observed that your professional income declared is Rs. 12,00,000 while the TDS deducted is Rs. 1,80,000.\n\n2. You are requested to clarify the following:\n   a. Whether the entire professional income was from freelancing or there were other sources\n   b. Details of major clients and projects\n   c. Any agreements or contracts that support the declared income\n\n3. Please provide the clarification through the e-Filing portal within 30 days.\n\nAll names, numbers, and references in this document are fictional and synthetic.",
+    "synthetic_extraction": {
+      "source_type": "synthetic_pdf",
+      "requires_human_confirmation": true,
+      "requests": [
+        {
+          "id": "req_income_source_clarification",
+          "classification_id": "req_income_source_clarification",
+          "category": "income_clarification",
+          "page": 1,
+          "original_text": "Whether the entire professional income was from freelancing or there were other sources",
+          "response_section": "Income source clarification",
+          "citations": ["kb-ao-clarification"]
+        },
+        {
+          "id": "req_client_details",
+          "classification_id": "req_client_details",
+          "category": "client_documentation",
+          "page": 1,
+          "original_text": "Details of major clients and projects",
+          "response_section": "Client details",
+          "citations": ["kb-ao-clarification"]
+        },
+        {
+          "id": "req_contracts_agreements",
+          "classification_id": "req_contracts_agreements",
+          "category": "contract_documentation",
+          "page": 1,
+          "original_text": "Any agreements or contracts that support the declared income",
+          "response_section": "Contracts and agreements",
+          "citations": ["kb-ao-clarification"]
+        }
+      ]
+    }
+  },
+  {
+    "id": "N-2026-014",
+    "citizen_id": "C-002",
+    "section": "AUTHORITY_REQUEST",
+    "issue_code": "AUTHORITY_INFORMATION",
+    "issue_date": "2026-08-22",
+    "response_due_date": "2026-09-21",
+    "assessment_year": "2024-25",
+    "amount_in_question": 0,
+    "income_source": {
+      "en": "authority information request for fictional business (fictional)",
+      "hi": "काल्पनिक व्यवसाय के लिए प्राधिकरण सूचना अनुरोध (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000014 (fictional)",
+    "official_text": "Office of the Assessing Officer (Ward - DEMO)\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000014 (fictional)   |   Date of issue: 22/08/2026\n\nSubject: Information request regarding business transactions for Assessment Year 2024-25\n\nSir/Madam,\n\n1. Information has been received that certain high-value transactions were recorded in your business accounts during Financial Year 2023-24.\n\n2. You are requested to provide:\n   a. Details of transactions exceeding Rs. 50,000 with related parties\n   b. Explanation for cash deposits during the year\n   c. Supporting documents for inter-entity transfers\n\n3. Please submit the information through the e-Filing portal within 30 days.\n\nAll names, numbers, and references in this document are fictional and synthetic.",
+    "synthetic_extraction": {
+      "source_type": "synthetic_pdf",
+      "requires_human_confirmation": true,
+      "requests": [
+        {
+          "id": "req_related_party_transactions",
+          "classification_id": "req_related_party_transactions",
+          "category": "related_party",
+          "page": 1,
+          "original_text": "Details of transactions exceeding Rs. 50,000 with related parties",
+          "response_section": "Related party transactions",
+          "citations": ["kb-authority-information"]
+        },
+        {
+          "id": "req_cash_deposits_explanation",
+          "classification_id": "req_cash_deposits_explanation",
+          "category": "cash_deposits",
+          "page": 1,
+          "original_text": "Explanation for cash deposits during the year",
+          "response_section": "Cash deposits explanation",
+          "citations": ["kb-authority-information"]
+        },
+        {
+          "id": "req_inter_entity_transfers",
+          "classification_id": "req_inter_entity_transfers",
+          "category": "inter_entity",
+          "page": 1,
+          "original_text": "Supporting documents for inter-entity transfers",
+          "response_section": "Inter-entity transfers",
+          "citations": ["kb-authority-information"]
+        }
+      ]
+    }
+  },
+  {
+    "id": "N-2026-015",
+    "citizen_id": "C-005",
+    "section": "148A",
+    "issue_code": "SHOW_CAUSE",
+    "issue_date": "2026-08-25",
+    "response_due_date": "2026-09-24",
+    "assessment_year": "2021-22",
+    "amount_in_question": 500000,
+    "income_source": {
+      "en": "show cause notice under section 148A for fictional business (fictional)",
+      "hi": "काल्पनिक व्यवसाय के लिए धारा 148A के तहत कारण बताओ नोटिस (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000015 (fictional)",
+    "official_text": "Office of the Assessing Officer (Ward - DEMO)\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000015 (fictional)   |   Date of issue: 25/08/2026\n\nSubject: Show cause notice under section 148A of the Income-tax Act, 1961\n\nSir/Madam,\n\n1. Before initiating reassessment proceedings under section 148, you are hereby called upon to show cause why the income of Rs. 5,00,000 should not be added to your total income for Assessment Year 2021-22.\n\n2. The proposed addition is based on information received regarding high-value deposits made during the financial year.\n\n3. You may submit your response within 30 days through the e-Filing portal along with supporting documents.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  },
+  {
+    "id": "N-2026-016",
+    "citizen_id": "C-004",
+    "section": "PENALTY",
+    "issue_code": "PENALTY_PROCEEDINGS",
+    "issue_date": "2026-08-28",
+    "response_due_date": "2026-09-27",
+    "assessment_year": "2023-24",
+    "amount_in_question": 10000,
+    "income_source": {
+      "en": "penalty proceedings for fictional investor (fictional)",
+      "hi": "काल्पनिक निवेशक के लिए दंड कार्यवाही (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000016 (fictional)",
+    "official_text": "Office of the Assessing Officer (Ward - DEMO)\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000016 (fictional)   |   Date of issue: 28/08/2026\n\nSubject: Show cause notice for penalty under section 270A of the Income-tax Act, 1961\n\nSir/Madam,\n\n1. A penalty of Rs. 10,000 is proposed to be imposed for under-reporting of income for Assessment Year 2023-24.\n\n2. The under-reporting pertains to capital gains of Rs. 1,00,000 which were not disclosed in the return.\n\n3. You may show cause against the proposed penalty within 30 days through the e-Filing portal.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  },
+  {
+    "id": "N-2026-017",
+    "citizen_id": "C-001",
+    "section": "AIS",
+    "issue_code": "COMPLIANCE",
+    "issue_date": "2026-08-01",
+    "assessment_year": "2024-25",
+    "amount_in_question": 0,
+    "income_source": {
+      "en": "AIS compliance communication for fictional taxpayer (fictional)",
+      "hi": "काल्पनिक करदाता के लिए AIS अनुपालन संचार (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000017 (fictional)",
+    "official_text": "Office of the Centralized Processing Center - DEMO\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000017 (fictional)   |   Date of issue: 01/08/2026\n\nSubject: Annual Information Statement (AIS) Compliance Communication\n\nSir/Madam,\n\n1. Your Annual Information Statement for Assessment Year 2024-25 shows the following high-value transactions:\n   a. Bank deposits: Rs. 5,00,000\n   b. Credit card payments: Rs. 2,00,000\n   c. Mutual fund transactions: Rs. 1,50,000\n\n2. Please verify these transactions and provide feedback through the compliance portal if any information is incorrect.\n\n3. This communication is for information and compliance verification purposes.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  },
+  {
+    "id": "N-2026-018",
+    "citizen_id": "C-003",
+    "section": "UNKNOWN",
+    "issue_code": "UNKNOWN_COMMUNICATION",
+    "issue_date": "2026-08-30",
+    "assessment_year": "2024-25",
+    "amount_in_question": 0,
+    "income_source": {
+      "en": "unknown income tax communication for fictional taxpayer (fictional)",
+      "hi": "काल्पनिक करदाता के लिए अज्ञात आयकर संचार (काल्पनिक)"
+    },
+    "official_reference": "DIN-DEMO-2026-000018 (fictional)",
+    "official_text": "Office of the Income Tax Department - DEMO\n\nDIN: DEMO-DIN-2026-000018 (fictional)   |   Date of issue: 30/08/2026\n\nSubject: General information communication\n\nSir/Madam,\n\n1. This is a general information communication from the Income Tax Department regarding administrative matters.\n\n2. This communication does not require any specific action from you and is for informational purposes only.\n\n3. No notice, demand, or proceeding is initiated against you through this communication.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+  },
+  {
+    "id": "N-2026-019",
+    "citizen_id": "C-004",
+    "section": "NON_TAX",
+    "issue_code": "NON_TAX_DOCUMENT",
+    "issue_date": "2026-08-31",
+    "assessment_year": "2024-25",
+    "amount_in_question": 0,
+    "income_source": {
+      "en": "non-tax document uploaded by mistake (fictional)",
+      "hi": "गलती से अपलोड किया गया गैर-कर दस्तावेज़ (काल्पनिक)"
+    },
+    "official_reference": "DOC-DEMO-2026-000019 (fictional)",
+    "official_text": "Product Catalog\n\nFictional Products LLC\n\nThis is a product catalog document containing product descriptions and pricing information. It is completely unrelated to income tax matters and contains no references to tax notices, demands, or proceedings.\n\nThis document was uploaded by mistake and should not be processed as a tax communication.\n\nAll names, numbers, and references in this document are fictional and synthetic."
   }
 ]

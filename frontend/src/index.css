@@ -544,6 +544,7 @@ button:disabled { cursor: wait; opacity: .55; }
 .contract-original summary { color: var(--tm-blue); cursor: pointer; font: 600 12px var(--font-sans); }
 .contract-original blockquote { max-height: 280px; overflow: auto; margin: 14px 0 0; padding: 16px; background: #f7f8fa; border-left: 2px solid var(--tm-blue); color: var(--tm-muted); font-size: 13px; line-height: 1.55; white-space: pre-wrap; }
 .contract-question-fields { display: grid; gap: 14px; margin-top: 24px; }
+.contract-question-help { margin: 0; padding: 10px 14px; background: #f0f5ff; border-left: 3px solid var(--tm-blue); border-radius: 4px; color: var(--tm-muted); font-size: 13px; line-height: 1.55; }
 .contract-question-fields > label { display: grid; gap: 8px; color: var(--tm-muted); font-size: 13px; }
 .contract-question-fields input[type="text"], .contract-question-fields input[type="number"], .contract-question-fields input[type="date"], .contract-question-fields textarea { width: 100%; border: 1px solid var(--tm-line); background: #fff; color: var(--tm-black); font: inherit; }
 .contract-question-fields input[type="radio"], .contract-question-fields input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--tm-blue); }

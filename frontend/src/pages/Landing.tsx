@@ -25,24 +25,24 @@ const heroSteps: FlowStepData[] = [
     badgeColor: "#0ea5e9",
     barTitle: { en: "01 Upload · Instant Read", hi: "01 अपलोड · तुरंत जांच" },
     headTitle: { en: "Income Tax Notice", hi: "आयकर नोटिस" },
-    headSubtitle: { en: "Section 142(1)", hi: "धारा 142(1)" },
+    headSubtitle: { en: "Identify Notice Type", hi: "नोटिस प्रकार पहचानें" },
     headMeta: { en: "Verified Notice", hi: "प्रमाणित नोटिस" },
     accentColor: "#0ea5e9",
     findingLabel: { en: "What We Found", hi: "क्या सामने आया" },
     findingValue: {
-      en: "Routine inquiry with 2 simple questions about your tax return",
-      hi: "आपके टैक्स रिटर्न के संबंध में 2 सीधे सवाल पूछे गए हैं",
+      en: "Notice type identified: supported workflow or safe stop boundary",
+      hi: "नोटिस प्रकार पहचाना गया: समर्थित कार्यप्रवाह या सुरक्षित सीमा",
     },
     checklist: {
       en: [
-        "Due date found: 15 days left to respond",
+        "Due date found if applicable",
         "Notice authenticity and tax year verified",
-        "2 specific questions highlighted clearly",
+        "Workflow capability determined",
       ],
       hi: [
-        "अंतिम तारीख: जवाब देने के लिए 15 दिन शेष",
+        "यदि लागू हो तो अंतिम तारीख पाई गई",
         "नोटिस की प्रामाणिकता व वर्ष सत्यापित",
-        "पूछे गए 2 मुख्य सवाल साफ-साफ अलग किए गए",
+        "कार्यप्रवाह क्षमता निर्धारित",
       ],
     },
     footerText: {
@@ -58,23 +58,23 @@ const heroSteps: FlowStepData[] = [
     barTitle: { en: "02 Understand · Plain Words", hi: "02 समझें · सीधी भाषा" },
     headTitle: { en: "Plain-Language Summary", hi: "सीधे शब्दों में समझें" },
     headSubtitle: { en: "Why You Received This", hi: "यह नोटिस क्यों आया?" },
-    headMeta: { en: "Due: Oct 15", hi: "अंतिम: 15 अक्टूबर" },
+    headMeta: { en: "Workflow Guidance", hi: "कार्यप्रवाह मार्गदर्शन" },
     accentColor: "var(--tm-blue)",
     findingLabel: { en: "In Simple Words", hi: "सरल शब्दों में" },
     findingValue: {
-      en: "The tax officer wants to verify your salary deductions and bank interest",
-      hi: "टैक्स अधिकारी आपकी सैलरी कटौती और बैंक ब्याज का मिलान करना चाहते हैं",
+      en: "Clear explanation of what the department is asking and your options",
+      hi: "विभाग क्या मांग रहा है और आपके विकल्प क्या हैं, इसका स्पष्ट स्पष्टीकरण",
     },
     checklist: {
       en: [
         "No confusing tax jargon or panic",
-        "Clear explanation of what the officer wants",
-        "Tells you whether it is routine or urgent",
+        "Clear explanation of supported next steps",
+        "Honest boundaries when professional help is needed",
       ],
       hi: [
         "कोई कानूनी उलझन या डराने वाली भाषा नहीं",
-        "अधिकारी क्या चाहते हैं, इसका सीधा स्पष्टीकरण",
-        "यह रूटीन जांच है या कुछ गंभीर, साफ बताया जाता है",
+        "समर्थित अगले कदमों का स्पष्ट स्पष्टीकरण",
+        "जब पेशेवर मदद चाहिए हो तो ईमानदार सीमाएं",
       ],
     },
     footerText: {
@@ -90,22 +90,22 @@ const heroSteps: FlowStepData[] = [
     barTitle: { en: "03 Prepare · Only What's Needed", hi: "03 तैयारी · केवल जरूरी कागज़" },
     headTitle: { en: "Document Checklist", hi: "कागज़ात चेकलिस्ट" },
     headSubtitle: { en: "Keep These Ready", hi: "बस ये तैयार रखें" },
-    headMeta: { en: "2 Documents", hi: "केवल 2 कागज़" },
+    headMeta: { en: "Evidence Required", hi: "प्रमाण आवश्यक" },
     accentColor: "#f59e0b",
     findingLabel: { en: "Keep Ready", hi: "तैयार रखें" },
     findingValue: {
-      en: "You only need 2 papers: your Form 16 and your Bank Statement",
-      hi: "आपको केवल 2 दस्तावेज़ चाहिए: फॉर्म 16 और बैंक स्टेटमेंट",
+      en: "Workflow-specific document checklist based on your notice type",
+      hi: "आपके नोटिस प्रकार के आधार पर कार्यप्रवाह-विशिष्ट दस्तावेज़ चेकलिस्ट",
     },
     checklist: {
       en: [
         "No endless forms or repetitive questions",
-        "Shows exactly which pages prove your answers",
+        "Shows exactly which records support your response",
         "Safe 'Not sure' option if you don't know an answer",
       ],
       hi: [
         "कोई लंबे फॉर्म या बार-बार पूछे जाने वाले सवाल नहीं",
-        "साफ पता चलता है कि कौन सा पेज सबूत बनेगा",
+        "साफ पता चलता है कि कौन से रिकॉर्ड सबूत बनेंगे",
         "'पक्का पता नहीं' विकल्प भी सुरक्षित रूप से उपलब्ध",
       ],
     },
@@ -119,26 +119,26 @@ const heroSteps: FlowStepData[] = [
     stepNum: "04",
     badge: { en: "Fact-Checked", hi: "सत्यापित" },
     badgeColor: "#8b5cf6",
-    barTitle: { en: "04 Review · Ready Reply Letter", hi: "04 ड्राफ्ट · बना हुआ जवाब" },
-    headTitle: { en: "Your Reply Letter", hi: "आपका जवाब पत्र" },
+    barTitle: { en: "04 Review · Ready Response", hi: "04 ड्राफ्ट · बना हुआ जवाब" },
+    headTitle: { en: "Your Response Draft", hi: "आपका जवाब पत्र" },
     headSubtitle: { en: "Fact-Checked & Ready", hi: "तथ्यों से सत्यापित" },
     headMeta: { en: "Ready to Edit", hi: "बदलने के लिए तैयार" },
     accentColor: "#8b5cf6",
     findingLabel: { en: "Ready Draft", hi: "तैयार जवाब" },
     findingValue: {
-      en: "A polite, factual response letter addressing each of the officer's questions",
-      hi: "अधिकारी के दोनों सवालों का विनम्र, सटीक और स्पष्ट जवाब",
+      en: "A workflow-specific response draft based on your answers and records",
+      hi: "आपके उत्तरों और रिकॉर्ड के आधार पर कार्यप्रवाह-विशिष्ट जवाब पत्र",
     },
     checklist: {
       en: [
-        "Every sentence is backed by your uploaded papers",
+        "Content is based on your uploaded records and answers",
         "Easy to read and fully editable",
-        "Nothing is finalized without your explicit click",
+        "Nothing is finalized without your explicit approval",
       ],
       hi: [
-        "हर वाक्य आपके दिए गए कागज़ात पर आधारित है",
+        "सामग्री आपके अपलोड किए गए रिकॉर्ड और उत्तरों पर आधारित है",
         "आसानी से पढ़ें और अपनी इच्छानुसार बदलें",
-        "आपकी मंजूरी के बिना कुछ भी आगे नहीं बढ़ता",
+        "आपकी स्पष्ट मंजूरी के बिना कुछ भी आगे नहीं बढ़ता",
       ],
     },
     footerText: {
@@ -153,24 +153,24 @@ const heroSteps: FlowStepData[] = [
     badgeColor: "#10b981",
     barTitle: { en: "05 Submit · Official Portal", hi: "05 सबमिट · सरकारी पोर्टल" },
     headTitle: { en: "Official Portal Upload", hi: "सरकारी पोर्टल पर जमा करें" },
-    headSubtitle: { en: "incometax.gov.in e-Proceedings", hi: "e-Proceedings अनुभाग" },
+    headSubtitle: { en: "Workflow-specific navigation", hi: "कार्यप्रवाह-विशिष्ट नेविगेशन" },
     headMeta: { en: "Final Step", hi: "अंतिम कदम" },
     accentColor: "#10b981",
     findingLabel: { en: "You Stay In Full Control", hi: "पूरा नियंत्रण आपके पास" },
     findingValue: {
-      en: "Download your clean reply PDF and submit it directly on the government portal",
-      hi: "साफ-सुथरी उत्तर PDF डाउनलोड करें और स्वयं आयकर पोर्टल पर जमा करें",
+      en: "Download your response and follow the correct portal navigation for your notice type",
+      hi: "अपना उत्तर डाउनलोड करें और अपने नोटिस प्रकार के लिए सही पोर्टल नेविगेशन का पालन करें",
     },
     checklist: {
       en: [
         "We never submit for you or ask for portal passwords",
         "Numbered PDF ready to attach with one click",
-        "Step-by-step guide shows exactly where to click on e-Proceedings",
+        "Step-by-step guide shows the correct portal section for your notice",
       ],
       hi: [
         "हम कभी आपके बदले सबमिट नहीं करते, न पासवर्ड मांगते हैं",
         "नंबर लगे साफ PDF अटैचमेंट तैयार",
-        "पोर्टल पर कहां क्लिक करना है, इसका स्पष्ट सचित्र तरीका",
+        "आपके नोटिस के लिए सही पोर्टल अनुभाग दिखाता स्पष्ट सचित्र तरीका",
       ],
     },
     footerText: {
@@ -183,9 +183,9 @@ const heroSteps: FlowStepData[] = [
 
 const promises = [
   ["01", "PLAIN LANGUAGE", "Simple explanations without legal jargon."],
-  ["02", "GUIDED STEPS", "A focused path from notice to next action."],
+  ["02", "MULTI-WORKFLOW SUPPORT", "Guided paths for 142(1), 133(6), 245, 154, and more."],
   ["03", "DOCUMENT HELP", "Prepare only the documents your notice needs."],
-  ["04", "HUMAN CONTROL", "You approve every important action."],
+  ["04", "HUMAN CONTROL", "You approve every important action. Safe stops when uncertain."],
 ];
 
 const steps = [
@@ -206,11 +206,11 @@ const comparison = {
     "No official-source citations by default",
   ],
   taxMitra: [
-    "Notice-specific guided workflow",
+    "Multi-workflow guided support for 142(1), 133(6), 245, 154, and more",
     "Verified knowledge base & CBDT citations",
     "Deterministic rules & dynamic questions",
     "Evidence checklist & response drafting",
-    "Refuses when uncertain · Human approval gate",
+    "Refuses when uncertain · Human approval gate · Safe stops",
   ],
 };
 
@@ -445,9 +445,9 @@ export default function Landing() {
 
             {curStep.visualKind === "evidence" && (
               <div className="tm-evidence-chips" aria-label="Evidence mapping preview">
-                <span className="tm-evidence-chip is-mapped">✓ {locale === "hi" ? "फॉर्म 16 (वेतन)" : "Form 16 (Salary)"}</span>
-                <span className="tm-evidence-chip is-mapped">✓ {locale === "hi" ? "बैंक खाता विवरण" : "Bank Statement"}</span>
-                <span className="tm-evidence-chip is-needed">? {locale === "hi" ? "अन्य रसीद (वैकल्पिक)" : "Other Receipt (Optional)"}</span>
+                <span className="tm-evidence-chip is-mapped">✓ {locale === "hi" ? "आवश्यक दस्तावेज़" : "Required documents"}</span>
+                <span className="tm-evidence-chip is-mapped">✓ {locale === "hi" ? "आपके रिकॉर्ड" : "Your records"}</span>
+                <span className="tm-evidence-chip is-needed">? {locale === "hi" ? "अतिरिक्त वैकल्पिक" : "Optional (if applicable)"}</span>
               </div>
             )}
 
@@ -455,16 +455,16 @@ export default function Landing() {
               <div className="tm-citation-highlight" aria-label="Grounded draft response preview">
                 <span>
                   {locale === "hi"
-                    ? "नोटिस के अनुसार ₹42,000 की ब्याज आय "
-                    : "Per your notice, interest income of ₹42,000 "}
+                    ? "आपके उत्तरों और रिकॉर्ड के आधार पर "
+                    : "Based on your answers and records "}
                 </span>
                 <span className="tm-citation-badge">
-                  {locale === "hi" ? "[बैंक रिकॉर्ड से सत्यापित ✓]" : "[SBI Bank Verified ✓]"}
+                  {locale === "hi" ? "[आधिकारिक स्रोत से सत्यापित ✓]" : "[Official sources verified ✓]"}
                 </span>
                 <span>
                   {locale === "hi"
-                    ? "खाता विवरण से पूरी तरह मेल खाती है।"
-                    : "matches your bank statement."}
+                    ? "आपकी स्थिति को सटीक रूप से प्रस्तुत किया गया है"
+                    : "Your position is accurately represented."}
                 </span>
               </div>
             )}
@@ -472,7 +472,7 @@ export default function Landing() {
             {curStep.visualKind === "portal" && (
               <div className="tm-portal-handoff-banner" aria-label="Portal package preview">
                 <span>📦 {locale === "hi" ? "आपका_टैक्स_जवाब.pdf (तैयार)" : "Your_Tax_Reply.pdf (Ready)"}</span>
-                <span className="tm-portal-tag">incometax.gov.in</span>
+                <span className="tm-portal-tag">{locale === "hi" ? "कार्यप्रवाह-विशिष्ट पोर्टल नेविगेशन" : "Workflow-specific portal navigation"}</span>
               </div>
             )}
 
@@ -510,8 +510,8 @@ export default function Landing() {
           </div>
           <p className="tm-intro-lede">
             {locale === "hi"
-              ? "Tax Mitra विभाग की भाषा को समझने योग्य बनाता है, ज़रूरी रिकॉर्ड पहचानता है और आपकी समीक्षा के लिए एक सीमित, सुरक्षित रास्ता तैयार करता है।"
-              : "Tax Mitra translates departmental language, identifies the records that matter, and gives you a bounded path to review before you act."}
+              ? "Tax Mitra विभाग की भाषा को समझने योग्य बनाता है, ज़रूरी रिकॉर्ड पहचानता है और आपकी समीक्षा के लिए एक सीमित, सुरक्षित रास्ता तैयार करता है। कई नोटिस प्रकारों के लिए कार्यप्रवाह-विशिष्ट मार्गदर्शन प्रदान करता है।"
+              : "Tax Mitra translates departmental language, identifies the records that matter, and gives you a bounded path to review before you act. Supports multiple notice types with workflow-specific guidance."}
           </p>
           <div className="tm-promises" aria-label={locale === "hi" ? "मुख्य विशेषताएँ" : "Core features"}>
             {promises.map(([number]) => (

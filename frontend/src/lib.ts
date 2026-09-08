@@ -95,6 +95,7 @@ export interface UniversalWorkflowContract {
   safeStopReason?: string;
   nextSteps: string[];
   officialPortalUrl: string;
+  portalNavigationPath?: Record<string, string>;
 }
 
 export interface BackendWorkflowContract {
@@ -230,10 +231,10 @@ export class ApiError extends Error {
       } else if ("message" in detail) {
         message = "We could not complete that step safely. Please try again.";
       } else {
-        message = `${url} -> ${status}`;
+        message = "We could not complete that step safely. Please try again.";
       }
     } else {
-      message = `${url} -> ${status}`;
+      message = "We could not complete that step safely. Please try again.";
     }
     super(message);
     this.name = "ApiError";

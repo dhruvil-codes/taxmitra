@@ -74,3 +74,14 @@ def test_not_sure_and_missing_amount_never_create_payment_or_response():
     assert unsure["status"] == "safe_stop"
     no_amount = handler.resolve({"section": "245", "official_text": "Outstanding demand under section 245."}, {"demand_record_confirmed": "yes", "demand_status": "correct_unpaid"})
     assert no_amount["status"] == "safe_stop"
+
+
+def test_245_demand_portal_navigation_path():
+    """Regression test: 245 demand should navigate to Pending Actions → Response to Outstanding Demand."""
+    handler = get_workflow_handler("demand_adjustment_245")
+    notice = fixture("demand_245_correct_unpaid.json")
+    result = handler.resolve(notice, {"demand_record_confirmed": "yes", "demand_status": "correct_unpaid"})
+    assert result["status"] == "supported"
+    assert "portal_navigation_path" in result
+    assert result["portal_navigation_path"]["en"] == "Pending Actions → Response to Outstanding Demand"
+    assert result["portal_navigation_path"]["hi"] == "Pending Actions → Response to Outstanding Demand"

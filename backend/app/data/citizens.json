@@ -9,5 +9,49 @@
       "en": "Salaried teacher, files his own return every year. All details are fictional.",
       "hi": "वेतनभोगी शिक्षक, हर वर्ष अपना रिटर्न स्वयं भरते हैं। सभी विवरण काल्पनिक हैं।"
     }
+  },
+  {
+    "id": "C-002",
+    "name": "Priya Patel",
+    "pan_masked": "EFGH••••I2J (fictional)",
+    "city": "Mumbai",
+    "preferred_locale": "en",
+    "profile_note": {
+      "en": "Small business owner with multiple income sources. All details are fictional.",
+      "hi": "छोटे व्यवसाय के मालिक जिनके पास कई आय स्रोत हैं। सभी विवरण काल्पनिक हैं।"
+    }
+  },
+  {
+    "id": "C-003",
+    "name": "Rajesh Kumar",
+    "pan_masked": "IJKL••••M3N (fictional)",
+    "city": "Delhi",
+    "preferred_locale": "en",
+    "profile_note": {
+      "en": "Freelance consultant with income from multiple clients. All details are fictional.",
+      "hi": "फ्रीलांस कंसल्टेंट जिनकी आय कई ग्राहकों से है। सभी विवरण काल्पनिक हैं।"
+    }
+  },
+  {
+    "id": "C-004",
+    "name": "Sneha Gupta",
+    "pan_masked": "MNOP••••Q4R (fictional)",
+    "city": "Bangalore",
+    "preferred_locale": "en",
+    "profile_note": {
+      "en": "Senior software engineer with investments and capital gains. All details are fictional.",
+      "hi": "वरिष्ठ सॉफ्टवेयर इंजीनियर जिनके पास निवेश और पूंजीगत लाभ हैं। सभी विवरण काल्पनिक हैं।"
+    }
+  },
+  {
+    "id": "C-005",
+    "name": "Vikram Singh",
+    "pan_masked": "QRST••••U5V (fictional)",
+    "city": "Chennai",
+    "preferred_locale": "en",
+    "profile_note": {
+      "en": "Proprietor of a manufacturing business. All details are fictional.",
+      "hi": "विनिर्माण व्यवसाय के मालिक। सभी विवरण काल्पनिक हैं।"
+    }
   }
 ]

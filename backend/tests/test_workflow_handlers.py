@@ -54,6 +54,19 @@ def test_1399_disagree_path_uses_only_taxpayer_remarks_and_not_sure_stops():
     assert unsure["status"] == "safe_stop"
 
 
+def test_1399_portal_navigation_path():
+    """Regression test: 139(9) defective return should navigate to e-Proceedings."""
+    notice = {"synthetic_extraction": {"requests": [
+        {"id": "defect-tds", "original_text": "TDS credit has been claimed but corresponding receipts were not offered for taxation.", "page_number": 1},
+    ]}}
+    handler = get_workflow_handler("defective_return_139_9")
+    result = handler.resolve(notice, {"defect_extraction_confirmed": "yes", "defect_position": "agree", "correction_route": "online_correction"})
+    assert result["status"] == "partial_support"
+    assert "portal_navigation_path" in result
+    assert result["portal_navigation_path"]["en"] == "e-Proceedings"
+    assert result["portal_navigation_path"]["hi"] == "e-Proceedings"
+
+
 def test_143_1a_resolve_valid_issue_date():
     handler = IncomeMismatch143Handler()
     notice = {
@@ -150,6 +163,27 @@ def test_143_1a_resolve_malformed_issue_date_preserves_extracted_date():
     assert result_garbage["deadline"]["days_remaining"] is None
     assert result_garbage["deadline"]["status"] == "action_required"
     assert "not-a-valid-date" in result_garbage["draft"]
+
+
+def test_143_1a_portal_navigation_path():
+    """Regression test: 143(1)(a) income mismatch should navigate to e-Proceedings."""
+    handler = IncomeMismatch143Handler()
+    notice = {
+        "id": "notice-portal-test",
+        "section": "143(1)(a)",
+        "issue_date": "2026-08-13",
+        "citizen_id": "c1",
+        "official_reference": "DIN-143-PORTAL",
+        "assessment_year": "2025-26",
+        "amount_in_question": 45000,
+        "income_source": "interest",
+    }
+    answers = {"q1_received": "yes", "q2_in_return": "yes", "q3_documents": "yes"}
+    result = handler.resolve(notice, answers)
+    assert result["supported"] is True
+    assert "portal_navigation_path" in result
+    assert result["portal_navigation_path"]["en"] == "e-Proceedings"
+    assert result["portal_navigation_path"]["hi"] == "e-Proceedings"
 
 
 def test_143_1a_real_upload_resolve_via_router_with_null_and_malformed_issue_date():

@@ -17,7 +17,7 @@ from app.rules.notice_types import (
         ("142(1)", NoticeCategory.SCRUTINY_142_1),
         ("139(9)", NoticeCategory.DEFECTIVE_RETURN_139_9),
         ("148", NoticeCategory.UNSUPPORTED),
-        ("245", NoticeCategory.UNSUPPORTED),
+        ("245", NoticeCategory.DEMAND_ADJUSTMENT_245),
         ("", NoticeCategory.UNSUPPORTED),
         (None, NoticeCategory.UNSUPPORTED),
     ],

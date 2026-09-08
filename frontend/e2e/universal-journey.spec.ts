@@ -26,7 +26,7 @@ function contractFor(s: Scenario) {
   };
 }
 
-async function json(route: Route, payload: unknown) { await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) }); }
+const json = async (route: Route, payload: unknown) => await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) });
 
 async function mockScenario(page: Page, s: Scenario, options: { upload?: boolean } = {}) {
   const contract = contractFor(s);
@@ -74,7 +74,7 @@ test.describe("universal Tax Mitra browser journey", () => {
     await page.getByRole("button", { name: /Back to overview/i }).click();
     await expect(page.getByRole("heading", { name: /What the Department wants/i })).toBeVisible();
     const visibleText = await page.locator("body").innerText();
-    expect(visibleText).not.toMatch(/REQUEST CONFIDENCE|DETERMINISTIC RULE|NOT_PROVIDED|classification_id|à¤/i);
+    expect(visibleText).not.toMatch(/REQUEST CONFIDENCE|DETERMINISTIC RULE|NOT_PROVIDED|classification_id|request_id|extraction_id|fingerprint|workflow_id|provider|lexical|ocr|à¤/i);
     await page.getByText("View original notice wording").first().click();
     await expect(page.getByText(/Page 1/).first()).toBeVisible();
     await page.getByRole("button", { name: /Continue/i }).click();
@@ -160,7 +160,7 @@ expect(visibleText).not.toContain("à¤");
 
   test("low-confidence OCR stops without opening a workflow", async ({ page }) => {
     await uploadRefusal(page, "low_extraction_confidence", "ocr");
-    await expect(page.getByRole("heading", { name: /could not be extracted with enough confidence/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /could not be extracted clearly enough/i })).toBeVisible();
     await expect(page.getByText(/PREPARED RESPONSE/i)).toHaveCount(0);
   });
 
@@ -168,5 +168,71 @@ expect(visibleText).not.toContain("à¤");
     await page.goto("/notices/N-2026-003/journey");
     await expect(page.getByRole("heading", { name: /142\(1\)/ })).toBeVisible();
     await expect(page.getByRole("heading", { name: /What the Department wants/i })).toBeVisible();
+  });
+
+  test("prevents internal metadata leakage in upload confirmation UI", async ({ page }) => {
+    await page.goto("/upload");
+    await page.route("**/api/workflows/extract", async (route) => {
+      json(route, {
+        supported: true,
+        status: "needs_confirmation",
+        extraction_id: "test-extraction-id",
+        fingerprint: "test-fingerprint-123",
+        metadata: { notice_reference: "TEST-001", section: "142(1)", assessment_year: "2025-26", response_deadline: "30 September 2026", issue_date: "01 September 2026" },
+        extraction: { status: "needs_confirmation", confidence: 0.96, warnings: ["AI classification is unavailable", "deterministic evidence routing was used", "classification_id: test-123", "workflow_id: test-workflow"], refusal_reason: null, method: "text", page_count: 1 },
+        classification: { workflow_id: "test-workflow", category: "section_142_1", section: "142(1)", confidence: 0.96, evidence: ["section reference"], capability: "SUPPORTED", grounding_status: "verified", reason: "Test classification", status: "supported", supported: true, frontend_entry: "journey" },
+        workflow: null,
+        pages: [{ page_number: 1, text: "Test notice content", source: "text" }],
+        document: { status: "extracted", page_count: 1, sha256: "test-sha256", pages: [{ page_number: 1, text: "Test notice content", source: "text" }] },
+        requests: [{
+          id: "req-1",
+          request_id: "request-internal-id",
+          classification_id: "classification-internal-id",
+          original_text: "Test request",
+          plain_language_explanation: { en: "Test explanation", hi: "परीक्षण व्याख्या" },
+          why_required: { en: "Why required", hi: "आवश्यक क्यों" },
+          required_evidence: [{ en: "Test evidence", hi: "परीक्षण प्रमाण" }],
+          response_section: "Test section",
+          citations: [],
+          confidence: 0.95,
+          warnings: ["provider: openai", "lexical matching used", "confidence: 0.95"],
+          page_number: 1,
+          source_location: "Page 1"
+        }]
+      });
+    });
+    await page.locator('input[type="file"]').setInputFiles({ name: "test.pdf", mimeType: "application/pdf", buffer: Buffer.from("test content") });
+    await page.getByRole("button", { name: /EXTRACT REQUESTS/i }).click();
+    await expect(page.getByText("EXTRACTION NEEDS CONFIRMATION")).toBeVisible();
+
+    const visibleText = await page.locator("body").innerText();
+    expect(visibleText).not.toMatch(/extraction_id|fingerprint|classification_id|request_id|workflow_id|test-extraction-id|test-fingerprint-123|request-internal-id|classification-internal-id/i);
+    expect(visibleText).not.toMatch(/confidence.*%|REQUEST CONFIDENCE/i);
+    expect(visibleText).not.toMatch(/deterministic|provider|lexical|OCR.*support/i);
+    expect(visibleText).not.toMatch(/grounding.*status|capability.*SAFE_STOP/i);
+    expect(visibleText).not.toMatch(/AI classification is unavailable|deterministic evidence routing was used/i);
+    expect(visibleText).not.toMatch(/provider: openai|lexical matching used/i);
+  });
+
+  test("prevents internal metadata leakage in refusal/safe-stop UI", async ({ page }) => {
+    await page.goto("/upload");
+    await page.route("**/api/workflows/extract", async (route) => {
+      json(route, {
+        supported: false,
+        status: "safe_stop",
+        metadata: { notice_reference: "REFUSAL-001", section: null, assessment_year: "2025-26", response_deadline: null, issue_date: null },
+        extraction: { status: "safe_stop", confidence: 0.18, warnings: ["workflow_id: unknown", "capability: SAFE_STOP", "provider: backend", "deterministic: false"], refusal_reason: "low_extraction_confidence", method: "ocr", page_count: 1 },
+        classification: { workflow_id: "unknown_income_tax_communication", category: "unknown", section: null, confidence: 0.18, evidence: ["insufficient extracted text"], capability: "SAFE_STOP", grounding_status: "below_floor", reason: "The communication cannot be classified safely.", status: "safe_stop", supported: false, frontend_entry: "unsupported" },
+        workflow: null,
+        pages: []
+      });
+    });
+    await page.locator('input[type="file"]').setInputFiles({ name: "refusal.pdf", mimeType: "application/pdf", buffer: Buffer.from("refusal content") });
+    await page.getByRole("button", { name: /EXTRACT REQUESTS/i }).click();
+    await expect(page.getByText(/SAFE STOP/i)).toBeVisible();
+
+    const visibleText = await page.locator("body").innerText();
+    expect(visibleText).not.toMatch(/workflow_id|capability.*SAFE_STOP|provider.*backend|deterministic.*false/i);
+    expect(visibleText).not.toMatch(/classification_id|extraction_id|fingerprint/i);
   });
 });

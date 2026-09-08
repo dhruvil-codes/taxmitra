@@ -173,7 +173,7 @@ class IncomeMismatch143Handler(WorkflowHandler):
             safe_notice["issue_date"] = ""
         citizen = get_citizen(notice.get("citizen_id")) or {}
         draft = build_draft(template, safe_notice, citizen, answers, due)
-        return {"supported": True, "path": {"path_id": path.path_id, "position": path.position, "headline": path.headline, "guidance": path.guidance}, "checklist": [{"id": item.id, "title": item.title, "why_needed": item.why_needed} for item in checklist_for(path.checklist_ids)], "deadline": {"due_date": due.isoformat() if due else None, "days_remaining": days_remaining(due), "status": deadline_status(due)}, "draft": draft}
+        return {"supported": True, "path": {"path_id": path.path_id, "position": path.position, "headline": path.headline, "guidance": path.guidance}, "checklist": [{"id": item.id, "title": item.title, "why_needed": item.why_needed} for item in checklist_for(path.checklist_ids)], "deadline": {"due_date": due.isoformat() if due else None, "days_remaining": days_remaining(due), "status": deadline_status(due)}, "draft": draft, "portal_navigation_path": {"en": "e-Proceedings", "hi": "e-Proceedings"}}
 
     def get_evidence(self, notice, statuses=None):
         from app.rules.checklists import checklist_for
@@ -231,7 +231,7 @@ class Rectification154Handler(WorkflowHandler):
         if issue not in {"reprocess_return", "tax_credit_mismatch", "return_data_correction"} or answers.get("mistake_apparent") != "yes" and facts.get("mistake_apparent") is not True:
             return {"supported": False, "status": "safe_stop", "handoff_allowed": False, "reason": "The rectification type or record-based mistake was not confirmed."}
         guidance = {"reprocess_return": "Use Reprocess the Return when true and correct return particulars were already furnished but CPC did not consider them.", "tax_credit_mismatch": "Use Tax Credit Mismatch Correction for TDS, TCS or tax/challan details shown in the return and Form 26AS.", "return_data_correction": "Use Return Data Correction only to correct existing return data; do not add a new income source or additional deduction."}[issue]
-        return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "path": {"path_id": issue, "headline": guidance, "official_source": self.official_source}, "action": guidance, "draft": f"Rectification action plan (review before use):\n{guidance}\n\nTax Mitra has not submitted a rectification request.", "checklist": self.get_evidence(notice), "handoff_allowed": False, "next_step": "Review the request type, existing records and all entries on the official e-Filing portal before submitting.", "facts": facts}
+        return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "path": {"path_id": issue, "headline": guidance, "official_source": self.official_source}, "action": guidance, "draft": f"Rectification action plan (review before use):\n{guidance}\n\nTax Mitra has not submitted a rectification request.", "checklist": self.get_evidence(notice), "handoff_allowed": False, "next_step": "Review the request type, existing records and all entries on the official e-Filing portal before submitting.", "facts": facts, "portal_navigation_path": {"en": "Services → Rectification", "hi": "Services → Rectification"}}
 
     def generate_response(self, notice, answers, **kwargs): return self.resolve(notice, answers, **kwargs)
     def review(self, notice, answers, **kwargs): return {"status": "approved" if kwargs.get("approved") else "blocked", "handoff_allowed": False, "message": "Review is required before using the official Rectification service."}
@@ -272,7 +272,7 @@ class TaxCreditMismatchHandler(Rectification154Handler):
         else:
             action = "Review the Tax Credit Mismatch Correction or applicable rectification route using only credit and challan details reflected in Form 26AS."
             path = "taxpayer_correction"
-        return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "path": {"path_id": path, "credit_type": credit_type, "headline": action, "official_source": self.official_source}, "action": action, "draft": f"Tax-credit action plan (review before use):\n{action}\n\nNo tax-credit value was created or changed by Tax Mitra.", "checklist": self.get_evidence(notice), "handoff_allowed": False, "next_step": "Review the official Tax Credit Mismatch service and submit only after verifying the displayed records.", "facts": facts}
+        return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "path": {"path_id": path, "credit_type": credit_type, "headline": action, "official_source": self.official_source}, "action": action, "draft": f"Tax-credit action plan (review before use):\n{action}\n\nNo tax-credit value was created or changed by Tax Mitra.", "checklist": self.get_evidence(notice), "handoff_allowed": False, "next_step": "Review the official Tax Credit Mismatch service and submit only after verifying the displayed records.", "facts": facts, "portal_navigation_path": {"en": "Services → Rectification", "hi": "Services → Rectification"}}
 
 
 class Demand245Handler(WorkflowHandler):
@@ -359,7 +359,7 @@ class Demand245Handler(WorkflowHandler):
                 action = "Prepare a full disagreement for taxpayer review using the selected reasons and details. No payment or legal conclusion has been generated."
         else:
             return {"supported": False, "status": "safe_stop", "handoff_allowed": False, "reason": "The demand status is not a supported response path."}
-        return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "demand_status": status, "action": action, "draft": f"Demand response action plan (review before use):\n{action}\n\nTax Mitra has not submitted a demand response or payment.", "checklist": self.get_evidence(notice), "next_step": "Review the response, evidence and any undisputed amount, then use Pending Actions > Response to Outstanding Demand on the official portal.", "handoff_allowed": False, "facts": facts}
+        return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "demand_status": status, "action": action, "draft": f"Demand response action plan (review before use):\n{action}\n\nTax Mitra has not submitted a demand response or payment.", "checklist": self.get_evidence(notice), "next_step": "Review the response, evidence and any undisputed amount, then use Pending Actions > Response to Outstanding Demand on the official portal.", "handoff_allowed": False, "facts": facts, "portal_navigation_path": {"en": "Pending Actions → Response to Outstanding Demand", "hi": "Pending Actions → Response to Outstanding Demand"}}
 
     def generate_response(self, notice, answers, **kwargs): return self.resolve(notice, answers, **kwargs)
     def review(self, notice, answers, **kwargs): return {"status": "approved" if kwargs.get("approved") else "blocked", "handoff_allowed": False, "message": "Review is required before payment or demand response on the official portal."}
@@ -428,7 +428,7 @@ class InformationRequest1336Handler(WorkflowHandler):
         draft_lines = ["133(6) information response plan (review before use):", action, "", "Requests:"]
         draft_lines.extend(f"{index}. {item['technical_term']} — {item['availability']} — {item['original_text']}" for index, item in enumerate(prepared, 1))
         draft_lines.append("\nTax Mitra has not submitted this response or uploaded any document.")
-        return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "requests": prepared, "response_plan": {"items": prepared, "partial_information_allowed": True}, "action": action, "draft": "\n".join(draft_lines), "checklist": self.get_evidence(notice), "deadline": notice.get("deadline") or notice.get("response_deadline"), "next_step": "Review every request and attachment, then use the official e-Proceedings or applicable Comply to Notice route. Tax Mitra will not submit.", "handoff_allowed": False}
+        return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "requests": prepared, "response_plan": {"items": prepared, "partial_information_allowed": True}, "action": action, "draft": "\n".join(draft_lines), "checklist": self.get_evidence(notice), "deadline": notice.get("deadline") or notice.get("response_deadline"), "next_step": "Review every request and attachment, then use the official e-Proceedings or applicable Comply to Notice route. Tax Mitra will not submit.", "handoff_allowed": False, "portal_navigation_path": {"en": "e-Proceedings", "hi": "e-Proceedings"}}
 
     def generate_response(self, notice, answers, **kwargs): return self.resolve(notice, answers, **kwargs)
     def review(self, notice, answers, **kwargs): return {"status": "approved" if kwargs.get("approved") else "blocked", "handoff_allowed": False, "message": "Review is required before submitting the 133(6) response on the official portal."}
@@ -451,6 +451,7 @@ class AuthorityInformationRequestHandler(InformationRequest1336Handler):
             if uncertain:
                 result["action"] += f" The following requests remain uncertain and must be resolved before submission: {', '.join(uncertain)}."
             result["next_step"] = "Review the authority, deadline, requests and attachments with a qualified professional where needed, then use the official e-Proceedings or applicable portal route. Tax Mitra will not submit."
+            result["portal_navigation_path"] = {"en": "e-Proceedings", "hi": "e-Proceedings"}
         return result
 
 
@@ -475,6 +476,7 @@ class ClarificationHandler(AuthorityInformationRequestHandler):
             result["draft"] = result["draft"].replace("Income Tax authority information response plan", "Clarification response plan", 1)
             result["draft"] = result["draft"].replace("Prepare a structured response to the Income Tax authority", result["action"], 1)
             result["next_step"] = "Review the clarification, supporting records and deadline, then use the official e-Proceedings route. Tax Mitra will not submit."
+            result["portal_navigation_path"] = {"en": "e-Proceedings", "hi": "e-Proceedings"}
         return result
 
 
@@ -615,6 +617,7 @@ class DefectiveReturn1399Handler(WorkflowHandler):
                 "checklist": self._checklist(notice),
                 "answers": answers,
                 "handoff_allowed": False,
+                "portal_navigation_path": {"en": "e-Proceedings", "hi": "e-Proceedings"},
             }
         if position == "disagree":
             reason = str(answers.get("disagreement_reason") or "").strip()
@@ -630,6 +633,7 @@ class DefectiveReturn1399Handler(WorkflowHandler):
                 "checklist": self._checklist(notice),
                 "answers": answers,
                 "handoff_allowed": False,
+                "portal_navigation_path": {"en": "e-Proceedings", "hi": "e-Proceedings"},
             }
         return {"supported": False, "status": "safe_stop", "handoff_allowed": False, "reason": "The taxpayer is not sure about the defect position; Tax Mitra will not choose Agree or Disagree.", "answers": answers}
 
@@ -786,7 +790,7 @@ class IncomeIntimation143Handler(WorkflowHandler):
         outcome = facts["outcome"]
         if outcome == "no_action":
             action = "No follow-up action was identified from the extracted intimation. Keep the intimation and filed-return records for your records."
-            return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "outcome": "no_action", "action": action, "draft": f"Action plan (review before use):\n{action}", "next_step": "No Tax Mitra response is prepared. Use the official portal only if the intimation itself identifies a later action.", "handoff_allowed": False, "facts": facts}
+            return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "outcome": "no_action", "action": action, "draft": f"Action plan (review before use):\n{action}", "next_step": "No Tax Mitra response is prepared. Use the official portal only if the intimation itself identifies a later action.", "handoff_allowed": False, "facts": facts, "portal_navigation_path": {"en": "e-Proceedings", "hi": "e-Proceedings"}}
         if outcome == "refund":
             received = answers.get("refund_received")
             if received == "yes":
@@ -795,19 +799,22 @@ class IncomeIntimation143Handler(WorkflowHandler):
                 action = "Review the official Refund Reissue service after confirming the refund failure and selecting a validated bank account."
             else:
                 return self._unknown("You are not sure whether the refund was received; verify the bank and portal record before taking action.")
-            return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "outcome": outcome, "action": action, "draft": f"Action plan (review before use):\n{action}\n\nTax Mitra has not raised a refund request.", "next_step": "Review the official e-Filing portal record; Tax Mitra has not raised a refund request.", "handoff_allowed": False, "facts": facts, "checklist": self.get_evidence(notice)}
+            return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "outcome": outcome, "action": action, "draft": f"Action plan (review before use):\n{action}\n\nTax Mitra has not raised a refund request.", "next_step": "Review the official e-Filing portal record; Tax Mitra has not raised a refund request.", "handoff_allowed": False, "facts": facts, "checklist": self.get_evidence(notice), "portal_navigation_path": {"en": "e-Proceedings", "hi": "e-Proceedings"}}
         selected = answers.get("intimation_action")
         if selected == "accept":
             action = "The taxpayer indicated that the processed result looks correct. No dispute or rectification response is prepared."
-            return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "outcome": outcome, "action": action, "draft": f"Action plan (review before use):\n{action}", "next_step": "Retain the intimation and follow any payment or refund instruction shown on the official portal.", "handoff_allowed": False, "facts": facts}
+            return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "outcome": outcome, "action": action, "draft": f"Action plan (review before use):\n{action}", "next_step": "Retain the intimation and follow any payment or refund instruction shown on the official portal.", "handoff_allowed": False, "facts": facts, "portal_navigation_path": {"en": "e-Proceedings", "hi": "e-Proceedings"}}
         if selected == "rectification":
-            return self._action_result(facts, "rectification", "Review a CPC rectification request for a mistake apparent from the record. Tax Mitra has not asserted that a mistake exists.", self.rectification_source, notice)
+            return self._action_result(facts, "rectification", "Review a CPC rectification request for a mistake apparent from the record. Tax Mitra has not asserted that a mistake exists.", self.rectification_source, notice, {"en": "Services → Rectification", "hi": "Services → Rectification"})
         if selected == "tax_credit":
-            return self._action_result(facts, "tax_credit_mismatch", "Review Tax Credit Mismatch Correction or rectification using the Department's tax-credit records. Tax Mitra has not changed or invented a credit.", self.mismatch_source, notice)
+            return self._action_result(facts, "tax_credit_mismatch", "Review Tax Credit Mismatch Correction or rectification using the Department's tax-credit records. Tax Mitra has not changed or invented a credit.", self.mismatch_source, notice, {"en": "Services → Rectification", "hi": "Services → Rectification"})
         return self._unknown("You are not sure which follow-up applies; Tax Mitra will not choose between payment, rectification and tax-credit correction.")
 
-    def _action_result(self, facts, action_id, action, source, notice):
-        return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "outcome": facts["outcome"], "path": {"path_id": action_id, "headline": action, "official_source": source}, "action": action, "draft": f"Action plan (review before use):\n{action}\n\nTax Mitra has not submitted anything to the Income Tax Department.", "next_step": "Review the official portal action and submit only after confirming the taxpayer's records.", "checklist": self.get_evidence(notice), "handoff_allowed": False, "facts": facts}
+    def _action_result(self, facts, action_id, action, source, notice, portal_navigation_path=None):
+        result = {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "outcome": facts["outcome"], "path": {"path_id": action_id, "headline": action, "official_source": source}, "action": action, "draft": f"Action plan (review before use):\n{action}\n\nTax Mitra has not submitted anything to the Income Tax Department.", "next_step": "Review the official portal action and submit only after confirming the taxpayer's records.", "checklist": self.get_evidence(notice), "handoff_allowed": False, "facts": facts}
+        if portal_navigation_path:
+            result["portal_navigation_path"] = portal_navigation_path
+        return result
 
     def generate_response(self, notice, answers, **kwargs):
         return self.resolve(notice, answers, **kwargs)
