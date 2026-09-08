@@ -11,13 +11,13 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements.txt file to the working directory
-COPY requirements.txt .
+COPY backend/requirements.txt .
 
 # Install the Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the backend application code to the working directory
-COPY . .
+COPY backend/ .
 
 # Expose the port FastAPI will run on
 EXPOSE $PORT
