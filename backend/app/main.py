@@ -126,6 +126,11 @@ def health():
 _FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 _INDEX = _FRONTEND_DIST / "index.html"
 
+# Fallback for Railway deployment where the directory structure is /app/backend
+if not _INDEX.exists():
+    _FRONTEND_DIST = Path(__file__).resolve().parents[1] / "frontend" / "dist"
+    _INDEX = _FRONTEND_DIST / "index.html"
+
 if _INDEX.exists():
     _assets = _FRONTEND_DIST / "assets"
     if _assets.exists():
