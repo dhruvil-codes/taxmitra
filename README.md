@@ -45,3 +45,8 @@ npm run build
 ```
 
 The repository currently contains 98 backend tests plus the frontend Vitest suite (3 tests). Fixtures cover native, scanned and mixed PDFs, page provenance, tables, long notices, nested requests, Hindi and English text, poor OCR, malformed, empty and password-protected files. Uploaded documents are processed for the current session only; document contents are not logged or persisted by the workflow.
+
+## Production Deployment
+- Backend: Railway (https://web-production-cfee8.up.railway.app)
+- Frontend: Vercel (https://taxmitra.bydhruvil.in)
+- Last deployment sync: 2026-09-08
