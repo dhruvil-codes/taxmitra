@@ -1,8 +1,5 @@
 [phases.setup]
 nixPkgs = ["tesseract", "tesseract-ocr-hin"]
 
-[phases.build]
-cmds = ["pip install -r backend/requirements.txt"]
-
 [start]
 cmd = "uvicorn backend.app.main:app --host 0.0.0.0 --port 8000"
