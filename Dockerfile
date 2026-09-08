@@ -10,11 +10,11 @@ RUN apt-get update && apt-get install -y \
     tesseract-ocr-hin \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the entire repository to working directory
-COPY . .
+# Copy backend directory to working directory
+COPY backend /app/backend
 
 # Install the Python dependencies
-RUN pip install --no-cache-dir -r backend/requirements.txt
+RUN pip install --no-cache-dir -r /app/backend/requirements.txt
 
 # Expose the port FastAPI will run on
 EXPOSE $PORT
