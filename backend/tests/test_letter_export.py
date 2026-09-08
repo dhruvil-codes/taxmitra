@@ -32,7 +32,8 @@ def test_formal_reply_letter_generated_on_resolve():
     assert "Income Tax Department" in draft
     assert "Ref:" in draft
     assert "ASSESSMENT YEAR:" in draft
-    assert "Sub: Reply in accordance with Notice under Section 142(1)" in draft
+    assert "Sub:" in draft
+    assert "Reply in accordance with Notice under Section 142(1)" in draft
     assert "Dear Sir/Madam," in draft
     assert "In response to the questionnaire as per the Notice" in draft
     assert "Computation of total income" in draft

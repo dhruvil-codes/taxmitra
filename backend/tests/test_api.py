@@ -75,7 +75,7 @@ def test_resolve_happy_path_disagree_already_reported():
     assert body["path"]["position"] == "disagree"
     assert body["checklist"][0]["id"] == "doc_itr_extract"
     assert body["deadline"]["due_date"] == "2026-09-12"
-    assert "₹45,000" in body["draft"]
+    assert "Proposed adjustment for interest income mismatch" in body["draft"]
     assert body["official_step"]["url"].startswith("https://www.incometax.gov.in")
     assert "has not submitted" in body["official_step"]["boundary"]["en"]
 

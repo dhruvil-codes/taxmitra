@@ -210,6 +210,10 @@ def _section_candidate(text: str) -> WorkflowDefinition | None:
         return _BY_CATEGORY["ao_notice_clarification"]
     if ("assessingofficer" in normalized or "incometaxauthority" in normalized) and any(term in normalized for term in ("informationrequest", "furnishinformation", "provideinformation", "documentsrequested")):
         return _BY_CATEGORY["authority_information_request"]
+    if "penalty" in normalized or "270a" in normalized or "271" in normalized:
+        return _BY_CATEGORY["penalty_proceedings"]
+    if "refund" in normalized and not any(term in normalized for term in ("143(1)", "intimation", "demand")):
+        return _BY_CATEGORY["refund_communication"]
     return None
 
 
@@ -222,8 +226,8 @@ def classify_extracted_notice(notice: dict[str, Any], grounding: Any = None) -> 
         is_tax = True
     grounding_status = _grounding_status(grounding)
 
-    has_workflow_signals = any(any(signal in content for signal in w.classification_signals) for w in _WORKFLOWS if w.classification_signals)
-    if not is_tax and not notice.get("section") and candidate is None and not has_workflow_signals:
+    is_explicit_non_tax = str(notice.get("section") or "").strip().upper() == "NON_TAX" or "non-tax" in raw_text.lower() or "not a tax" in raw_text.lower()
+    if is_explicit_non_tax or (not is_tax and not notice.get("section") and candidate is None):
         return ClassificationResult(
             "not_income_tax_document", "not_income_tax_document", 0.0,
             grounding_status, False, "safe_stop",

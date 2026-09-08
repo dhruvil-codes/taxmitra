@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+from typing import Any
 
 from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel
@@ -36,7 +37,7 @@ router = APIRouter(prefix="/api/scrutiny", tags=["scrutiny"])
 
 class ScrutinyResolveRequest(BaseModel):
     notice_id: str
-    answers: dict[str, str]
+    answers: dict[str, Any]
     extraction_confirmed: bool = True
     document_statuses: dict[str, str] = {}
 
@@ -46,7 +47,7 @@ class EvidenceStatusUpdate(BaseModel):
 
 
 class ScrutinyReviewRequest(BaseModel):
-    answers: dict[str, str]
+    answers: dict[str, Any]
     document_statuses: dict[str, str] = {}
     draft: str
     approved: bool = False

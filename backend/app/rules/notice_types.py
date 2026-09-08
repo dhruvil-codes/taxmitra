@@ -23,6 +23,9 @@ class NoticeCategory(str, Enum):
     REASSESSMENT_148 = "reassessment_148"
     REASSESSMENT_148A = "reassessment_148a"
     PENALTY_PROCEEDINGS = "penalty_proceedings"
+    AUTHORITY_131 = "authority_131"
+    COMPLIANCE_AIS = "compliance_ais"
+    AUTHORITY_INFORMATION_REQUEST = "authority_information_request"
     UNKNOWN_INCOME_TAX_COMMUNICATION = "unknown_income_tax_communication"
     UNSUPPORTED = "unsupported"
 

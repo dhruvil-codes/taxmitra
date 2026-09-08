@@ -12,7 +12,22 @@
       "hi": "Demo Bharat Bank (काल्पनिक) द्वारा रिपोर्ट की गई ब्याज आय"
     },
     "official_reference": "DIN-DEMO-2026-000001 (fictional)",
-    "official_text": "Office of the Assessing Officer (Centralized Processing Centre - DEMO)\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000001 (fictional)   |   Date of issue: 13/08/2026\n\nSubject: Intimation under section 143(1)(a) of the Income-tax Act, 1961 - adjustment on account of information mismatch for Assessment Year 2025-26\n\nSir/Madam,\n\n1. On processing of your return of income for Assessment Year 2025-26, information received under section 285BA of the Income-tax Act, 1961 from Demo Bharat Bank (fictional) reflects aggregate receipts of Rs. 45,000 (interest income) which is not found to be consistent with the income returned by you.\n\n2. The said sum has accordingly been included in computing your total income, and tax, interest and fee, if any, have been computed accordingly as per the intimation enclosed.\n\n3. In case you do not agree with the adjustment, you may furnish an online response through the 'Pending Actions' tab on the e-Filing portal within 30 days of issue of this intimation, failing which the adjustment shall be treated as accepted and the demand, if any, shall become payable.\n\n4. This is a computer-generated demonstration document and does not require a signature.\n\nAll names, numbers, and references in this document are fictional and synthetic."
+    "official_text": "Office of the Assessing Officer (Centralized Processing Centre - DEMO)\nIncome Tax Department\n\nDIN: DEMO-DIN-2026-000001 (fictional)   |   Date of issue: 13/08/2026\n\nSubject: Intimation under section 143(1)(a) of the Income-tax Act, 1961 - adjustment on account of information mismatch for Assessment Year 2025-26\n\nSir/Madam,\n\n1. On processing of your return of income for Assessment Year 2025-26, information received under section 285BA of the Income-tax Act, 1961 from Demo Bharat Bank (fictional) reflects aggregate receipts of Rs. 45,000 (interest income) which is not found to be consistent with the income returned by you.\n\n2. The said sum has accordingly been included in computing your total income, and tax, interest and fee, if any, have been computed accordingly as per the intimation enclosed.\n\n3. In case you do not agree with the adjustment, you may furnish an online response through the 'Pending Actions' tab on the e-Filing portal within 30 days of issue of this intimation, failing which the adjustment shall be treated as accepted and the demand, if any, shall become payable.\n\n4. This is a computer-generated demonstration document and does not require a signature.\n\nAll names, numbers, and references in this document are fictional and synthetic.",
+    "synthetic_extraction": {
+      "source_type": "synthetic_pdf",
+      "requires_human_confirmation": true,
+      "requests": [
+        {
+          "id": "req_interest_mismatch_143_1a",
+          "classification_id": "req_interest_mismatch",
+          "category": "interest_income",
+          "page": 1,
+          "original_text": "Information received under section 285BA from Demo Bharat Bank reflects aggregate receipts of Rs. 45,000 (interest income) not consistent with returned income.",
+          "response_section": "Proposed adjustment for interest income mismatch",
+          "citations": ["kb-143-1a-adjustment"]
+        }
+      ]
+    }
   },
   {
     "id": "N-2026-002",

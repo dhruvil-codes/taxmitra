@@ -60,11 +60,22 @@ class WorkflowHandler(ABC):
             if original is None or getattr(original, "_grounded", False):
                 continue
             if method_name == "get_questions":
-                def get_questions(self, notice, locale="en", answers=None, _original=original):
-                    result = _original(self, notice, locale, answers)
+                def get_questions(self, notice, locale="en", answers=None, _original=original, **kw):
+                    result = _original(self, notice, locale=locale, answers=answers, **kw)
                     if isinstance(result, dict):
                         result = dict(result)
                         result.setdefault("grounding", grounding_payload(notice, self.category))
+                        from app.workflows.notice_requests import get_notice_extracted_requests, build_answer_the_notice_questions
+                        extracted = get_notice_extracted_requests(notice)
+                        if "requests" not in result or not result["requests"]:
+                            result["requests"] = extracted
+                        notice_qs = build_answer_the_notice_questions(extracted, locale=locale)
+                        sit_qs = [dict(q) if isinstance(q, dict) else q for q in (result.get("situation_questions") or result.get("questions") or [])]
+                        for q in sit_qs:
+                            if isinstance(q, dict):
+                                q.setdefault("section", "understand_situation")
+                        result["situation_questions"] = sit_qs
+                        result["notice_questions"] = notice_qs
                     return result
                 get_questions._grounded = True
                 setattr(cls, method_name, get_questions)
@@ -74,6 +85,30 @@ class WorkflowHandler(ABC):
                     if isinstance(result, dict):
                         result = dict(result)
                         result.setdefault("grounding", grounding_payload(notice, self.category))
+                        # Universal: append taxpayer "Answer the Notice" responses to any draft.
+                        # Runs for every handler — only adds content if notice_req_* answers exist.
+                        # Skips if the draft was already produced by format_formal_reply_letter
+                        # (which handles notice answers inline, e.g. 142(1) scrutiny).
+                        draft = result.get("draft")
+                        already_has_answers = (
+                            "Notice Request Responses" in draft
+                            or "Taxpayer details:" in draft
+                            or "Taxpayer position:" in draft
+                            or "(As per Annexure \u2014" in draft  # formal letter already embedded answers
+                        ) if isinstance(draft, str) else True
+                        if isinstance(draft, str) and not already_has_answers:
+                            try:
+                                from app.workflows.notice_requests import (
+                                    get_notice_extracted_requests,
+                                    append_notice_answers_to_draft,
+                                )
+                                locale = kwargs.get("locale", "en")
+                                extracted = get_notice_extracted_requests(notice)
+                                result["draft"] = append_notice_answers_to_draft(
+                                    draft, extracted, answers, locale=locale
+                                )
+                            except Exception:
+                                pass  # Never block resolve due to draft enrichment
                     return result
                 resolve._grounded = True
                 setattr(cls, method_name, resolve)
@@ -173,6 +208,19 @@ class IncomeMismatch143Handler(WorkflowHandler):
             safe_notice["issue_date"] = ""
         citizen = get_citizen(notice.get("citizen_id")) or {}
         draft = build_draft(template, safe_notice, citizen, answers, due)
+
+        # If the notice has extracted requests, produce the authentic formal letter instead
+        from app.workflows.notice_requests import get_notice_extracted_requests
+        extracted = get_notice_extracted_requests(notice)
+        if extracted:
+            from app.rules.letter_templates import format_formal_reply_letter
+            draft = format_formal_reply_letter(
+                notice=notice,
+                requests=extracted,
+                answers=answers,
+                due_date=due.isoformat() if due else None,
+            )
+
         return {"supported": True, "path": {"path_id": path.path_id, "position": path.position, "headline": path.headline, "guidance": path.guidance}, "checklist": [{"id": item.id, "title": item.title, "why_needed": item.why_needed} for item in checklist_for(path.checklist_ids)], "deadline": {"due_date": due.isoformat() if due else None, "days_remaining": days_remaining(due), "status": deadline_status(due)}, "draft": draft, "portal_navigation_path": {"en": "e-Proceedings", "hi": "e-Proceedings"}}
 
     def get_evidence(self, notice, statuses=None):
@@ -204,12 +252,82 @@ class Rectification154Handler(WorkflowHandler):
 
     def get_questions(self, notice, locale="en", answers=None):
         facts = self._facts(notice)
-        questions = [{"id": "rectification_record_confirmed", "question_type": "single_choice", "text": "Do the issue and records shown here match the communication?", "help": "Rectification must be based on a mistake apparent from the record, not only disagreement with the result.", "options": [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}, {"id": "unsure", "label": "Not sure"}], "required": True}]
+        questions = [{
+            "id": "rectification_record_confirmed", 
+            "question_type": "single_choice", 
+            "text": {
+                "en": "Do the issue and records shown here match the communication?",
+                "hi": "क्या यहां दिखाई गई समस्या और रिकॉर्ड संचार से मेल खाते हैं?"
+            },
+            "help": {
+                "en": "Rectification must be based on a mistake apparent from the record, not only disagreement with the result.",
+                "hi": "सुधार केवल रिकॉर्ड से स्पष्ट गलती के आधार पर होना चाहिए, न कि केवल परिणाम से असहमति के आधार पर।"
+            },
+            "options": [
+                {"id": "yes", "label": {"en": "Yes", "hi": "हाँ"}}, 
+                {"id": "no", "label": {"en": "No", "hi": "नहीं"}}, 
+                {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}}
+            ], 
+            "required": True
+        }]
         if facts["issue_type"] == "unknown":
-            questions.append({"id": "rectification_issue_type", "question_type": "single_choice", "text": "Which issue is clearly shown in the record?", "help": "This selects the official request type; do not choose one if the record does not support it.", "options": [{"id": "reprocess_return", "label": "CPC did not consider correct return data"}, {"id": "tax_credit_mismatch", "label": "TDS, TCS or tax credit details"}, {"id": "return_data_correction", "label": "Incorrect return data needs correction"}, {"id": "not_sure", "label": "Not sure"}], "conditions": [{"depends_on": "rectification_record_confirmed", "equals": "yes"}], "required": True})
+            questions.append({
+                "id": "rectification_issue_type", 
+                "question_type": "single_choice", 
+                "text": {
+                    "en": "Which issue is clearly shown in the record?",
+                    "hi": "रिकॉर्ड में कौन सी समस्या स्पष्ट रूप से दिखाई दे रही है?"
+                },
+                "help": {
+                    "en": "This selects the official request type; do not choose one if the record does not support it.",
+                    "hi": "यह आधिकारिक अनुरोध प्रकार चुनता है; यदि रिकॉर्ड इसका समर्थन नहीं करता तो इसे न चुनें।"
+                },
+                "options": [
+                    {"id": "reprocess_return", "label": {"en": "CPC did not consider correct return data", "hi": "CPC ने सही रिटर्न डेटा नहीं माना"}}, 
+                    {"id": "tax_credit_mismatch", "label": {"en": "TDS, TCS or tax credit details", "hi": "TDS, TCS या कर क्रेडिट विवरण"}}, 
+                    {"id": "return_data_correction", "label": {"en": "Incorrect return data needs correction", "hi": "गलत रिटर्न डेटा को सुधार की आवश्यकता है"}}, 
+                    {"id": "not_sure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}}
+                ], 
+                "conditions": [{"depends_on": "rectification_record_confirmed", "equals": "yes"}], 
+                "required": True
+            })
         if facts.get("mistake_apparent") is None:
-            questions.append({"id": "mistake_apparent", "question_type": "single_choice", "text": "Is there a specific mistake apparent from the existing record?", "help": "A rectification request is not appropriate merely because you disagree with the outcome or want to add a new claim.", "options": [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}, {"id": "unsure", "label": "Not sure"}], "conditions": [{"depends_on": "rectification_record_confirmed", "equals": "yes"}], "required": True})
-        return {"questions": questions, "facts": facts}
+            questions.append({
+                "id": "mistake_apparent", 
+                "question_type": "single_choice", 
+                "text": {
+                    "en": "Is there a specific mistake apparent from the existing record?",
+                    "hi": "क्या मौजूदा रिकॉर्ड से कोई विशिष्ट गलती स्पष्ट है?"
+                },
+                "help": {
+                    "en": "A rectification request is not appropriate merely because you disagree with the outcome or want to add a new claim.",
+                    "hi": "केवल इसलिए कि आप परिणाम से असहमत हैं या नया दावा जोड़ना चाहते हैं, सुधार अनुरोध उचित नहीं है।"
+                },
+                "options": [
+                    {"id": "yes", "label": {"en": "Yes", "hi": "हाँ"}}, 
+                    {"id": "no", "label": {"en": "No", "hi": "नहीं"}}, 
+                    {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}}
+                ], 
+                "conditions": [{"depends_on": "rectification_record_confirmed", "equals": "yes"}], 
+                "required": True
+            })
+        
+        # Localize the questions based on locale
+        localized_questions = []
+        for q in questions:
+            localized_q = {
+                "id": q["id"],
+                "question_type": q["question_type"],
+                "text": q["text"].get(locale, q["text"]["en"]),
+                "help": q["help"].get(locale, q["help"]["en"]),
+                "options": [{"id": opt["id"], "label": opt["label"].get(locale, opt["label"]["en"])} for opt in q["options"]],
+                "required": q.get("required", False)
+            }
+            if "conditions" in q:
+                localized_q["conditions"] = q["conditions"]
+            localized_questions.append(localized_q)
+        
+        return {"questions": localized_questions, "facts": facts}
 
     def get_evidence(self, notice, statuses=None):
         statuses = statuses or {}
@@ -252,11 +370,83 @@ class TaxCreditMismatchHandler(Rectification154Handler):
 
     def get_questions(self, notice, locale="en", answers=None):
         facts = self._facts(notice)
-        questions = [{"id": "credit_record_confirmed", "question_type": "single_choice", "text": "Do the mismatch details match your return and Form 26AS?", "help": "Tax Mitra will not invent or change a credit value.", "options": [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}, {"id": "unsure", "label": "Not sure"}], "required": True}]
+        questions = [{
+            "id": "credit_record_confirmed", 
+            "question_type": "single_choice", 
+            "text": {
+                "en": "Do the mismatch details match your return and Form 26AS?",
+                "hi": "क्या बेमेल विवरण आपके रिटर्न और फॉर्म 26AS से मेल खाते हैं?"
+            },
+            "help": {
+                "en": "Tax Mitra will not invent or change a credit value.",
+                "hi": "Tax Mitra कोई क्रेडिट मान नहीं बनाएगा या नहीं बदलेगा।"
+            },
+            "options": [
+                {"id": "yes", "label": {"en": "Yes", "hi": "हाँ"}}, 
+                {"id": "no", "label": {"en": "No", "hi": "नहीं"}}, 
+                {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}}
+            ], 
+            "required": True
+        }]
         if facts["credit_type"] == "unknown":
-            questions.append({"id": "credit_type", "question_type": "single_choice", "text": "Which type of credit is shown as mismatched?", "help": "This determines whether the portal checklist concerns TDS, TCS or a tax challan.", "options": [{"id": "tds", "label": "TDS"}, {"id": "tcs", "label": "TCS"}, {"id": "advance_tax", "label": "Advance tax"}, {"id": "self_assessment_tax", "label": "Self-assessment tax"}, {"id": "other_tax_credit", "label": "Other tax credit"}, {"id": "unsure", "label": "Not sure"}], "conditions": [{"depends_on": "credit_record_confirmed", "equals": "yes"}], "required": True})
-        questions.append({"id": "correction_owner", "question_type": "single_choice", "text": "Where does the correction appear to be needed?", "help": "For TDS/TCS reporting errors, the deductor/collector may need to file a correction statement. Incorrect taxpayer-entered challan or return data may need taxpayer-side correction.", "options": [{"id": "taxpayer", "label": "My return or challan details"}, {"id": "deductor", "label": "Employer, deductor or collector reporting"}, {"id": "unsure", "label": "Not sure"}], "conditions": [{"depends_on": "credit_record_confirmed", "equals": "yes"}], "required": True})
-        return {"questions": questions, "facts": facts}
+            questions.append({
+                "id": "credit_type", 
+                "question_type": "single_choice", 
+                "text": {
+                    "en": "Which type of credit is shown as mismatched?",
+                    "hi": "किस प्रकार का क्रेडिट बेमेल दिखाया गया है?"
+                },
+                "help": {
+                    "en": "This determines whether the portal checklist concerns TDS, TCS or a tax challan.",
+                    "hi": "यह तय करता है कि पोर्टल चेकलिस्ट TDS, TCS या कर चालान से संबंधित है।"
+                },
+                "options": [
+                    {"id": "tds", "label": {"en": "TDS", "hi": "TDS"}}, 
+                    {"id": "tcs", "label": {"en": "TCS", "hi": "TCS"}}, 
+                    {"id": "advance_tax", "label": {"en": "Advance tax", "hi": "अग्रिम कर"}}, 
+                    {"id": "self_assessment_tax", "label": {"en": "Self-assessment tax", "hi": "स्व-मूल्यांकन कर"}}, 
+                    {"id": "other_tax_credit", "label": {"en": "Other tax credit", "hi": "अन्य कर क्रेडिट"}}, 
+                    {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}}
+                ], 
+                "conditions": [{"depends_on": "credit_record_confirmed", "equals": "yes"}], 
+                "required": True
+            })
+        questions.append({
+            "id": "correction_owner", 
+            "question_type": "single_choice", 
+            "text": {
+                "en": "Where does the correction appear to be needed?",
+                "hi": "सुधार कहाँ आवश्यक प्रतीत होता है?"
+            },
+            "help": {
+                "en": "For TDS/TCS reporting errors, the deductor/collector may need to file a correction statement. Incorrect taxpayer-entered challan or return data may need taxpayer-side correction.",
+                "hi": "TDS/TCS रिपोर्टिंग त्रुटियों के लिए, कर्ता/संग्रहकर्ता को सुधार विवरण दाखिल करने की आवश्यकता हो सकती है। गलत करदाता-दर्ज चालान या रिटर्न डेटा को करदाता-पक्ष सुधार की आवश्यकता हो सकती है।"
+            },
+            "options": [
+                {"id": "taxpayer", "label": {"en": "My return or challan details", "hi": "मेरे रिटर्न या चालान विवरण"}}, 
+                {"id": "deductor", "label": {"en": "Employer, deductor or collector reporting", "hi": "नियोक्ता, कर्ता या संग्रहकर्ता रिपोर्टिंग"}}, 
+                {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}}
+            ], 
+            "conditions": [{"depends_on": "credit_record_confirmed", "equals": "yes"}], 
+            "required": True
+        })
+        
+        # Localize the questions based on locale
+        localized_questions = []
+        for q in questions:
+            localized_q = {
+                "id": q["id"],
+                "question_type": q["question_type"],
+                "text": q["text"].get(locale, q["text"]["en"]),
+                "help": q["help"].get(locale, q["help"]["en"]),
+                "options": [{"id": opt["id"], "label": opt["label"].get(locale, opt["label"]["en"])} for opt in q["options"]],
+                "required": q.get("required", False)
+            }
+            if "conditions" in q:
+                localized_q["conditions"] = q["conditions"]
+            localized_questions.append(localized_q)
+        
+        return {"questions": localized_questions, "facts": facts}
 
     def resolve(self, notice, answers, **kwargs):
         facts = self._facts(notice)
@@ -284,6 +474,8 @@ class Demand245Handler(WorkflowHandler):
     def _facts(self, notice):
         facts = notice.get("demand_facts") or (notice.get("synthetic_extraction") or {}).get("demand_facts") or {}
         amount = facts.get("demand_amount")
+        if amount is None:
+            amount = notice.get("amount_in_question") or notice.get("amount")
         try:
             amount = float(amount) if amount is not None else None
         except (TypeError, ValueError):
@@ -297,28 +489,148 @@ class Demand245Handler(WorkflowHandler):
         facts = self._facts(notice)
         questions = [{
             "id": "demand_record_confirmed", "question_type": "single_choice",
-            "text": "Do the demand amount and notice details match the official communication?",
-            "help": "We need to confirm the record before preparing a payment or disagreement path.",
-            "options": [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}, {"id": "unsure", "label": "Not sure"}], "required": True,
+            "text": {
+                "en": "Do the demand amount and notice details match the official communication?",
+                "hi": "क्या मांग राशि और सूचना विवरण आधिकारिक संचार से मेल खाते हैं?"
+            },
+            "help": {
+                "en": "We need to confirm the record before preparing a payment or disagreement path.",
+                "hi": "भुगतान या असहमति पथ तैयार करने से पहले हमें रिकॉर्ड की पुष्टि करने की आवश्यकता है।"
+            },
+            "options": [
+                {"id": "yes", "label": {"en": "Yes", "hi": "हाँ"}}, 
+                {"id": "no", "label": {"en": "No", "hi": "नहीं"}}, 
+                {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}}
+            ], 
+            "required": True,
         }, {
             "id": "demand_status", "question_type": "single_choice",
-            "text": "What is the current status of this demand?",
-            "help": "This determines whether the official next step is payment, challan evidence, or a disagreement response.",
+            "text": {
+                "en": "What is the current status of this demand?",
+                "hi": "इस मांग की वर्तमान स्थिति क्या है?"
+            },
+            "help": {
+                "en": "This determines whether the official next step is payment, challan evidence, or a disagreement response.",
+                "hi": "यह तय करता है कि आधिकारिक अगला कदम भुगतान, चालान सबूत या असहमति प्रतिक्रिया है।"
+            },
             "options": [
-                {"id": "correct_unpaid", "label": "Correct and unpaid"},
-                {"id": "correct_paid", "label": "Correct but already paid"},
-                {"id": "disputed_full", "label": "Disagree fully"},
-                {"id": "disputed_partial", "label": "Disagree partially"},
-                {"id": "unsure", "label": "Not sure"},
-            ], "conditions": [{"depends_on": "demand_record_confirmed", "equals": "yes"}], "required": True,
+                {"id": "correct_unpaid", "label": {"en": "Correct and unpaid", "hi": "सही और अभी तक अवैतनित"}},
+                {"id": "correct_paid", "label": {"en": "Correct but already paid", "hi": "सही लेकिन पहले से भुगतान किया गया"}},
+                {"id": "disputed_full", "label": {"en": "Disagree fully", "hi": "पूरी तरह से असहमत"}},
+                {"id": "disputed_partial", "label": {"en": "Disagree partially", "hi": "आंशिक रूप से असहमत"}},
+                {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}},
+            ], 
+            "conditions": [{"depends_on": "demand_record_confirmed", "equals": "yes"}], 
+            "required": True,
         }]
         if facts["source"] == "unknown":
-            questions.append({"id": "demand_source", "question_type": "single_choice", "text": "What appears to have caused this demand?", "help": "The source helps identify which records to review; do not guess when the order or processing record is unclear.", "options": [{"id": "processing", "label": "Previous return processing"}, {"id": "order", "label": "A previous assessment or other order"}, {"id": "other", "label": "Another department record"}, {"id": "unsure", "label": "Not sure"}], "conditions": [{"depends_on": "demand_record_confirmed", "equals": "yes"}], "required": True})
-        questions.append({"id": "payment_evidence", "question_type": "single_choice", "text": "Do you have the payment challan or official payment record?", "help": "This is needed only when payment is being claimed, not to decide whether the demand is correct.", "options": [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}, {"id": "unsure", "label": "Not sure"}], "conditions": [{"depends_on": "demand_status", "equals": "correct_paid"}], "required": True})
-        questions.append({"id": "dispute_reasons", "question_type": "multi_choice", "text": "Why do you disagree with the demand?", "help": "The official portal allows one or more reasons; choose only reasons supported by your records.", "options": [{"id": "already_paid", "label": "Demand already paid"}, {"id": "previous_processing_error", "label": "Previous processing/order error"}, {"id": "challan_credit_missing", "label": "Tax payment or challan not credited"}, {"id": "appeal_or_rectification_pending", "label": "Appeal or rectification is pending"}, {"id": "other", "label": "Something else"}], "conditions": [{"depends_on": "demand_status", "one_of": ["disputed_full", "disputed_partial"]}], "required": True})
-        questions.append({"id": "undisputed_amount", "question_type": "number", "text": "What amount of the demand do you agree is payable?", "help": "For partial disagreement, the official guidance requires the undisputed portion to be paid before submitting the response.", "options": [], "conditions": [{"depends_on": "demand_status", "equals": "disputed_partial"}], "required": True})
-        questions.append({"id": "dispute_details", "question_type": "text", "text": "Add the details supporting your disagreement.", "help": "Use the notice, payment records, prior order or other documents. Tax Mitra will not add legal conclusions.", "options": [], "conditions": [{"depends_on": "demand_status", "one_of": ["disputed_full", "disputed_partial"]}], "required": True})
-        return {"questions": questions, "facts": facts}
+            questions.append({
+                "id": "demand_source", 
+                "question_type": "single_choice", 
+                "text": {
+                    "en": "What appears to have caused this demand?",
+                    "hi": "ऐसा प्रतीत होता है कि इस मांग का क्या कारण है?"
+                },
+                "help": {
+                    "en": "The source helps identify which records to review; do not guess when the order or processing record is unclear.",
+                    "hi": "स्रोत समीक्षा के लिए कौन से रिकॉर्ड की पहचान करने में मदद करता है; जब आदेश या प्रोसेसिंग रिकॉर्ड अस्पष्ट हो तो अनुमान न लगाएं।"
+                },
+                "options": [
+                    {"id": "processing", "label": {"en": "Previous return processing", "hi": "पिछली रिटर्न प्रोसेसिंग"}}, 
+                    {"id": "order", "label": {"en": "A previous assessment or other order", "hi": "पिछला आकलन या अन्य आदेश"}}, 
+                    {"id": "other", "label": {"en": "Another department record", "hi": "अन्य विभागीय रिकॉर्ड"}}, 
+                    {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}}
+                ], 
+                "conditions": [{"depends_on": "demand_record_confirmed", "equals": "yes"}], 
+                "required": True
+            })
+        questions.append({
+            "id": "payment_evidence", 
+            "question_type": "single_choice", 
+            "text": {
+                "en": "Do you have the payment challan or official payment record?",
+                "hi": "क्या आपके पास भुगतान चालान या आधिकारिक भुगतान रिकॉर्ड है?"
+            },
+            "help": {
+                "en": "This is needed only when payment is being claimed, not to decide whether the demand is correct.",
+                "hi": "यह केवल तब आवश्यक है जब भुगतान का दावा किया जा रहा हो, यह तय करने के लिए नहीं कि मांग सही है या नहीं।"
+            },
+            "options": [
+                {"id": "yes", "label": {"en": "Yes", "hi": "हाँ"}}, 
+                {"id": "no", "label": {"en": "No", "hi": "नहीं"}}, 
+                {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}}
+            ], 
+            "conditions": [{"depends_on": "demand_status", "equals": "correct_paid"}], 
+            "required": True
+        })
+        questions.append({
+            "id": "dispute_reasons", 
+            "question_type": "multi_choice", 
+            "text": {
+                "en": "Why do you disagree with the demand?",
+                "hi": "आप मांग से क्यों असहमत हैं?"
+            },
+            "help": {
+                "en": "The official portal allows one or more reasons; choose only reasons supported by your records.",
+                "hi": "आधिकारिक पोर्टल एक या अधिक कारणों की अनुमति देता है; केवल अपने रिकॉर्ड द्वारा समर्थित कारण चुनें।"
+            },
+            "options": [
+                {"id": "already_paid", "label": {"en": "Demand already paid", "hi": "मांग पहले से भुगतान की गई"}}, 
+                {"id": "previous_processing_error", "label": {"en": "Previous processing/order error", "hi": "पिछली प्रोसेसिंग/आदेश त्रुटि"}}, 
+                {"id": "challan_credit_missing", "label": {"en": "Tax payment or challan not credited", "hi": "कर भुगतान या चालान क्रेडिट नहीं किया गया"}}, 
+                {"id": "appeal_or_rectification_pending", "label": {"en": "Appeal or rectification is pending", "hi": "अपील या सुधार लंबित है"}}, 
+                {"id": "other", "label": {"en": "Something else", "hi": "कुछ और"}}
+            ], 
+            "conditions": [{"depends_on": "demand_status", "one_of": ["disputed_full", "disputed_partial"]}], 
+            "required": True
+        })
+        questions.append({
+            "id": "undisputed_amount", 
+            "question_type": "number", 
+            "text": {
+                "en": "What amount of the demand do you agree is payable?",
+                "hi": "आप मांग की कितनी राशि देय स्वीकार करते हैं?"
+            },
+            "help": {
+                "en": "For partial disagreement, the official guidance requires the undisputed portion to be paid before submitting the response.",
+                "hi": "आंशिक असहमति के लिए, आधिकारिक मार्गदर्शन के अनुसार प्रतिक्रिया जमा करने से पहले विवादित नहीं वाली राशि का भुगतान करना आवश्यक है।"
+            },
+            "options": [], 
+            "conditions": [{"depends_on": "demand_status", "equals": "disputed_partial"}], 
+            "required": True
+        })
+        questions.append({
+            "id": "dispute_details", 
+            "question_type": "text", 
+            "text": {
+                "en": "Add the details supporting your disagreement.",
+                "hi": "अपनी असहमति का समर्थन करने वाला विवरण जोड़ें।"
+            },
+            "help": {
+                "en": "Use the notice, payment records, prior order or other documents. Tax Mitra will not add legal conclusions.",
+                "hi": "सूचना, भुगतान रिकॉर्ड, पिछला आदेश या अन्य दस्तावेज़ का उपयोग करें। Tax Mitra कोई कानूनी निष्कर्ष नहीं जोड़ेगा।"
+            },
+            "options": [], 
+            "conditions": [{"depends_on": "demand_status", "one_of": ["disputed_full", "disputed_partial"]}], 
+            "required": True
+        })
+        
+        # Localize the questions based on locale
+        localized_questions = []
+        for q in questions:
+            localized_q = {
+                "id": q["id"],
+                "question_type": q["question_type"],
+                "text": q["text"].get(locale, q["text"]["en"]),
+                "help": q["help"].get(locale, q["help"]["en"]),
+                "options": [{"id": opt["id"], "label": opt["label"].get(locale, opt["label"]["en"])} for opt in q["options"]],
+                "required": q.get("required", False)
+            }
+            if "conditions" in q:
+                localized_q["conditions"] = q["conditions"]
+            localized_questions.append(localized_q)
+        
+        return {"questions": localized_questions, "facts": facts}
 
     def get_evidence(self, notice, statuses=None):
         statuses = statuses or {}
@@ -390,10 +702,62 @@ class InformationRequest1336Handler(WorkflowHandler):
 
     def get_questions(self, notice, locale="en", answers=None):
         requests = self._requests(notice)
-        questions = [{"id": "information_record_confirmed", "question_type": "single_choice", "text": "Do these extracted requests match the 133(6) communication?", "help": "We need to confirm the Department's exact requests before preparing any response.", "options": [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}, {"id": "unsure", "label": "Not sure"}], "required": True}]
+        questions = [{
+            "id": "information_record_confirmed", 
+            "question_type": "single_choice", 
+            "text": {
+                "en": "Do these extracted requests match the 133(6) communication?",
+                "hi": "क्या ये निकाले गए अनुरोध 133(6) संचार से मेल खाते हैं?"
+            },
+            "help": {
+                "en": "We need to confirm the Department's exact requests before preparing any response.",
+                "hi": "किसी भी प्रतिक्रिया तैयार करने से पहले हमें विभाग के सटीक अनुरोधों की पुष्टि करने की आवश्यकता है।"
+            },
+            "options": [
+                {"id": "yes", "label": {"en": "Yes", "hi": "हाँ"}}, 
+                {"id": "no", "label": {"en": "No", "hi": "नहीं"}}, 
+                {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}}
+            ], 
+            "required": True
+        }]
         for item in requests:
-            questions.append({"id": f"information_status_{item['id']}", "question_type": "single_choice", "text": f"How much of this request can you provide: {item['technical_term']}?", "help": "This determines whether the prepared response marks the request complete, partial, or unavailable. Not sure stays separate from unavailable.", "options": [{"id": "complete", "label": "I can provide it"}, {"id": "partial", "label": "I can provide some of it"}, {"id": "unavailable", "label": "I cannot provide it"}, {"id": "not_sure", "label": "Not sure"}], "conditions": [{"depends_on": "information_record_confirmed", "equals": "yes"}], "required": True})
-        return {"questions": questions, "requests": requests, "request_count": len(requests)}
+            questions.append({
+                "id": f"information_status_{item['id']}", 
+                "question_type": "single_choice", 
+                "text": {
+                    "en": f"How much of this request can you provide: {item['technical_term']}?",
+                    "hi": f"आप इस अनुरोध का कितना हिस्सा प्रदान कर सकते हैं: {item['technical_term']}?"
+                },
+                "help": {
+                    "en": "This determines whether the prepared response marks the request complete, partial, or unavailable. Not sure stays separate from unavailable.",
+                    "hi": "यह तय करता है कि तैयार प्रतिक्रिया अनुरोध को पूर्ण, आंशिक या अनुपलब्ध के रूप में चिह्नित करती है। निश्चित नहीं अनुपलब्ध से अलग रहता है।"
+                },
+                "options": [
+                    {"id": "complete", "label": {"en": "I can provide it", "hi": "मैं इसे प्रदान कर सकता हूँ"}}, 
+                    {"id": "partial", "label": {"en": "I can provide some of it", "hi": "मैं इसका कुछ हिस्सा प्रदान कर सकता हूँ"}}, 
+                    {"id": "unavailable", "label": {"en": "I cannot provide it", "hi": "मैं इसे प्रदान नहीं कर सकता"}}, 
+                    {"id": "not_sure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}}
+                ], 
+                "conditions": [{"depends_on": "information_record_confirmed", "equals": "yes"}], 
+                "required": True
+            })
+        
+        # Localize the questions based on locale
+        localized_questions = []
+        for q in questions:
+            localized_q = {
+                "id": q["id"],
+                "question_type": q["question_type"],
+                "text": q["text"].get(locale, q["text"]["en"]),
+                "help": q["help"].get(locale, q["help"]["en"]),
+                "options": [{"id": opt["id"], "label": opt["label"].get(locale, opt["label"]["en"])} for opt in q["options"]],
+                "required": q.get("required", False)
+            }
+            if "conditions" in q:
+                localized_q["conditions"] = q["conditions"]
+            localized_questions.append(localized_q)
+        
+        return {"questions": localized_questions, "requests": requests, "request_count": len(requests)}
 
     def get_evidence(self, notice, statuses=None):
         statuses = statuses or {}
@@ -416,19 +780,30 @@ class InformationRequest1336Handler(WorkflowHandler):
         if answers.get("information_record_confirmed") != "yes":
             return {"supported": False, "status": "safe_stop", "handoff_allowed": False, "reason": "The extracted information requests were not confirmed against the communication."}
         prepared: list[dict[str, Any]] = []
+        from app.workflows.notice_requests import extract_taxpayer_request_answer
         for item in requests:
             status = answers.get(f"information_status_{item['id']}")
+            ans_pos, ans_details = extract_taxpayer_request_answer(item['id'], answers)
+            if status not in {"complete", "partial", "unavailable", "not_sure"} and ans_pos:
+                raw_choice = answers.get(f"notice_req_{item['id']}") or answers.get(item["id"])
+                choice_str = raw_choice.get("choice") if isinstance(raw_choice, dict) else raw_choice
+                status_map = {"provide": "complete", "partial": "partial", "not_applicable": "unavailable", "explain": "partial"}
+                status = status_map.get(choice_str, "complete" if "complete" in ans_pos.lower() or "full" in ans_pos.lower() else "partial")
             if status not in {"complete", "partial", "unavailable", "not_sure"}:
                 return {"supported": False, "status": "safe_stop", "handoff_allowed": False, "reason": f"The availability of request {item['id']} was not confirmed."}
-            prepared.append({"request_id": item["id"], "technical_term": item["technical_term"], "original_text": item["original_text"], "plain_language_explanation": item["plain_language_explanation"], "page_number": item["page_number"], "confidence": item["confidence"], "availability": status})
+            prepared.append({"request_id": item["id"], "technical_term": item["technical_term"], "original_text": item["original_text"], "plain_language_explanation": item["plain_language_explanation"], "page_number": item["page_number"], "confidence": item["confidence"], "availability": status, "taxpayer_position": ans_pos, "taxpayer_details": ans_details})
         uncertain = [item["request_id"] for item in prepared if item["availability"] == "not_sure"]
         action = "Prepare a structured 133(6) information response for taxpayer review, with each request answered separately and supporting attachments added where available."
         if uncertain:
             action += f" The following requests remain uncertain and must be resolved before submission: {', '.join(uncertain)}."
-        draft_lines = ["133(6) information response plan (review before use):", action, "", "Requests:"]
-        draft_lines.extend(f"{index}. {item['technical_term']} — {item['availability']} — {item['original_text']}" for index, item in enumerate(prepared, 1))
-        draft_lines.append("\nTax Mitra has not submitted this response or uploaded any document.")
-        return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "requests": prepared, "response_plan": {"items": prepared, "partial_information_allowed": True}, "action": action, "draft": "\n".join(draft_lines), "checklist": self.get_evidence(notice), "deadline": notice.get("deadline") or notice.get("response_deadline"), "next_step": "Review every request and attachment, then use the official e-Proceedings or applicable Comply to Notice route. Tax Mitra will not submit.", "handoff_allowed": False, "portal_navigation_path": {"en": "e-Proceedings", "hi": "e-Proceedings"}}
+        from app.rules.letter_templates import format_formal_reply_letter
+        draft_letter = format_formal_reply_letter(
+            notice=notice,
+            requests=requests,
+            answers=answers,
+            due_date=notice.get("deadline") or notice.get("response_deadline"),
+        )
+        return {"supported": True, "status": "supported", "capability": "SUPPORTED", "workflow_id": self.category, "requests": prepared, "response_plan": {"items": prepared, "partial_information_allowed": True}, "action": action, "draft": draft_letter, "checklist": self.get_evidence(notice), "deadline": notice.get("deadline") or notice.get("response_deadline"), "next_step": "Review every request and attachment, then use the official e-Proceedings or applicable Comply to Notice route. Tax Mitra will not submit.", "handoff_allowed": False, "portal_navigation_path": {"en": "e-Proceedings", "hi": "e-Proceedings"}}
 
     def generate_response(self, notice, answers, **kwargs): return self.resolve(notice, answers, **kwargs)
     def review(self, notice, answers, **kwargs): return {"status": "approved" if kwargs.get("approved") else "blocked", "handoff_allowed": False, "message": "Review is required before submitting the 133(6) response on the official portal."}
@@ -438,6 +813,21 @@ class AuthorityInformationRequestHandler(InformationRequest1336Handler):
     """Section-independent fallback for grounded AO/authority requests."""
 
     category = "authority_information_request"
+
+    def get_questions(self, notice, locale="en", answers=None):
+        result = super().get_questions(notice, locale, answers)
+        if result.get("questions"):
+            texts = {
+                "en": "Do these extracted requests match the Income Tax authority communication?",
+                "hi": "क्या ये निकाले गए अनुरोध आयकर प्राधिकरण संचार से मेल खाते हैं?",
+            }
+            helps = {
+                "en": "We need to confirm the Department's exact requests before preparing any response.",
+                "hi": "किसी भी प्रतिक्रिया तैयार करने से पहले हमें विभाग के सटीक अनुरोधों की पुष्टि करने की आवश्यकता है।",
+            }
+            result["questions"][0]["text"] = texts.get(locale, texts["en"])
+            result["questions"][0]["help"] = helps.get(locale, helps["en"])
+        return result
 
     def resolve(self, notice, answers, **kwargs):
         result = super().resolve(notice, answers, **kwargs)
@@ -463,8 +853,16 @@ class ClarificationHandler(AuthorityInformationRequestHandler):
     def get_questions(self, notice, locale="en", answers=None):
         result = super().get_questions(notice, locale, answers)
         if result.get("questions"):
-            result["questions"][0]["text"] = "Do these extracted clarification points match the communication?"
-            result["questions"][0]["help"] = "We need to confirm the exact point that the Department wants clarified before preparing remarks."
+            texts = {
+                "en": "Do these extracted clarification points match the communication?",
+                "hi": "क्या ये निकाले गए स्पष्टीकरण बिंदु संचार से मेल खाते हैं?",
+            }
+            helps = {
+                "en": "We need to confirm the exact point that the Department wants clarified before preparing remarks.",
+                "hi": "टिप्पणी तैयार करने से पहले हमें यह पुष्टि करनी होगी कि विभाग किस बिंदु पर स्पष्टीकरण चाहता है।",
+            }
+            result["questions"][0]["text"] = texts.get(locale, texts["en"])
+            result["questions"][0]["help"] = helps.get(locale, helps["en"])
         return result
 
     def resolve(self, notice, answers, **kwargs):
@@ -544,56 +942,98 @@ class DefectiveReturn1399Handler(WorkflowHandler):
         requests = self._requests(notice)
         if not requests:
             return {"questions": [], "status": "safe_stop", "supported": False, "reason": "The notice was classified as 139(9), but no specific defect wording was extracted safely."}
+        
+        questions = [
+            {
+                "id": "defect_extraction_confirmed",
+                "question_type": "single_choice",
+                "text": {
+                    "en": "Do these extracted defect details match your notice?",
+                    "hi": "क्या ये निकाले गए दोष विवरण आपकी सूचना से मेल खाते हैं?"
+                },
+                "help": {
+                    "en": "We need you to confirm the exact defect before Tax Mitra plans a correction path.",
+                    "hi": "Tax Mitra सुधार पथ योजना बनाने से पहले हमें आपको सटीक दोष की पुष्टि करने की आवश्यकता है।"
+                },
+                "options": [
+                    {"id": "yes", "label": {"en": "Yes", "hi": "हाँ"}},
+                    {"id": "no", "label": {"en": "No", "hi": "नहीं"}},
+                    {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}},
+                ],
+                "required": True,
+            },
+            {
+                "id": "defect_position",
+                "question_type": "single_choice",
+                "text": {
+                    "en": "What is your position on the defect?",
+                    "hi": "दोष पर आपकी स्थिति क्या है?"
+                },
+                "help": {
+                    "en": "The official e-Proceedings flow asks you to agree with the defect or provide a reason for disagreeing.",
+                    "hi": "आधिकारिक e-Proceedings प्रवाह आपसे दोष से सहमत होने या असहमति का कारण बताने के लिए कहता है।"
+                },
+                "options": [
+                    {"id": "agree", "label": {"en": "Agree — I will correct the return", "hi": "सहमत — मैं रिटर्न को सुधारूँगा"}},
+                    {"id": "disagree", "label": {"en": "Disagree — I want to explain why", "hi": "असहमत — मैं समझाना चाहता हूँ क्यों"}},
+                    {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}},
+                ],
+                "conditions": [{"depends_on": "defect_extraction_confirmed", "equals": "yes"}],
+                "required": True,
+            },
+            {
+                "id": "correction_route",
+                "question_type": "single_choice",
+                "text": {
+                    "en": "How do you expect to correct the return?",
+                    "hi": "आप रिटर्न को कैसे सुधारने की उम्मीद करते हैं?"
+                },
+                "help": {
+                    "en": "This helps Tax Mitra show the appropriate official-portal action. It does not create or validate an ITR file.",
+                    "hi": "यह Tax Mitra को उचित आधिकारिक पोर्टल कार्रवाई दिखाने में मदद करता है। यह ITR फ़ाइल नहीं बनाता या सत्यापित नहीं करता।"
+                },
+                "options": [
+                    {"id": "online_correction", "label": {"en": "Correct the ITR online", "hi": "ITR को ऑनलाइन सुधारें"}},
+                    {"id": "offline_json", "label": {"en": "Use the portal's offline response and applicable JSON", "hi": "पोर्टल की ऑफ़लाइन प्रतिक्रिया और लागू JSON का उपयोग करें"}},
+                    {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}},
+                ],
+                "conditions": [{"depends_on": "defect_position", "equals": "agree"}],
+                "required": True,
+            },
+            {
+                "id": "disagreement_reason",
+                "question_type": "text",
+                "text": {
+                    "en": "Why do you disagree with the defect?",
+                    "hi": "आप दोष से क्यों असहमत हैं?"
+                },
+                "help": {
+                    "en": "The official flow asks you to write the reason for disagreement. Tax Mitra will use only the words you provide.",
+                    "hi": "आधिकारिक प्रवाह आपसे असहमति का कारण लिखने के लिए कहता है। Tax Mitra केवल आपके द्वारा प्रदान किए गए शब्दों का उपयोग करेगा।"
+                },
+                "options": [],
+                "conditions": [{"depends_on": "defect_position", "equals": "disagree"}],
+                "required": True,
+            },
+        ]
+        
+        # Localize the questions based on locale
+        localized_questions = []
+        for q in questions:
+            localized_q = {
+                "id": q["id"],
+                "question_type": q["question_type"],
+                "text": q["text"].get(locale, q["text"]["en"]),
+                "help": q["help"].get(locale, q["help"]["en"]),
+                "options": [{"id": opt["id"], "label": opt["label"].get(locale, opt["label"]["en"])} for opt in q["options"]],
+                "required": q.get("required", False)
+            }
+            if "conditions" in q:
+                localized_q["conditions"] = q["conditions"]
+            localized_questions.append(localized_q)
+        
         return {
-            "questions": [
-                {
-                    "id": "defect_extraction_confirmed",
-                    "question_type": "single_choice",
-                    "text": "Do these extracted defect details match your notice?",
-                    "help": "We need you to confirm the exact defect before Tax Mitra plans a correction path.",
-                    "options": [
-                        {"id": "yes", "label": "Yes"},
-                        {"id": "no", "label": "No"},
-                        {"id": "unsure", "label": "Not sure"},
-                    ],
-                    "required": True,
-                },
-                {
-                    "id": "defect_position",
-                    "question_type": "single_choice",
-                    "text": "What is your position on the defect?",
-                    "help": "The official e-Proceedings flow asks you to agree with the defect or provide a reason for disagreeing.",
-                    "options": [
-                        {"id": "agree", "label": "Agree — I will correct the return"},
-                        {"id": "disagree", "label": "Disagree — I want to explain why"},
-                        {"id": "unsure", "label": "Not sure"},
-                    ],
-                    "conditions": [{"depends_on": "defect_extraction_confirmed", "equals": "yes"}],
-                    "required": True,
-                },
-                {
-                    "id": "correction_route",
-                    "question_type": "single_choice",
-                    "text": "How do you expect to correct the return?",
-                    "help": "This helps Tax Mitra show the appropriate official-portal action. It does not create or validate an ITR file.",
-                    "options": [
-                        {"id": "online_correction", "label": "Correct the ITR online"},
-                        {"id": "offline_json", "label": "Use the portal's offline response and applicable JSON"},
-                        {"id": "unsure", "label": "Not sure"},
-                    ],
-                    "conditions": [{"depends_on": "defect_position", "equals": "agree"}],
-                    "required": True,
-                },
-                {
-                    "id": "disagreement_reason",
-                    "question_type": "text",
-                    "text": "Why do you disagree with the defect?",
-                    "help": "The official flow asks you to write the reason for disagreement. Tax Mitra will use only the words you provide.",
-                    "options": [],
-                    "conditions": [{"depends_on": "defect_position", "equals": "disagree"}],
-                    "required": True,
-                },
-            ],
+            "questions": localized_questions,
             "requests": requests,
             "request_count": len(requests),
         }
@@ -607,13 +1047,22 @@ class DefectiveReturn1399Handler(WorkflowHandler):
             if route not in {"online_correction", "offline_json"}:
                 return {"supported": False, "status": "safe_stop", "handoff_allowed": False, "reason": "A correction route was not confirmed. Review the official portal or seek professional help before proceeding.", "answers": answers}
             route_label = "online ITR correction" if route == "online_correction" else "the portal's offline response with the applicable corrected JSON"
+            draft = f"Correction action plan (review before use):\n1. Review each defect identified in the notice.\n2. Correct only the relevant return fields or schedules.\n3. Use {route_label}.\n4. Review the final response before submission.\n\nTax Mitra has not created or submitted an ITR file."
+            from app.workflows.notice_requests import extract_taxpayer_request_answer
+            itemized_defects = []
+            for req in self._requests(notice):
+                pos, det = extract_taxpayer_request_answer(req["id"], answers)
+                if pos or det:
+                    itemized_defects.append(f"- {req['what_department_is_asking']}: {pos}" + (f" (Details: {det})" if det else ""))
+            if itemized_defects:
+                draft += "\n\nItemized Defect Responses:\n" + "\n".join(itemized_defects)
             return {
                 "supported": True,
                 "status": "partial_support",
                 "capability": "PARTIAL_SUPPORT",
                 "workflow_id": self.category,
                 "action": f"Review the identified defects, correct the return using {route_label}, and complete the response on the official e-Filing portal.",
-                "draft": f"Correction action plan (review before use):\n1. Review each defect identified in the notice.\n2. Correct only the relevant return fields or schedules.\n3. Use {route_label}.\n4. Review the final response before submission.\n\nTax Mitra has not created or submitted an ITR file.",
+                "draft": draft,
                 "checklist": self._checklist(notice),
                 "answers": answers,
                 "handoff_allowed": False,
@@ -623,13 +1072,22 @@ class DefectiveReturn1399Handler(WorkflowHandler):
             reason = str(answers.get("disagreement_reason") or "").strip()
             if not reason:
                 raise ValueError("A reason is required when disagreeing with the defect")
+            draft = f"Remarks supplied by the taxpayer (review before use):\n{reason}\n\nTax Mitra has not added a legal conclusion or submitted these remarks."
+            from app.workflows.notice_requests import extract_taxpayer_request_answer
+            itemized_defects = []
+            for req in self._requests(notice):
+                pos, det = extract_taxpayer_request_answer(req["id"], answers)
+                if pos or det:
+                    itemized_defects.append(f"- {req['what_department_is_asking']}: {pos}" + (f" (Details: {det})" if det else ""))
+            if itemized_defects:
+                draft += "\n\nItemized Defect Responses:\n" + "\n".join(itemized_defects)
             return {
                 "supported": True,
                 "status": "partial_support",
                 "capability": "PARTIAL_SUPPORT",
                 "workflow_id": self.category,
                 "action": "Review the taxpayer-provided disagreement remarks and submit them through the official e-Filing portal if correct.",
-                "draft": f"Remarks supplied by the taxpayer (review before use):\n{reason}\n\nTax Mitra has not added a legal conclusion or submitted these remarks.",
+                "draft": draft,
                 "checklist": self._checklist(notice),
                 "answers": answers,
                 "handoff_allowed": False,
@@ -703,9 +1161,19 @@ class IncomeIntimation143Handler(WorkflowHandler):
         questions = [{
             "id": "intimation_facts_confirmed",
             "question_type": "single_choice",
-            "text": "Do these processed-return figures and outcome match your intimation?",
-            "help": "We use your confirmation to avoid routing a refund, demand or correction action from an incorrect extraction.",
-            "options": [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}, {"id": "unsure", "label": "Not sure"}],
+            "text": {
+                "en": "Do these processed-return figures and outcome match your intimation?",
+                "hi": "क्या ये संसाधित रिटर्न आंकड़े और परिणाम आपकी सूचना से मेल खाते हैं?",
+            },
+            "help": {
+                "en": "We use your confirmation to avoid routing a refund, demand or correction action from an incorrect extraction.",
+                "hi": "गलत निष्कर्षण से रिफंड, मांग या सुधार कार्रवाई से बचने के लिए हम आपकी पुष्टि का उपयोग करते हैं।",
+            },
+            "options": [
+                {"id": "yes", "label": {"en": "Yes", "hi": "हाँ"}},
+                {"id": "no", "label": {"en": "No", "hi": "नहीं"}},
+                {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}},
+            ],
             "required": True,
         }]
         if facts["outcome"] == "no_action":
@@ -714,9 +1182,19 @@ class IncomeIntimation143Handler(WorkflowHandler):
             questions.append({
                 "id": "refund_received",
                 "question_type": "single_choice",
-                "text": "Have you received the refund shown in the intimation?",
-                "help": "This determines whether the next step is simply to keep the record or to check the official refund-reissue service.",
-                "options": [{"id": "yes", "label": "Yes"}, {"id": "no", "label": "No"}, {"id": "unsure", "label": "Not sure"}],
+                "text": {
+                    "en": "Have you received the refund shown in the intimation?",
+                    "hi": "क्या आपको सूचना में दर्शाया गया रिफंड प्राप्त हो चुका है?",
+                },
+                "help": {
+                    "en": "This determines whether the next step is simply to keep the record or to check the official refund-reissue service.",
+                    "hi": "यह तय करता है कि अगला कदम केवल रिकॉर्ड रखना है या आधिकारिक रिफंड पुनः जारी सेवा की जांच करना है।",
+                },
+                "options": [
+                    {"id": "yes", "label": {"en": "Yes", "hi": "हाँ"}},
+                    {"id": "no", "label": {"en": "No", "hi": "नहीं"}},
+                    {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}},
+                ],
                 "conditions": [{"depends_on": "intimation_facts_confirmed", "equals": "yes"}],
                 "required": True,
             })
@@ -724,13 +1202,19 @@ class IncomeIntimation143Handler(WorkflowHandler):
             questions.append({
                 "id": "intimation_action",
                 "question_type": "single_choice",
-                "text": "What best describes the action you want to review?",
-                "help": "A 143(1) intimation is already processed. This selects a review route; Tax Mitra will not decide whether the Department's figure is legally correct.",
+                "text": {
+                    "en": "What best describes the action you want to review?",
+                    "hi": "आप किस प्रकार की कार्रवाई की समीक्षा करना चाहते हैं?",
+                },
+                "help": {
+                    "en": "A 143(1) intimation is already processed. This selects a review route; Tax Mitra will not decide whether the Department's figure is legally correct.",
+                    "hi": "143(1) सूचना पहले से ही संसाधित है। यह समीक्षा मार्ग चुनता है; टैक्स मित्र यह तय नहीं करेगा कि विभागीय आंकड़ा कानूनी रूप से सही है या नहीं।",
+                },
                 "options": [
-                    {"id": "accept", "label": "The processed result looks correct"},
-                    {"id": "rectification", "label": "There is a mistake apparent from the record"},
-                    {"id": "tax_credit", "label": "The issue is TDS/TCS or tax credit"},
-                    {"id": "unsure", "label": "Not sure"},
+                    {"id": "accept", "label": {"en": "The processed result looks correct", "hi": "संसाधित परिणाम सही लगता है"}},
+                    {"id": "rectification", "label": {"en": "There is a mistake apparent from the record", "hi": "रिकॉर्ड से स्पष्ट गलती दिखाई दे रही है"}},
+                    {"id": "tax_credit", "label": {"en": "The issue is TDS/TCS or tax credit", "hi": "मुद्दा TDS/TCS या टैक्स क्रेडिट का है"}},
+                    {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}},
                 ],
                 "conditions": [{"depends_on": "intimation_facts_confirmed", "equals": "yes"}],
                 "required": True,
@@ -895,13 +1379,19 @@ class StructuredExplanationHandler(WorkflowHandler):
         if self.category == "compliance_ais":
             return {"questions": [{
                 "id": "compliance_issue_confirmed", "question_type": "single_choice",
-                "text": "What would you like to do with the reported information?",
-                "help": "This selects an explanation and review path; Tax Mitra will not submit feedback.",
+                "text": {
+                    "en": "What would you like to do with the reported information?",
+                    "hi": "आप रिपोर्ट की गई जानकारी के साथ क्या करना चाहेंगे?",
+                },
+                "help": {
+                    "en": "This selects an explanation and review path; Tax Mitra will not submit feedback.",
+                    "hi": "यह व्याख्या और समीक्षा मार्ग चुनता है; टैक्स मित्र फीडबैक जमा नहीं करेगा।",
+                },
                 "options": [
-                    {"id": "appears_correct", "label": "It appears correct"},
-                    {"id": "need_feedback", "label": "I need to provide feedback"},
-                    {"id": "not_mine", "label": "It does not belong to me"},
-                    {"id": "unsure", "label": "Not sure"},
+                    {"id": "appears_correct", "label": {"en": "It appears correct", "hi": "यह सही प्रतीत होता है"}},
+                    {"id": "need_feedback", "label": {"en": "I need to provide feedback", "hi": "मुझे फीडबैक देने की आवश्यकता है"}},
+                    {"id": "not_mine", "label": {"en": "It does not belong to me", "hi": "यह मेरा नहीं है"}},
+                    {"id": "unsure", "label": {"en": "Not sure", "hi": "मुझे पक्का नहीं है"}},
                 ], "required": True,
             }], "facts": self._facts(notice)}
         return {"questions": [], "facts": self._facts(notice)}

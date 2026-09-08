@@ -1626,9 +1626,9 @@ small, .app-brand small, .upload-file small, .tm-start-note,
    Keep this block last so legacy page-specific rules cannot split the system.
    ========================================================================== */
 :root {
-  --tm-shell-max: 1560px;
-  --tm-shell-sidebar: 280px;
-  --tm-content-max: 1080px;
+  --tm-shell-max: min(1520px, calc(100vw - 48px));
+  --tm-shell-sidebar: 290px;
+  --tm-content-max: 1120px;
   --tm-radius: 6px;
   --tm-space-1: 8px;
   --tm-space-2: 12px;
@@ -1640,19 +1640,27 @@ small, .app-brand small, .upload-file small, .tm-start-note,
   --tm-surface: #ffffff;
 }
 
+@media (min-width: 1280px) {
+  :root {
+    --tm-shell-max: min(1600px, calc(100vw - 64px));
+    --tm-shell-sidebar: 310px;
+    --tm-content-max: 1180px;
+  }
+}
+
 @media (min-width: 1440px) {
   :root {
-    --tm-shell-max: 1660px;
-    --tm-shell-sidebar: 300px;
-    --tm-content-max: 1180px;
+    --tm-shell-max: min(1700px, calc(100vw - 80px));
+    --tm-shell-sidebar: 320px;
+    --tm-content-max: 1260px;
   }
 }
 
 @media (min-width: 1680px) {
   :root {
-    --tm-shell-max: 1780px;
-    --tm-shell-sidebar: 320px;
-    --tm-content-max: 1280px;
+    --tm-shell-max: min(1840px, calc(100vw - 96px));
+    --tm-shell-sidebar: 340px;
+    --tm-content-max: 1360px;
   }
 }
 
@@ -1702,7 +1710,7 @@ body { font-size: 16px; line-height: 1.6; }
 
 .workflow-main {
   min-width: 0;
-  padding: 36px clamp(24px, 4vw, 56px) 88px;
+  padding: 32px clamp(24px, 3vw, 48px) 80px;
 }
 .workflow-main > *,
 .workflow-main .app-page {
@@ -1736,6 +1744,50 @@ body { font-size: 16px; line-height: 1.6; }
   width: 100%;
   max-width: var(--tm-content-max);
   gap: var(--tm-space-4);
+}
+
+/* ── Desktop Density Scale: reduce excessive whitespace on 1200px-1920px ── */
+@media (min-width: 1200px) {
+  body:not(:has(.workflow-shell)) .app-page {
+    width: min(calc(100% - 64px), 1280px);
+  }
+  .app-title {
+    max-width: 920px;
+  }
+  .app-lead {
+    max-width: 780px;
+  }
+  .response-draft-editor,
+  .review-draft-preview,
+  .act-draft-copy,
+  .scrutiny-draft {
+    line-height: 1.68;
+    font-size: 13.5px;
+  }
+}
+
+@media (min-width: 1440px) {
+  body:not(:has(.workflow-shell)) .app-page {
+    width: min(calc(100% - 80px), 1440px);
+  }
+  .app-title {
+    max-width: 1020px;
+  }
+  .app-lead {
+    max-width: 840px;
+  }
+}
+
+@media (min-width: 1680px) {
+  body:not(:has(.workflow-shell)) .app-page {
+    width: min(calc(100% - 96px), 1620px);
+  }
+  .app-title {
+    max-width: 1140px;
+  }
+  .app-lead {
+    max-width: 900px;
+  }
 }
 .screen-context-bar {
   min-height: 34px;
@@ -3444,6 +3496,140 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px
   flex-shrink: 0;
   cursor: pointer;
   margin: 0;
+}
+
+/* Department Requisition Card in "Answer the Notice" */
+.department-requisition-card {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  border-radius: var(--tm-radius);
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.requisition-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.requisition-kicker {
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1e3a8a;
+  background: #dbeafe;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.requisition-amount-pill {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  background: #e2e8f0;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.requisition-quote-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.requisition-label-subtle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.department-requisition-quote {
+  border-left: 3px solid #3b82f6;
+  background: #ffffff;
+  padding: 10px 14px;
+  border-radius: 0 6px 6px 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #334155;
+  margin: 0;
+  font-style: italic;
+}
+
+.requisition-meaning-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+
+.requisition-meaning-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.requisition-meaning-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #334155;
+  margin: 0;
+}
+
+.requisition-why-text {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #475569;
+  margin: 0;
+}
+
+.taxpayer-action-lead {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+
+.contract-details-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+.contract-details-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.contract-details-field textarea {
+  width: 100%;
+  border: 1.5px solid #cbd5e1;
+  border-radius: var(--tm-radius);
+  padding: 12px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #0f172a;
+  background: #ffffff;
+  resize: vertical;
+}
+
+.contract-details-field textarea:focus {
+  outline: none;
+  border-color: var(--tm-blue);
+  box-shadow: 0 0 0 1px var(--tm-blue);
 }
 
 /* Universal Evidence Cards */

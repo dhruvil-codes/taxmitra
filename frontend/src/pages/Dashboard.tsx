@@ -8,6 +8,7 @@ export default function Dashboard() {
   const { t, locale } = useI18n();
   const navigate = useNavigate();
   const [notices, setNotices] = useState<NoticeCardT[] | null>(null);
+  const [viewMode, setViewMode] = useState<"assigned" | "all">("assigned");
   const citizenId = store.citizenId();
 
   useEffect(() => {
@@ -15,34 +16,68 @@ export default function Dashboard() {
       navigate("/login");
       return;
     }
-    Promise.all([
-      api.notices(citizenId),
-      api.notice("N-2026-003").catch(() => null),
-    ])
-      .then(([owned, scrutiny]) =>
-        setNotices(
-          scrutiny
-            ? [scrutiny, ...owned.filter((n) => n.id !== scrutiny.id)]
-            : owned
+    if (viewMode === "all") {
+      api.notices()
+        .then((all) => setNotices(all))
+        .catch(() => setNotices([]));
+    } else {
+      Promise.all([
+        api.notices(citizenId),
+        api.notice("N-2026-003").catch(() => null),
+      ])
+        .then(([owned, scrutiny]) =>
+          setNotices(
+            scrutiny
+              ? [scrutiny, ...owned.filter((n) => n.id !== scrutiny.id)]
+              : owned
+          )
         )
-      )
-      .catch(() => setNotices([]));
-  }, [citizenId, navigate]);
+        .catch(() => setNotices([]));
+    }
+  }, [citizenId, navigate, viewMode]);
 
   if (!notices)
     return (
       <div className="app-page">
-        <div className="app-loading">LOADING NOTICES...</div>
+        <div className="app-loading">{locale === "hi" ? "नोटिस लोड हो रहे हैं..." : "LOADING NOTICES..."}</div>
       </div>
     );
 
   return (
     <div className="app-page">
-      <p className="app-eyebrow font-semibold tracking-wider text-slate-500">
-        {locale === "hi" ? "नोटिस सूची" : "ACTIVE NOTICES"}
-      </p>
-      <h1 className="app-title">{t("dash.title")}</h1>
-      <p className="app-lead">{t("dash.subtitle")}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
+        <div>
+          <p className="app-eyebrow font-semibold tracking-wider text-slate-500">
+            {locale === "hi" ? "नोटिस सूची" : "ACTIVE NOTICES"}
+          </p>
+          <h1 className="app-title">{t("dash.title")}</h1>
+          <p className="app-lead">{t("dash.subtitle")}</p>
+        </div>
+        <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200 self-start sm:self-auto">
+          <button
+            type="button"
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+              viewMode === "assigned"
+                ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+            onClick={() => setViewMode("assigned")}
+          >
+            {locale === "hi" ? "मेरे नोटिस" : "My Notices"}
+          </button>
+          <button
+            type="button"
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+              viewMode === "all"
+                ? "bg-white text-blue-900 shadow-sm border border-blue-200 font-bold"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+            onClick={() => setViewMode("all")}
+          >
+            {locale === "hi" ? "सभी 19 नोटिस (डेमो यूनिवर्स)" : "All 19 Demo Notices"}
+          </button>
+        </div>
+      </div>
 
       {notices.length === 0 ? (
         <div className="app-empty mt-8">
@@ -79,15 +114,9 @@ export default function Dashboard() {
                 <StatusChip status={n.status} daysRemaining={n.days_remaining} />
               </div>
               <div className="mt-6">
-                {n.supported ? (
-                  <Link to={`/notices/${n.id}`} className="app-primary">
-                    {t("dash.start")} →
-                  </Link>
-                ) : (
-                  <Link to={`/notices/${n.id}/unsupported`} className="app-primary">
-                    {t("dash.unsupported")} →
-                  </Link>
-                )}
+                <Link to={`/notices/${n.id}`} className="app-primary">
+                  {n.supported ? t("dash.start") : t("dash.unsupported")} →
+                </Link>
               </div>
             </Card>
           ))}

@@ -64,11 +64,12 @@ export interface WorkflowStepItem {
 
 export const WORKFLOW_STEPS: WorkflowStepItem[] = [
   { id: "understand", num: "01", label: { en: "Understand", hi: "समझें" } },
-  { id: "questions", num: "02", label: { en: "Questions", hi: "सवाल" } },
-  { id: "documents", num: "03", label: { en: "Documents", hi: "दस्तावेज़" } },
-  { id: "response", num: "04", label: { en: "Response", hi: "उत्तर" } },
-  { id: "review", num: "05", label: { en: "Review", hi: "समीक्षा" } },
-  { id: "act", num: "06", label: { en: "Act", hi: "कार्रवाई" } },
+  { id: "situation", num: "02", label: { en: "Understand your situation", hi: "अपनी स्थिति समझें" } },
+  { id: "answer_notice", num: "03", label: { en: "Answer the Notice", hi: "नोटिस का उत्तर दें" } },
+  { id: "documents", num: "04", label: { en: "Documents", hi: "दस्तावेज़" } },
+  { id: "response", num: "05", label: { en: "Response", hi: "उत्तर" } },
+  { id: "review", num: "06", label: { en: "Review", hi: "समीक्षा" } },
+  { id: "act", num: "07", label: { en: "Act", hi: "कार्रवाई" } },
 ];
 
 export function WorkflowLayout({
@@ -78,21 +79,22 @@ export function WorkflowLayout({
   onStepSelect,
   children,
 }: {
-  currentStep: 0 | 1 | 2 | 3 | 4 | 5;
+  currentStep: number;
   notice?: NoticeCard | null;
   noticeId?: string;
-  onStepSelect?: (step: 0 | 1 | 2 | 3 | 4 | 5) => void;
+  onStepSelect?: (step: number) => void;
   children: ReactNode;
 }) {
   const { locale } = useI18n();
-  const activeStep = WORKFLOW_STEPS[currentStep];
+  const activeStep = WORKFLOW_STEPS[currentStep] || WORKFLOW_STEPS[0];
+  const totalCount = String(WORKFLOW_STEPS.length).padStart(2, "0");
 
   return (
     <div className="workflow-shell">
       {/* Mobile Compact Progress Bar */}
       <div className="workflow-mobile-bar" aria-label="Workflow progress">
         <div className="mobile-progress-badge">
-          <span className="mobile-step-num">{activeStep.num} / 06</span>
+          <span className="mobile-step-num">{activeStep.num} / {totalCount}</span>
           <span className="mobile-step-name">{activeStep.label[locale] ?? activeStep.label.en}</span>
         </div>
         {notice && (
@@ -141,7 +143,7 @@ export function WorkflowLayout({
                     <button
                       type="button"
                       className="step-btn"
-                      onClick={() => onStepSelect(idx as 0 | 1 | 2 | 3 | 4 | 5)}
+                      onClick={() => onStepSelect(idx)}
                     >
                       {content}
                     </button>
@@ -171,7 +173,7 @@ export function WorkflowLayout({
   );
 }
 
-export function Stepper({ current }: { current: 0 | 1 | 2 | 3 | 4 | 5 }) {
+export function Stepper({ current }: { current: number }) {
   const { locale } = useI18n();
   return (
     <ol className="app-stepper" aria-label="Progress">
@@ -189,12 +191,13 @@ export function Stepper({ current }: { current: 0 | 1 | 2 | 3 | 4 | 5 }) {
   );
 }
 
-export function WorkflowRail({ current = 0 }: { current?: 0 | 1 | 2 | 3 | 4 | 5 }) {
+export function WorkflowRail({ current = 0 }: { current?: number }) {
   const { locale } = useI18n();
-  const active = WORKFLOW_STEPS[current];
+  const active = WORKFLOW_STEPS[current] || WORKFLOW_STEPS[0];
+  const totalCount = String(WORKFLOW_STEPS.length).padStart(2, "0");
   return (
     <aside className="workflow-rail-legacy" aria-label="Workflow progress">
-      <span>{active.num} / 06</span>
+      <span>{active.num} / {totalCount}</span>
       <strong>{active.label[locale] ?? active.label.en}</strong>
     </aside>
   );

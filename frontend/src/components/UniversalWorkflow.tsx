@@ -75,18 +75,234 @@ const canonicalQuestionType = (type: Question["question_type"]): NonNullable<Que
 };
 
 export function ContractQuestion({ question, locale, value, onChange, onContinue }: ContractQuestionProps) {
+  const isDeptReq = Boolean(question.department_request || question.section === "answer_the_notice");
   const type = canonicalQuestionType(question.question_type);
-  const selected: string[] = Array.isArray(value) ? value.map(String) : value && typeof value === "object" ? [value.choice] : value !== undefined && value !== "" ? [String(value)] : [];
+  const selected: string[] = Array.isArray(value)
+    ? value.map(String)
+    : value && typeof value === "object"
+      ? [value.choice]
+      : value !== undefined && value !== ""
+        ? [String(value)]
+        : [];
   const otherSelected = selected.some((item) => /(^|[_-])(other|something_else)([_-]|$)/i.test(item));
-  const textValue = value && typeof value === "object" && !Array.isArray(value) ? value.other : "";
+  const textValue = value && typeof value === "object" && !Array.isArray(value) ? (value.other ?? "") : "";
+  const detailsValue = value && typeof value === "object" && !Array.isArray(value) ? (value.details ?? value.other ?? "") : "";
+  const selectedChoice = selected[0] ?? "";
+
   const setSingle = (option: string) => {
-    if (type === "choice_with_other" && /(^|[_-])(other|something_else)([_-]|$)/i.test(option)) onChange({ choice: option, other: "" });
-    else onChange(option);
+    if (isDeptReq) {
+      onChange({ choice: option, details: detailsValue });
+    } else if (type === "choice_with_other" && /(^|[_-])(other|something_else)([_-]|$)/i.test(option)) {
+      onChange({ choice: option, other: "" });
+    } else {
+      onChange(option);
+    }
   };
+
   const toggle = (option: string) => onChange(selected.includes(option) ? selected.filter((item) => item !== option) : [...selected, option]);
-  const needsValue = type === "multi_choice" ? selected.length > 0 : type === "choice_with_other" ? (otherSelected ? textValue.trim().length > 0 : selected.length > 0) : Boolean(value);
-  if (type === "text" || type === "number" || type === "date") return <div className="contract-question-fields">{question.help && <p className="contract-question-help">{question.help}</p>}<label htmlFor={`question-${question.id}`}>{type === "text" ? "Your answer" : type === "number" ? "Enter a number" : "Select a date"}</label>{type === "text" ? <textarea id={`question-${question.id}`} aria-label={question.text} className="w-full border border-slate-300 p-4" rows={5} value={typeof value === "string" ? value : ""} onChange={(event) => onChange(event.target.value)} /> : <input id={`question-${question.id}`} aria-label={question.text} className="w-full border border-slate-300 p-4" type={type} value={typeof value === "string" ? value : ""} onChange={(event) => onChange(event.target.value)} />}<PrimaryButton onClick={onContinue}>Continue</PrimaryButton></div>;
-  return <div className="contract-question-fields">{question.help && <p className="contract-question-help">{question.help}</p>}<div className={type === "multi_choice" ? "answer-grid answer-grid-multi" : "answer-grid"}>{question.options.map((option) => <label className="journey-answer" key={option.id}><input type={type === "multi_choice" ? "checkbox" : "radio"} name={`question-${question.id}`} checked={selected.includes(option.id)} onChange={() => type === "multi_choice" ? toggle(option.id) : setSingle(option.id)} /><span>{option.label}</span></label>)}</div>{type === "choice_with_other" && otherSelected && <label className="contract-other-field" htmlFor={`question-${question.id}-other`}>Tell us briefly what you mean<textarea id={`question-${question.id}-other`} aria-label="Something else" rows={4} value={textValue} onChange={(event) => onChange({ choice: selected[0] ?? "something_else", other: event.target.value })} /></label>}<PrimaryButton disabled={!needsValue} onClick={onContinue}>Continue</PrimaryButton></div>;
+  const needsValue = isDeptReq
+    ? selectedChoice.length > 0
+    : type === "multi_choice"
+      ? selected.length > 0
+      : type === "choice_with_other"
+        ? (otherSelected ? textValue.trim().length > 0 : selected.length > 0)
+        : Boolean(value);
+
+  const continueLabel = locale === "hi" ? "आगे बढ़ें" : "Continue";
+  const otherLabel = locale === "hi" ? "संक्षेप में बताएं कि आपका क्या मतलब है" : "Tell us briefly what you mean";
+  const detailsLabel = locale === "hi"
+    ? "अतिरिक्त विवरण, दस्तावेज संदर्भ या अधिकारी के लिए स्पष्टीकरण (वैकल्पिक):"
+    : "Supporting details, document/ledger references, or specific notes for the Assessing Officer (optional):";
+  const detailsPlaceholder = locale === "hi"
+    ? "जैसे: बैंक विवरण पृष्ठ संख्या, खाता बही संदर्भ, या कारण..."
+    : "e.g., Ledger folio, bank statement reference, or reason why records are partial/unavailable...";
+
+  const fieldLabel = type === "text"
+    ? (locale === "hi" ? "आपका उत्तर" : "Your answer")
+    : type === "number"
+      ? (locale === "hi" ? "संख्या दर्ज करें" : "Enter a number")
+      : (locale === "hi" ? "तारीख चुनें" : "Select a date");
+
+  if (type === "text" || type === "number" || type === "date") return (
+    <div className="contract-question-fields">
+      {question.department_request && (
+        <div className="department-requisition-card" aria-label="Extracted Department Requisition">
+          <div className="requisition-header-row">
+            <span className="requisition-kicker">
+              {locale === "hi" ? "विभागीय मांग" : "DEPARTMENT REQUISITION"}
+              {question.department_request.page ? ` · ${locale === "hi" ? `पृष्ठ ${question.department_request.page}` : `PAGE ${question.department_request.page}`}` : ""}
+            </span>
+            {question.department_request.amount != null && question.department_request.amount > 0 && (
+              <span className="requisition-amount-pill">
+                ₹{Number(question.department_request.amount).toLocaleString("en-IN")}
+              </span>
+            )}
+          </div>
+
+          {question.department_request.original_text && (
+            <div className="requisition-quote-wrap">
+              <span className="requisition-label-subtle">
+                {locale === "hi" ? "नोटिस में मूल पाठ (Original Request):" : "Extracted Notice Text:"}
+              </span>
+              <blockquote className="department-requisition-quote">
+                "{question.department_request.original_text}"
+              </blockquote>
+            </div>
+          )}
+
+          {question.department_request.plain_meaning && (
+            <div className="requisition-meaning-box">
+              <p className="requisition-meaning-label">
+                {locale === "hi" ? "सरल शब्दों में क्या मांग रहे हैं:" : "What the Department is asking for in plain terms:"}
+              </p>
+              <p className="requisition-meaning-text">{question.department_request.plain_meaning}</p>
+            </div>
+          )}
+
+          {question.department_request.why_required && (
+            <p className="requisition-why-text">
+              <strong>{locale === "hi" ? "यह क्यों जरूरी है: " : "Why required: "}</strong>
+              {question.department_request.why_required}
+            </p>
+          )}
+        </div>
+      )}
+
+      {question.help && !question.department_request && (
+        <p className="contract-question-help">{question.help}</p>
+      )}
+
+      <label htmlFor={`question-${question.id}`}>{fieldLabel}</label>
+      {type === "text" ? (
+        <textarea
+          id={`question-${question.id}`}
+          aria-label={question.text}
+          className="w-full border border-slate-300 p-4"
+          rows={5}
+          value={typeof value === "string" ? value : ""}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      ) : (
+        <input
+          id={`question-${question.id}`}
+          aria-label={question.text}
+          className="w-full border border-slate-300 p-4"
+          type={type}
+          value={typeof value === "string" ? value : ""}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      )}
+      <PrimaryButton onClick={onContinue}>{continueLabel}</PrimaryButton>
+    </div>
+  );
+
+  return (
+    <div className="contract-question-fields">
+      {/* Department Requisition Highlight Card */}
+      {question.department_request && (
+        <div className="department-requisition-card" aria-label="Extracted Department Requisition">
+          <div className="requisition-header-row">
+            <span className="requisition-kicker">
+              {locale === "hi" ? "विभागीय मांग" : "DEPARTMENT REQUISITION"}
+              {question.department_request.page ? ` · ${locale === "hi" ? `पृष्ठ ${question.department_request.page}` : `PAGE ${question.department_request.page}`}` : ""}
+            </span>
+            {question.department_request.amount != null && question.department_request.amount > 0 && (
+              <span className="requisition-amount-pill">
+                ₹{Number(question.department_request.amount).toLocaleString("en-IN")}
+              </span>
+            )}
+          </div>
+
+          {question.department_request.original_text && (
+            <div className="requisition-quote-wrap">
+              <span className="requisition-label-subtle">
+                {locale === "hi" ? "नोटिस में मूल पाठ (Original Request):" : "Extracted Notice Text:"}
+              </span>
+              <blockquote className="department-requisition-quote">
+                "{question.department_request.original_text}"
+              </blockquote>
+            </div>
+          )}
+
+          {question.department_request.plain_meaning && (
+            <div className="requisition-meaning-box">
+              <p className="requisition-meaning-label">
+                {locale === "hi" ? "सरल शब्दों में क्या मांग रहे हैं:" : "What the Department is asking for in plain terms:"}
+              </p>
+              <p className="requisition-meaning-text">{question.department_request.plain_meaning}</p>
+            </div>
+          )}
+
+          {question.department_request.why_required && (
+            <p className="requisition-why-text">
+              <strong>{locale === "hi" ? "यह क्यों जरूरी है: " : "Why required: "}</strong>
+              {question.department_request.why_required}
+            </p>
+          )}
+        </div>
+      )}
+
+      {question.help && !question.department_request && (
+        <p className="contract-question-help">{question.help}</p>
+      )}
+
+      {isDeptReq && (
+        <p className="taxpayer-action-lead">
+          <strong>{locale === "hi" ? "अपनी स्थिति चुनें:" : "Your response to this request:"}</strong>
+        </p>
+      )}
+      <div className={type === "multi_choice" ? "answer-grid answer-grid-multi" : "answer-grid"}>
+        {question.options.map((option) => (
+          <label className="journey-answer" key={option.id}>
+            <input
+              type={type === "multi_choice" ? "checkbox" : "radio"}
+              name={`question-${question.id}`}
+              checked={selected.includes(option.id)}
+              onChange={() => type === "multi_choice" ? toggle(option.id) : setSingle(option.id)}
+            />
+            <span>{option.label}</span>
+          </label>
+        ))}
+      </div>
+
+      {/* Standard "Other" text area */}
+      {!isDeptReq && type === "choice_with_other" && otherSelected && (
+        <label className="contract-other-field" htmlFor={`question-${question.id}-other`}>
+          {otherLabel}
+          <textarea
+            id={`question-${question.id}-other`}
+            aria-label="Something else"
+            rows={4}
+            value={textValue}
+            onChange={(event) => onChange({ choice: selected[0] ?? "something_else", other: event.target.value })}
+          />
+        </label>
+      )}
+
+      {/* Department request supporting details / notes field */}
+      {isDeptReq && (
+        <label className="contract-details-field" htmlFor={`question-${question.id}-details`}>
+          <span className="contract-details-label">{detailsLabel}</span>
+          <textarea
+            id={`question-${question.id}-details`}
+            aria-label="Supporting details"
+            rows={3}
+            placeholder={detailsPlaceholder}
+            value={detailsValue}
+            onChange={(event) => onChange({
+              choice: selectedChoice || question.options[0]?.id || "provide",
+              details: event.target.value,
+              other: event.target.value,
+            })}
+          />
+        </label>
+      )}
+
+      <PrimaryButton disabled={!needsValue} onClick={onContinue}>
+        {continueLabel}
+      </PrimaryButton>
+    </div>
+  );
 }
 
 export function ContractRequests({ requests, locale }: { requests: ScrutinyRequest[]; locale: string }) {
@@ -117,7 +333,7 @@ export function ContractRequests({ requests, locale }: { requests: ScrutinyReque
                 <strong className="compact-request-title">{title}</strong>
                 {location && <span className="compact-request-loc">{location}</span>}
                 <span className="compact-request-toggle" aria-hidden="true">
-                  <span className="toggle-indicator">Expand ↓</span>
+                  <span className="toggle-indicator">{locale === "hi" ? "विस्तार करें ↓" : "Expand ↓"}</span>
                 </span>
               </summary>
               <div className="compact-request-details">

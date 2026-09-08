@@ -90,6 +90,8 @@ export interface UniversalWorkflowContract {
   notice: NoticeCard;
   requests: ScrutinyRequest[];
   questions: Question[];
+  situationQuestions?: Question[];
+  noticeQuestions?: Question[];
   evidence: EvidenceRecommendation[];
   action?: string;
   safeStopReason?: string;
@@ -107,6 +109,8 @@ export interface BackendWorkflowContract {
   notice_facts: Record<string, string | number | null | undefined>;
   requests: ScrutinyRequest[];
   questions: (Question & { question_id?: string; question?: string; why_we_are_asking?: string; type?: Question["question_type"] })[];
+  situation_questions?: (Question & { question_id?: string; question?: string; why_we_are_asking?: string; type?: Question["question_type"] })[];
+  notice_questions?: (Question & { question_id?: string; question?: string; why_we_are_asking?: string; type?: Question["question_type"] })[];
   evidence: EvidenceRecommendation[];
   safe_stop: { reason: string; facts: Record<string, string | number | null | undefined> };
   official_portal: { url: string; submission_boundary: string };
@@ -114,6 +118,8 @@ export interface BackendWorkflowContract {
   action?: string;
   next_steps?: string[];
   response_plan?: Record<string, unknown>;
+  official_step?: { portal_navigation_path?: Record<string, string> };
+  portal_navigation_path?: Record<string, string>;
 }
 
 export interface UniversalExtractionResult {
@@ -179,6 +185,19 @@ export interface Question {
   required?: boolean;
   conditions?: QuestionCondition[];
   related_request_ids?: string[];
+  section?: "understand_situation" | "answer_the_notice";
+  request_id?: string;
+  allow_details?: boolean;
+  department_request?: {
+    request_id?: string;
+    title?: string;
+    original_text?: string;
+    plain_meaning?: string;
+    why_required?: string;
+    page?: number;
+    source_location?: string;
+    amount?: number | null;
+  };
 }
 
 export interface QuestionCondition {
@@ -433,12 +452,30 @@ async function post<T>(url: string, body: unknown, signal?: AbortSignal): Promis
   });
 }
 
-async function loadWorkflowData(id: string, locale: Locale, _workflowId: string): Promise<{ requests: ScrutinyRequest[]; evidence: EvidenceRecommendation[]; questions: Question[] }> {
-  const questionData = await get<{ questions: Question[]; requests?: ScrutinyRequest[]; evidence?: EvidenceRecommendation[] }>(`/api/workflow/questions/${id}?locale=${locale}`);
-  return { requests: questionData.requests ?? [], evidence: questionData.evidence ?? [], questions: questionData.questions ?? [] };
+async function loadWorkflowData(id: string, locale: Locale, _workflowId: string): Promise<{
+  requests: ScrutinyRequest[];
+  evidence: EvidenceRecommendation[];
+  questions: Question[];
+  situation_questions?: Question[];
+  notice_questions?: Question[];
+}> {
+  const questionData = await get<{
+    questions: Question[];
+    requests?: ScrutinyRequest[];
+    evidence?: EvidenceRecommendation[];
+    situation_questions?: Question[];
+    notice_questions?: Question[];
+  }>(`/api/workflow/questions/${id}?locale=${locale}`);
+  return {
+    requests: questionData.requests ?? [],
+    evidence: questionData.evidence ?? [],
+    questions: questionData.questions ?? [],
+    situation_questions: questionData.situation_questions ?? [],
+    notice_questions: questionData.notice_questions ?? [],
+  };
 }
 
-export type QuestionAnswer = string | number | string[] | { choice: string; other: string };
+export type QuestionAnswer = string | number | string[] | { choice: string; other?: string; details?: string };
 
 function resolveWorkflowContract(id: string, _workflowId: string, answers: Record<string, QuestionAnswer>): Promise<ResolveResult | ScrutinyResolveResult> {
   return post<ResolveResult>("/api/workflow/resolve", { notice_id: id, answers });
@@ -446,7 +483,7 @@ function resolveWorkflowContract(id: string, _workflowId: string, answers: Recor
 
 export const api = {
   citizens: () => get<Citizen[]>("/api/citizens"),
-  notices: (citizenId: string) => get<NoticeCard[]>(`/api/notices?citizen_id=${citizenId}`),
+  notices: (citizenId?: string) => get<NoticeCard[]>(citizenId ? `/api/notices?citizen_id=${citizenId}` : "/api/notices"),
   notice: (id: string) => get<NoticeCard>(`/api/notices/${id}`),
   workflows: () => get<{ workflows: WorkflowDefinition[] }>("/api/workflows"),
   noticeWorkflow: (id: string) => get<{ notice_id: string; classification: WorkflowClassification; workflow: WorkflowDefinition | null; contract?: BackendWorkflowContract }>(`/api/notices/${id}/workflow`),

@@ -29,7 +29,7 @@ export default function Login() {
         {citizens.map((c) => (
           <Card key={c.id}>
             <p className="app-section-label font-bold text-blue-600">FICTIONAL DEMO PROFILE</p>
-            <h2 className="text-2xl font-bold text-slate-900 mt-1">{c.name}</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-1 cursor-pointer" onClick={() => pick(c)}>{c.name}</h2>
             <p className="text-sm font-semibold text-slate-700">{c.city} · PAN {c.pan_masked}</p>
             <p className="text-sm text-slate-600 mt-4 leading-relaxed">{c.profile_note?.[locale] ?? c.profile_note?.en}</p>
             <div className="mt-6"><PrimaryButton onClick={() => pick(c)}>{t("login.cta", { name: c.name })} →</PrimaryButton></div>

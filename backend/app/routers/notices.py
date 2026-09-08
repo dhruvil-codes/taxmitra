@@ -37,8 +37,13 @@ class WorkflowExtractionConfirmation(BaseModel):
     corrections: dict[str, str] = {}
 
 
-def _parse_date(value: str) -> date:
-    return date.fromisoformat(value)
+def _parse_date(value: str) -> date | None:
+    if not value or not isinstance(value, str):
+        return None
+    try:
+        return date.fromisoformat(value.strip())
+    except (ValueError, TypeError):
+        return None
 
 
 def _session_notice(notice_id: str) -> dict | None:
@@ -70,11 +75,19 @@ def _session_notice(notice_id: str) -> dict | None:
 
 def _due_date_for_notice(notice: dict, category: NoticeCategory) -> date | None:
     if notice.get("response_due_date"):
-        return _parse_date(notice["response_due_date"])
-    return compute_due_date(_parse_date(notice["issue_date"]), category) if notice.get("issue_date") else None
+        parsed = _parse_date(notice["response_due_date"])
+        if parsed:
+            return parsed
+    if notice.get("issue_date"):
+        parsed_issue = _parse_date(notice["issue_date"])
+        if parsed_issue:
+            return compute_due_date(parsed_issue, category)
+    return None
 
 
-def _title_for_category(category: NoticeCategory) -> dict[str, str]:
+def _title_for_category(category: NoticeCategory, workflow: object = None) -> dict[str, str]:
+    if workflow and getattr(workflow, "title", None):
+        return getattr(workflow, "title")
     if category == NoticeCategory.DEFECTIVE_RETURN_139_9:
         return {
             "en": "139(9) defective return notice",
@@ -99,7 +112,7 @@ def _title_for_category(category: NoticeCategory) -> dict[str, str]:
 def notice_card(notice: dict) -> dict:
     category = classify_notice(notice)
     classification = classify_extracted_notice(notice)
-    workflow = get_workflow(category.value)
+    workflow = get_workflow(classification.category) or get_workflow(category.value)
     due = _due_date_for_notice(notice, category)
     remaining = days_remaining(due)
     return {
@@ -112,7 +125,7 @@ def notice_card(notice: dict) -> dict:
         "classification_confidence": classification.confidence,
         "classification_grounding_status": classification.grounding_status,
         "frontend_entry": workflow.frontend_entry if workflow else "unsupported",
-        "title": _title_for_category(category),
+        "title": _title_for_category(category, workflow),
         "amount_in_question": notice["amount_in_question"],
         "issue_date": notice["issue_date"],
         "assessment_year": notice["assessment_year"],
@@ -351,6 +364,18 @@ def notice_workflow(notice_id: str):
         contract["evidence"] = handler.get_evidence(notice)
         contract["notice_facts"].update(question_payload.get("facts") or {})
         contract["next_steps"] = [workflow.official_next_step]
+
+        from app.workflows.notice_requests import get_notice_extracted_requests, build_answer_the_notice_questions
+        extracted = get_notice_extracted_requests(notice)
+        if not contract["requests"]:
+            contract["requests"] = extracted
+        notice_qs = build_answer_the_notice_questions(extracted, "en")
+        sit_qs = list(question_payload.get("situation_questions") or question_payload.get("questions") or [])
+        for q in sit_qs:
+            if isinstance(q, dict):
+                q.setdefault("section", "understand_situation")
+        contract["situation_questions"] = sit_qs
+        contract["notice_questions"] = notice_qs
     else:
         # Fallback to raw requests for SAFE_STOP workflows
         contract["requests"] = list((notice.get("synthetic_extraction") or {}).get("requests") or [])

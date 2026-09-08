@@ -24,7 +24,7 @@ import {
 } from "../components/UniversalWorkflow";
 import { NoticeFactsCard, PrimaryButton, ScreenFrame, WorkflowLayout } from "../components";
 
-type Phase = "understand" | "requests" | "questions" | "documents" | "response" | "review" | "act";
+type Phase = "understand" | "requests" | "situation" | "answer_notice" | "questions" | "documents" | "response" | "review" | "act";
 
 function userCapability(value: string | undefined): WorkflowCapability {
   return value === "SUPPORTED" || value === "PARTIAL_SUPPORT" || value === "EXPLANATION_ONLY" || value === "SAFE_STOP"
@@ -48,6 +48,10 @@ function normalizeQuestion(
     required: question.required,
     conditions: question.conditions,
     related_request_ids: question.related_request_ids,
+    section: question.section,
+    request_id: question.request_id,
+    allow_details: question.allow_details,
+    department_request: question.department_request,
   };
 }
 
@@ -180,10 +184,14 @@ export default function Journey() {
   const { locale } = useI18n();
   const [contract, setContract] = useState<UniversalWorkflowContract | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [situationQuestions, setSituationQuestions] = useState<Question[]>([]);
+  const [noticeQuestions, setNoticeQuestions] = useState<Question[]>([]);
   const [requests, setRequests] = useState<ScrutinyRequest[]>([]);
   const [evidence, setEvidence] = useState<EvidenceRecommendation[]>([]);
   const [mappedEvidence, setMappedEvidence] = useState<EvidenceRecommendation[]>([]);
   const [answers, setAnswers] = useState<Record<string, QuestionAnswer>>(() => (id ? (store.answers(id) as Record<string, QuestionAnswer>) : {}));
+  const [situationIndex, setSituationIndex] = useState(0);
+  const [noticeIndex, setNoticeIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -216,6 +224,8 @@ export default function Journey() {
           notice,
           requests: backend?.requests ?? [],
           questions: (backend?.questions ?? []).map(normalizeQuestion),
+          situationQuestions: (backend?.situation_questions ?? []).map(normalizeQuestion),
+          noticeQuestions: (backend?.notice_questions ?? []).map(normalizeQuestion),
           evidence: backend?.evidence ?? [],
           action: backend?.action,
           nextSteps: backend?.next_steps ?? [
@@ -227,26 +237,62 @@ export default function Journey() {
         };
         setContract(base);
         let loadedQuestions: Question[] = [];
+        let loadedSituation: Question[] = [];
+        let loadedNotice: Question[] = [];
         if (routed.contract) {
           setRequests(routed.contract.requests ?? []);
           setEvidence(routed.contract.evidence ?? []);
           loadedQuestions = (routed.contract.questions ?? []).map(normalizeQuestion);
-          setQuestions(loadedQuestions);
+          loadedSituation = (routed.contract.situation_questions ?? []).map(normalizeQuestion);
+          loadedNotice = (routed.contract.notice_questions ?? []).map(normalizeQuestion);
         }
-        if (capability === "SAFE_STOP" || capability === "EXPLANATION_ONLY") return;
+        if (capability === "SAFE_STOP" || capability === "EXPLANATION_ONLY") {
+          setQuestions(loadedQuestions);
+          setSituationQuestions(loadedSituation);
+          setNoticeQuestions(loadedNotice);
+          return;
+        }
         if (!loadedQuestions.length && !routed.contract?.requests?.length) {
           const workflowData = await api.workflowData(id, locale, base.workflowId);
           setRequests(workflowData.requests);
           setEvidence(workflowData.evidence);
-          loadedQuestions = workflowData.questions;
-          setQuestions(loadedQuestions);
+          loadedQuestions = (workflowData.questions ?? []).map(normalizeQuestion);
+          loadedSituation = (workflowData.situation_questions ?? []).map(normalizeQuestion);
+          loadedNotice = (workflowData.notice_questions ?? []).map(normalizeQuestion);
         }
-        if (startAtQuestions && loadedQuestions.length > 0) {
-          setPhase("questions");
+
+        if (!loadedSituation.length && !loadedNotice.length && loadedQuestions.length > 0) {
+          loadedNotice = loadedQuestions.filter(
+            (q) => q.section === "answer_the_notice" || Boolean(q.department_request)
+          );
+          loadedSituation = loadedQuestions.filter(
+            (q) => q.section !== "answer_the_notice" && !q.department_request
+          );
+        }
+
+        setQuestions(loadedQuestions);
+        setSituationQuestions(loadedSituation);
+        setNoticeQuestions(loadedNotice);
+
+        if (startAtQuestions) {
+          if (loadedSituation.length > 0) {
+            setPhase("situation");
+          } else if (loadedNotice.length > 0) {
+            setPhase("answer_notice");
+          }
         }
       })
       .catch(() => setError("We could not load this workflow contract."));
   }, [id, locale, startAtQuestions]);
+
+  // Handle legacy "questions" phase fallback
+  useEffect(() => {
+    if (phase === "questions") {
+      if (situationQuestions.length > 0) setPhase("situation");
+      else if (noticeQuestions.length > 0) setPhase("answer_notice");
+      else setPhase("documents");
+    }
+  }, [phase, situationQuestions.length, noticeQuestions.length]);
 
   // Persist answers so navigation back and forth never loses them
   useEffect(() => {
@@ -261,9 +307,19 @@ export default function Journey() {
     if (draft) setEditableDraft(draft);
   }, [result]);
 
+  const visibleSituationQuestions = situationQuestions.filter((question) => questionIsVisible(question, answers));
+  const visibleSituationQuestion = visibleSituationQuestions[situationIndex];
+
+  const visibleNoticeQuestions = noticeQuestions.filter((question) => questionIsVisible(question, answers));
+  const visibleNoticeQuestion = visibleNoticeQuestions[noticeIndex];
+
   const visibleQuestions = questions.filter((question) => questionIsVisible(question, answers));
   const visibleQuestion = visibleQuestions[questionIndex];
-  const hasQuestions = visibleQuestions.length > 0;
+
+  const hasSituation = visibleSituationQuestions.length > 0;
+  const hasNotice = visibleNoticeQuestions.length > 0;
+  const hasQuestions = hasSituation || hasNotice || visibleQuestions.length > 0;
+
   const capability = contract?.capability ?? "SAFE_STOP";
   const title = contract?.title[locale] ?? contract?.title.en ?? "Income Tax communication";
 
@@ -292,6 +348,35 @@ export default function Journey() {
     }
   };
 
+  const handleSituationContinue = async () => {
+    if (!visibleSituationQuestion) return;
+    if (situationIndex + 1 < visibleSituationQuestions.length) {
+      setSituationIndex(situationIndex + 1);
+    } else {
+      if (visibleNoticeQuestions.length > 0) {
+        setPhase("answer_notice");
+        setNoticeIndex(0);
+      } else {
+        const res = await resolveWorkflow(answers);
+        if (res) {
+          setPhase(evidence.length > 0 ? "documents" : "response");
+        }
+      }
+    }
+  };
+
+  const handleNoticeContinue = async () => {
+    if (!visibleNoticeQuestion) return;
+    if (noticeIndex + 1 < visibleNoticeQuestions.length) {
+      setNoticeIndex(noticeIndex + 1);
+    } else {
+      const res = await resolveWorkflow(answers);
+      if (res) {
+        setPhase(evidence.length > 0 ? "documents" : "response");
+      }
+    }
+  };
+
   const handleQuestionContinue = async () => {
     if (!visibleQuestion) return;
     if (questionIndex + 1 < visibleQuestions.length) {
@@ -304,24 +389,27 @@ export default function Journey() {
     }
   };
 
-  const currentStepNumber = ((): 0 | 1 | 2 | 3 | 4 | 5 => {
+  const currentStepNumber = ((): number => {
     if (phase === "understand" || phase === "requests") return 0;
+    if (phase === "situation") return 1;
+    if (phase === "answer_notice") return 2;
     if (phase === "questions") return 1;
-    if (phase === "documents") return 2;
-    if (phase === "response") return 3;
-    if (phase === "review") return 4;
-    return 5; // act
+    if (phase === "documents") return 3;
+    if (phase === "response") return 4;
+    if (phase === "review") return 5;
+    return 6; // act
   })();
 
-  const handleStepSelect = (step: 0 | 1 | 2 | 3 | 4 | 5) => {
+  const handleStepSelect = (step: number) => {
     if (step === 0) setPhase("understand");
-    else if (step === 1 && hasQuestions) setPhase("questions");
-    else if (step === 2) setPhase("documents");
-    else if (step === 3) {
+    else if (step === 1 && hasSituation) setPhase("situation");
+    else if (step === 2 && hasNotice) setPhase("answer_notice");
+    else if (step === 3) setPhase("documents");
+    else if (step === 4) {
       if (!result && id) resolveWorkflow(answers).then(() => setPhase("response"));
       else setPhase("response");
-    } else if (step === 4) setPhase("review");
-    else if (step === 5 && reviewApproved) setPhase("act");
+    } else if (step === 5) setPhase("review");
+    else if (step === 6 && reviewApproved) setPhase("act");
   };
 
   if (error) return <div className="app-page"><div className="app-empty" role="alert">{error}</div></div>;
@@ -386,7 +474,19 @@ export default function Journey() {
               }
               statusBadge={<CapabilityBadge capability={capability} locale={locale} />}
               primaryAction={
-                <PrimaryButton onClick={() => setPhase(hasQuestions ? "questions" : "documents")}>
+                <PrimaryButton
+                  onClick={() => {
+                    if (visibleSituationQuestions.length > 0) {
+                      setPhase("situation");
+                      setSituationIndex(0);
+                    } else if (visibleNoticeQuestions.length > 0) {
+                      setPhase("answer_notice");
+                      setNoticeIndex(0);
+                    } else {
+                      setPhase(evidence.length > 0 ? "documents" : "response");
+                    }
+                  }}
+                >
                   {locale === "hi" ? "आगे बढ़ें →" : "Continue →"}
                 </PrimaryButton>
               }
@@ -415,45 +515,85 @@ export default function Journey() {
             </ScreenFrame>
           )}
 
-          {/* Phase 2: Questions */}
-          {phase === "questions" && visibleQuestion && (
+          {/* Phase 2: Understand your situation */}
+          {phase === "situation" && visibleSituationQuestion && (
             <ScreenFrame
-              whereAmI={`Step 02 · Question ${questionIndex + 1} of ${visibleQuestions.length}`}
-              whatDoesThisMean={questionText(visibleQuestion)}
-              whatDoINeedToDo="Select the option that best matches your records. Your answer determines how Tax Mitra structures your response."
+              whereAmI={`Step 02 · ${locale === "hi" ? "आपकी स्थिति" : "Understand your situation"} · ${locale === "hi" ? "सवाल" : "Question"} ${situationIndex + 1} of ${visibleSituationQuestions.length}`}
+              whatDoesThisMean={questionText(visibleSituationQuestion)}
+              whatDoINeedToDo={locale === "hi" ? "अपनी स्थिति के अनुसार विकल्प चुनें ताकि टैक्स मित्र आपके लिए सही प्रक्रिया तय कर सके।" : "Select the option that best matches your situation. Your answers help Tax Mitra calibrate your tax position."}
               statusBadge={<CapabilityBadge capability={capability} locale={locale} />}
               secondaryAction={
                 <button
                   type="button"
                   onClick={() => {
-                    if (questionIndex > 0) {
-                      setQuestionIndex(questionIndex - 1);
+                    if (situationIndex > 0) {
+                      setSituationIndex(situationIndex - 1);
                     } else {
                       setPhase("understand");
                     }
                   }}
                   className="app-back-link"
                 >
-                  ← {questionIndex > 0 ? (locale === "hi" ? "पिछला सवाल" : "Previous question") : (locale === "hi" ? "नोटिस अवलोकन" : "Back to overview")}
+                  ← {situationIndex > 0 ? (locale === "hi" ? "पिछला सवाल" : "Previous question") : (locale === "hi" ? "नोटिस अवलोकन" : "Back to overview")}
                 </button>
               }
             >
               <div className="universal-section">
                 <ContractQuestion
-                  question={visibleQuestion}
+                  question={visibleSituationQuestion}
                   locale={locale}
-                  value={answers[visibleQuestion.id]}
-                  onChange={(value) => setAnswers({ ...answers, [visibleQuestion.id]: value })}
-                  onContinue={handleQuestionContinue}
+                  value={answers[visibleSituationQuestion.id]}
+                  onChange={(value) => setAnswers({ ...answers, [visibleSituationQuestion.id]: value })}
+                  onContinue={handleSituationContinue}
                 />
               </div>
             </ScreenFrame>
           )}
 
-          {/* Phase 3: Documents / Evidence */}
+          {/* Phase 3: Answer the Notice */}
+          {phase === "answer_notice" && visibleNoticeQuestion && (
+            <ScreenFrame
+              whereAmI={`Step 03 · ${locale === "hi" ? "नोटिस का उत्तर दें" : "Answer the Notice"} · ${locale === "hi" ? "मांग" : "Requisition"} ${noticeIndex + 1} of ${visibleNoticeQuestions.length}`}
+              whatDoesThisMean={questionText(visibleNoticeQuestion)}
+              whatDoINeedToDo={locale === "hi" ? "विभाग की इस विशिष्ट मांग पर अपनी स्थिति चुनें और आवश्यक विवरण दर्ज करें। यह सीधे आपके उत्तर पत्र में शामिल होगा।" : "State your position and provide supporting details for this requisition. Your answer will directly address this item in the response letter."}
+              statusBadge={<CapabilityBadge capability={capability} locale={locale} />}
+              secondaryAction={
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (noticeIndex > 0) {
+                      setNoticeIndex(noticeIndex - 1);
+                    } else {
+                      if (visibleSituationQuestions.length > 0) {
+                        setPhase("situation");
+                        setSituationIndex(visibleSituationQuestions.length - 1);
+                      } else {
+                        setPhase("understand");
+                      }
+                    }
+                  }}
+                  className="app-back-link"
+                >
+                  ← {noticeIndex > 0 ? (locale === "hi" ? "पिछली मांग" : "Previous requisition") : (locale === "hi" ? "स्थिति के सवालों पर वापस" : "Back to situation questions")}
+                </button>
+              }
+            >
+              <div className="universal-section">
+                <ContractQuestion
+                  question={visibleNoticeQuestion}
+                  locale={locale}
+                  value={answers[visibleNoticeQuestion.id]}
+                  onChange={(value) => setAnswers({ ...answers, [visibleNoticeQuestion.id]: value })}
+                  onContinue={handleNoticeContinue}
+                />
+              </div>
+            </ScreenFrame>
+          )}
+
+          {/* Phase 4: Documents / Evidence */}
           {phase === "documents" && (
             <ScreenFrame
-              whereAmI="Step 03 · Documents"
+              whereAmI="Step 04 · Documents"
               whatDoesThisMean={locale === "hi" ? "ज़रूरी रिकॉर्ड और प्रमाण" : "Required Records & Evidence"}
               whatDoINeedToDo={locale === "hi" ? "अपने उत्तर के समर्थन के लिए आवश्यक दस्तावेज़ तैयार रखें।" : "Gather these records before writing your response. Required items are what the notice specifically asked for."}
               statusBadge={<CapabilityBadge capability={capability} locale={locale} />}
@@ -471,16 +611,19 @@ export default function Journey() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (hasQuestions) {
-                      setPhase("questions");
-                      setQuestionIndex(visibleQuestions.length - 1);
+                    if (visibleNoticeQuestions.length > 0) {
+                      setPhase("answer_notice");
+                      setNoticeIndex(visibleNoticeQuestions.length - 1);
+                    } else if (visibleSituationQuestions.length > 0) {
+                      setPhase("situation");
+                      setSituationIndex(visibleSituationQuestions.length - 1);
                     } else {
                       setPhase("understand");
                     }
                   }}
                   className="app-back-link"
                 >
-                  ← {locale === "hi" ? "सवालों पर वापस" : "Back to questions"}
+                  ← {locale === "hi" ? "नोटिस के सवालों पर वापस" : "Back to notice questions"}
                 </button>
               }
             >
@@ -490,10 +633,10 @@ export default function Journey() {
             </ScreenFrame>
           )}
 
-          {/* Phase 4: Editable Response Draft */}
+          {/* Phase 5: Editable Response Draft */}
           {phase === "response" && (
             <ScreenFrame
-              whereAmI="Step 04 · Response"
+              whereAmI="Step 05 · Response"
               whatDoesThisMean={locale === "hi" ? "अपना उत्तर तैयार करें" : "Your prepared response"}
               whatDoINeedToDo={locale === "hi" ? "Tax Mitra ने नीचे एक उत्तर का मसौदा तैयार किया है। आप इसे अपनी जानकारी के अनुसार बदल सकते हैं। कोई भी जमा नहीं किया गया है।" : "Tax Mitra has drafted a response based on your answers. Edit it to match your exact records. Nothing has been submitted."}
               statusBadge={<CapabilityBadge capability={capability} locale={locale} />}
@@ -505,10 +648,22 @@ export default function Journey() {
               secondaryAction={
                 <button
                   type="button"
-                  onClick={() => setPhase(activeEvidence.length > 0 ? "documents" : "questions")}
+                  onClick={() => {
+                    if (activeEvidence.length > 0) {
+                      setPhase("documents");
+                    } else if (visibleNoticeQuestions.length > 0) {
+                      setPhase("answer_notice");
+                      setNoticeIndex(visibleNoticeQuestions.length - 1);
+                    } else if (visibleSituationQuestions.length > 0) {
+                      setPhase("situation");
+                      setSituationIndex(visibleSituationQuestions.length - 1);
+                    } else {
+                      setPhase("understand");
+                    }
+                  }}
                   className="app-back-link"
                 >
-                  ← {locale === "hi" ? "दस्तावेज़ों पर वापस" : "Back to documents"}
+                  ← {locale === "hi" ? (activeEvidence.length > 0 ? "दस्तावेज़ों पर वापस" : "सवालों पर वापस") : (activeEvidence.length > 0 ? "Back to documents" : "Back to notice questions")}
                 </button>
               }
             >
@@ -540,10 +695,10 @@ export default function Journey() {
             </ScreenFrame>
           )}
 
-          {/* Phase 5: Review & Approve */}
+          {/* Phase 6: Review & Approve */}
           {phase === "review" && (
             <ScreenFrame
-              whereAmI="Step 05 · Review"
+              whereAmI="Step 06 · Review"
               whatDoesThisMean={locale === "hi" ? "आधिकारिक जमा करने से पहले समीक्षा करें" : "Review before any official submission"}
               whatDoINeedToDo={locale === "hi" ? "मूल नोटिस, आपके उत्तर और तैयार मसौदे को ध्यान से पढ़ें। अनुमोदन के बाद ही अगला चरण उपलब्ध होगा।" : "Read the original notice wording, your answers, and the prepared draft carefully. Check everything before approving."}
               statusBadge={<CapabilityBadge capability={capability} locale={locale} />}
@@ -605,10 +760,10 @@ export default function Journey() {
             </ScreenFrame>
           )}
 
-          {/* Phase 6: Act — Portal Navigation Guide */}
+          {/* Phase 7: Act — Portal Navigation Guide */}
           {phase === "act" && (
             <ScreenFrame
-              whereAmI="Step 06 · Act"
+              whereAmI="Step 07 · Act"
               whatDoesThisMean={locale === "hi" ? "आधिकारिक पोर्टल पर अपना उत्तर जमा करें" : "Submit your response on the official portal"}
               whatDoINeedToDo={locale === "hi" ? "नीचे दिए गए चरणों का पालन करें। Tax Mitra ने कुछ भी जमा नहीं किया है — यह आपकी ज़िम्मेदारी है।" : "Follow the steps below on the Income Tax e-Filing portal. Tax Mitra has not submitted anything — this is your action."}
               statusBadge={<CapabilityBadge capability={capability} locale={locale} />}

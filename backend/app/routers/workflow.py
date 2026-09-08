@@ -32,10 +32,12 @@ class Answers(BaseModel):
     def validate_answer_values(cls, values):
         for key, value in values.items():
             if isinstance(value, dict):
-                if set(value) - {"choice", "other"} or not isinstance(value.get("choice"), str):
+                if set(value) - {"choice", "other", "details"} or (value.get("choice") is not None and not isinstance(value.get("choice"), str)):
                     raise ValueError(f"Invalid choice-with-other answer for {key}")
                 if "other" in value and not isinstance(value["other"], str):
                     raise ValueError(f"Invalid other answer for {key}")
+                if "details" in value and not isinstance(value["details"], str):
+                    raise ValueError(f"Invalid details answer for {key}")
             elif isinstance(value, list):
                 if not all(isinstance(item, str) for item in value):
                     raise ValueError(f"Invalid multi-choice answer for {key}")
@@ -50,8 +52,16 @@ def _question_type(question: dict) -> str:
 
 def _active(question: dict, answers: dict) -> bool:
     for condition in question.get("conditions") or []:
-        if answers.get(condition.get("depends_on")) != condition.get("equals"):
+        dep = condition.get("depends_on") or condition.get("question_id")
+        ans = answers.get(dep)
+        if "equals" in condition and ans != condition.get("equals"):
             return False
+        if "value" in condition and ans != condition.get("value"):
+            return False
+        allowed = condition.get("one_of") or condition.get("values")
+        if allowed is not None:
+            if isinstance(allowed, list) and ans not in allowed:
+                return False
     return True
 
 
@@ -60,6 +70,10 @@ def _validate_against_questions(questions: list[dict], answers: dict) -> None:
     for question_id, question in by_id.items():
         if not _active(question, answers):
             continue
+        if question_id.startswith("information_status_"):
+            req_suffix = question_id.replace("information_status_", "")
+            if f"notice_req_{req_suffix}" in answers or req_suffix in answers:
+                continue
         value = answers.get(question_id)
         if value is None or value == "" or value == []:
             if question.get("required", True):
@@ -134,6 +148,17 @@ def questions(
     handler = get_workflow_handler(classification.category)
     response = handler.get_questions(notice, locale)
     response["grounding"] = grounding_payload(notice, classification.category)
+    from app.workflows.notice_requests import get_notice_extracted_requests, build_answer_the_notice_questions
+    extracted = get_notice_extracted_requests(notice)
+    notice_qs = build_answer_the_notice_questions(extracted, locale=locale)
+    sit_qs = [dict(q) if isinstance(q, dict) else q for q in (response.get("situation_questions") or response.get("questions") or [])]
+    for q in sit_qs:
+        if isinstance(q, dict):
+            q.setdefault("section", "understand_situation")
+    response["situation_questions"] = sit_qs
+    response["notice_questions"] = notice_qs
+    if "requests" not in response or not response["requests"]:
+        response["requests"] = extracted
     return response
 
 

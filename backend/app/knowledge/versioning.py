@@ -72,6 +72,6 @@ def chunk_matches_context(chunk, applicability: Applicability, workflow_context:
             return False
     if workflow_context and chunk.workflow_context:
         wanted = workflow_context.lower()
-        if not any(wanted in value.lower() for value in chunk.workflow_context):
+        if not any(wanted in value.lower() or value.lower() in wanted or any(part in value.lower() for part in wanted.split('_') if len(part) > 2) for value in chunk.workflow_context):
             return False
     return chunk.status not in {"SUPERSEDED", "HISTORICAL"}

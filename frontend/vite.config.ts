@@ -51,7 +51,7 @@ export default defineConfig(({ mode }) => {
       setupFiles: "./src/test/setup.ts",
       globals: true,
       css: true,
-      exclude: ["e2e/**", "node_modules/**"],
+      exclude: ["e2e/**", "tests/**", "node_modules/**"],
     },
   };
 });

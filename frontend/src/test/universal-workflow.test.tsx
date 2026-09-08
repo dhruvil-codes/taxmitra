@@ -168,4 +168,77 @@ describe("universal workflow contract renderer", () => {
     renderWithRouter(<ContractRequests requests={[request("r-debug", "Provide the notice records")]} locale="en" />);
     expect(screen.queryByText(/REQUEST CONFIDENCE|DETERMINISTIC RULE|classification_id|NOT_PROVIDED|SAFE_STOP/)).not.toBeInTheDocument();
   });
+
+  it("renders Answer the Notice question with department requisition details and supporting notes", () => {
+    const onChange = vi.fn();
+    const onContinue = vi.fn();
+    const deptQuestion = {
+      id: "req_1",
+      text: "What is your position regarding Requisition 1 (Books of Accounts)?",
+      help: "Requirement: Needed to substantiate entries.",
+      section: "answer_the_notice" as const,
+      department_request: {
+        request_id: "req_1",
+        title: "Books of Accounts",
+        original_text: "Produce books of accounts including ledger, cash book, and journal.",
+        plain_meaning: "The department requires certified books of account for the financial year.",
+        why_required: "To verify total income returned.",
+        page: 2,
+        amount: 250000,
+      },
+      question_type: "choice_with_other" as const,
+      options: [
+        { id: "provide", label: "Will provide requested document in full" },
+        { id: "partial", label: "Only partial records available" },
+        { id: "not_applicable", label: "Not applicable" },
+        { id: "explain", label: "Clarification only" },
+      ],
+    };
+
+    const { rerender } = renderWithRouter(
+      <ContractQuestion
+        question={deptQuestion}
+        locale="en"
+        value={undefined}
+        onChange={onChange}
+        onContinue={onContinue}
+      />
+    );
+
+    // Verify requisition card content
+    expect(screen.getByText("DEPARTMENT REQUISITION · PAGE 2")).toBeInTheDocument();
+    expect(screen.getByText("₹2,50,000")).toBeInTheDocument();
+    expect(screen.getByText('"Produce books of accounts including ledger, cash book, and journal."')).toBeInTheDocument();
+    expect(screen.getByText("The department requires certified books of account for the financial year.")).toBeInTheDocument();
+    expect(screen.getByText(/To verify total income returned/)).toBeInTheDocument();
+
+    // Verify taxpayer options
+    expect(screen.getByLabelText("Will provide requested document in full")).toBeInTheDocument();
+    expect(screen.getByLabelText("Only partial records available")).toBeInTheDocument();
+
+    // Selecting an option triggers onChange with choice and current details
+    fireEvent.click(screen.getByLabelText("Will provide requested document in full"));
+    expect(onChange).toHaveBeenCalledWith({ choice: "provide", details: "" });
+
+    // Rerender with chosen option and type details
+    rerender(
+      <ContractQuestion
+        question={deptQuestion}
+        locale="en"
+        value={{ choice: "provide", details: "" }}
+        onChange={onChange}
+        onContinue={onContinue}
+      />
+    );
+
+    const detailsInput = screen.getByLabelText("Supporting details");
+    expect(detailsInput).toBeInTheDocument();
+    fireEvent.change(detailsInput, { target: { value: "Ledger Folio 42, audited copy attached" } });
+    expect(onChange).toHaveBeenCalledWith({
+      choice: "provide",
+      details: "Ledger Folio 42, audited copy attached",
+      other: "Ledger Folio 42, audited copy attached",
+    });
+  });
 });
+

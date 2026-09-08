@@ -196,6 +196,31 @@ def build_draft(
     text = template
     for key, value in slots.items():
         text = text.replace("{" + key + "}", str(value))
+
+    from app.workflows.notice_requests import get_notice_extracted_requests, extract_taxpayer_request_answer
+    extracted_reqs = get_notice_extracted_requests(notice)
+    if extracted_reqs:
+        req_lines = ["\nResponse to Notice Requisitions:"]
+        has_req_answers = False
+        for idx, req in enumerate(extracted_reqs, 1):
+            pos, details = extract_taxpayer_request_answer(req["id"], answers)
+            title = req.get("response_section") or req.get("title") or f"Item {idx}"
+            req_lines.append(f"{idx}. {title}")
+            req_lines.append(f"   Department request: {req.get('original_text', '')}")
+            if pos:
+                has_req_answers = True
+                req_lines.append(f"   Taxpayer position: {pos}")
+            if details:
+                has_req_answers = True
+                req_lines.append(f"   Taxpayer details: {details}")
+        if has_req_answers or len(extracted_reqs) > 0:
+            insert_marker = "Yours faithfully,"
+            req_block = "\n".join(req_lines) + "\n\n"
+            if insert_marker in text:
+                text = text.replace(insert_marker, req_block + insert_marker, 1)
+            else:
+                text = text + "\n\n" + req_block
+
     return text
 
 
