@@ -10,17 +10,14 @@ RUN apt-get update && apt-get install -y \
     tesseract-ocr-hin \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the requirements.txt file to the working directory
-COPY backend/requirements.txt .
+# Copy the entire repository to working directory
+COPY . .
 
 # Install the Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the backend application code to the working directory
-COPY backend/ .
+RUN pip install --no-cache-dir -r backend/requirements.txt
 
 # Expose the port FastAPI will run on
 EXPOSE $PORT
 
 # Define the command to run your FastAPI application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "$PORT"]
+CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "$PORT"]
